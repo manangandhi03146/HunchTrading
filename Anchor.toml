@@ -9,6 +9,9 @@ skip-lint = false
 [programs.localnet]
 marketkit = "J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP"
 
+[programs.devnet]
+marketkit = "J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP"
+
 [provider]
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"

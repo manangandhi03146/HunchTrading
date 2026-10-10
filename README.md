@@ -67,6 +67,21 @@ signatures, never simulated ids.**
 
 ---
 
+## Live deployment
+
+The `marketkit` program is deployed and verifiable on **Solana Devnet**:
+
+| | |
+|---|---|
+| Program ID | `J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP` |
+| Cluster | Devnet — RPC `https://api.devnet.solana.com` |
+| Explorer | https://explorer.solana.com/address/J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP?cluster=devnet |
+
+Client IDL + types: [`packages/sdk/src/idl/`](packages/sdk/src/idl/). For local
+dev, run `solana-test-validator` and `anchor deploy --provider.cluster localnet`.
+
+---
+
 ## Ownership & branches
 
 | Dev | Owns | Branch |
