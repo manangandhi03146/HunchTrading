@@ -1,0 +1,51 @@
+name: Contract lifecycle (no deployment)
+on:
+  pull_request:
+    paths:
+      - 'programs/**'
+      - 'Cargo.toml'
+      - 'rust-toolchain.toml'
+      - 'Anchor.toml'
+      - 'scripts/contract-test.mjs'
+      - 'scripts/setup-devnet-toolchain.sh'
+      - '.github/workflows/contract-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  litesvm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pinned toolchain
+        run: bash scripts/setup-devnet-toolchain.sh
+      - name: Baseline and failing deadline regression
+        shell: bash
+        run: |
+          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          baseline=$(mktemp -d)
+          git archive 49a5e7055d3a490c3c7791d03315ef6107fb28e9 | tar -x -C "$baseline"
+          (cd "$baseline"; anchor build; cargo test -p marketkit)
+          cp programs/marketkit/tests/lifecycle_guards.rs "$baseline/programs/marketkit/tests/"
+          if (cd "$baseline"; cargo test -p marketkit --test lifecycle_guards early_resolution_regression -- --exact) > baseline-regression.log 2>&1; then
+            cat baseline-regression.log
+            echo 'Regression unexpectedly passed without deadline guard'
+            exit 1
+          fi
+          cat baseline-regression.log
+          rg 'operation unexpectedly succeeded' baseline-regression.log
+      - name: Build patched program and run all contract suites
+        run: |
+          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npm run test:contract
+      - name: Upload compiler and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-evidence
+          path: |
+            .data/devnet-lifecycle/contract-tests.json
+            baseline-regression.log

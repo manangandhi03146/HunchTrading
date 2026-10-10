@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-10T22:56:38.883Z",
+  "rpc": "https://api.devnet.solana.com",
+  "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "program": "J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP",
+  "programData": "NwHWvjqKNy1UditaY3D5zawfGXmtXsjGknxLUq2Fear",
+  "deploymentSlot": "509647737",
+  "upgradeAuthority": "FndLN9xiWLBa2CMMjRA4X5DwU5VZwQzaTuoF43kuMM6D",
+  "mint": "9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs",
+  "decimals": 0,
+  "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "mintSupply": "1000000",
+  "treasuryOwner": "FndLN9xiWLBa2CMMjRA4X5DwU5VZwQzaTuoF43kuMM6D",
+  "treasuryTokenAccount": "7mRZVNDvywk9DHtbvEsBP2KMGdPKLQW383RWt2k9p1VM",
+  "treasuryBalance": "999900",
+  "resolver": "6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt",
+  "resolverLamports": 0,
+  "chainClock": {
+    "unixTimestamp": 1791672997,
+    "slot": 509698104
+  },
+  "deadlineSimulation": {
+    "broadcast": false,
+    "signed": false,
+    "transactionSignature": null,
+    "simulatedMarket": "4Q1Jnseo7pKwEJ9CiFBtUujZkUJDxbsCsSJeRLtDuFBT",
+    "simulatedMarketIdHex": "4441050fdc8b334181b37d94622a5c80c56d5e6a55eb15daf4c618662e841f76",
+    "observedClock": {
+      "unixTimestamp": 1791672997,
+      "slot": 509698105
+    },
+    "proposedDeadline": 1791673597,
+    "simulationSlot": 509698105,
+    "error": null,
+    "logs": [
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP invoke [1]",
+      "Program log: Instruction: CreateMarket",
+      "Program 11111111111111111111111111111111 invoke [2]",
+      "Program 11111111111111111111111111111111 success",
+      "Program log: Market created: deadline=1791673597, resolver=6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt",
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP consumed 9648 of 400000 compute units",
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP success",
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP invoke [1]",
+      "Program log: Instruction: ResolveMarket",
+      "Program log: Market resolved: winning_outcome=1",
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP consumed 4654 of 390352 compute units",
+      "Program J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP success"
+    ],
+    "earlyResolutionAccepted": true,
+    "explanation": "Unsigned create + early resolve in one RPC simulation. No real market or transaction was submitted."
+  }
+}

@@ -1,6 +1,6 @@
 use {
     anchor_lang::{
-        prelude::Pubkey,
+        prelude::{Pubkey, Clock},
         solana_program::{instruction::Instruction, system_instruction, system_program},
         AccountDeserialize, InstructionData, ToAccountMetas,
     },
@@ -16,17 +16,20 @@ const MINT_LEN: u64 = 82;
 const TOKEN_ACCOUNT_LEN: u64 = 165;
 
 fn send_tx(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&Keypair]) {
+    svm.expire_blockhash();
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(ixs, Some(payer), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), signers).unwrap();
     assert!(svm.send_transaction(tx).is_ok(), "tx unexpectedly failed");
 }
 
-fn expect_tx_fails(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&Keypair]) {
+fn expect_tx_fails(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&Keypair], code: u32) {
+    svm.expire_blockhash();
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(ixs, Some(payer), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), signers).unwrap();
-    assert!(svm.send_transaction(tx).is_err(), "tx unexpectedly succeeded");
+    let failure = svm.send_transaction(tx).expect_err("tx unexpectedly succeeded");
+    assert_eq!(format!("{:?}", failure.err), format!("InstructionError(0, Custom({code}))"), "{:?}", failure.meta.logs);
 }
 
 /// Reads an SPL token account's `amount` (u64 at byte offset 64).
@@ -206,6 +209,9 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     assert_eq!(token_balance(&svm, &vault_pda), 350);
 
     // --- Resolve: outcome 1 wins (submitted by the resolver = payer) ---
+    let mut clock = svm.get_sysvar::<Clock>();
+    clock.unix_timestamp = deadline;
+    svm.set_sysvar(&clock);
     send_tx(
         &mut svm,
         &[Instruction::new_with_bytes(
@@ -240,7 +246,7 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     };
 
     // Loser (B) cannot claim — backed the losing outcome.
-    expect_tx_fails(&mut svm, &[claim(&user_b.pubkey(), pos_b, b_ata)], &user_b.pubkey(), &[&user_b]);
+    expect_tx_fails(&mut svm, &[claim(&user_b.pubkey(), pos_b, b_ata)], &user_b.pubkey(), &[&user_b], 6008);
 
     // Winner (A) claims the whole 350 pool (sole winner): 100 * 350 / 100.
     send_tx(&mut svm, &[claim(&user_a.pubkey(), pos_a, a_ata)], &user_a.pubkey(), &[&user_a]);
@@ -254,5 +260,5 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     assert!(position.claimed);
 
     // Double-claim is rejected.
-    expect_tx_fails(&mut svm, &[claim(&user_a.pubkey(), pos_a, a_ata)], &user_a.pubkey(), &[&user_a]);
+    expect_tx_fails(&mut svm, &[claim(&user_a.pubkey(), pos_a, a_ata)], &user_a.pubkey(), &[&user_a], 6007);
 }

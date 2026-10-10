@@ -18,6 +18,7 @@ const MINT_LEN: u64 = 82;
 const TOKEN_ACCOUNT_LEN: u64 = 165;
 
 fn send_tx(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&Keypair]) {
+    svm.expire_blockhash();
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(ixs, Some(payer), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), signers).unwrap();
@@ -176,4 +177,8 @@ fn test_place_prediction_escrows_and_accumulates() {
     let mut market_data: &[u8] = &market_account.data;
     let market = marketkit::state::Market::try_deserialize(&mut market_data).unwrap();
     assert_eq!(market.pool, [0, 150]);
+    let user_data = svm.get_account(&user_ata.pubkey()).unwrap().data;
+    let vault_data = svm.get_account(&vault_pda).unwrap().data;
+    assert_eq!(u64::from_le_bytes(user_data[64..72].try_into().unwrap()), 850);
+    assert_eq!(u64::from_le_bytes(vault_data[64..72].try_into().unwrap()), 150);
 }
