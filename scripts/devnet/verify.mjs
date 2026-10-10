@@ -128,6 +128,10 @@ try {
     if (Date.now() - lastProgress >= 30_000) { console.log(`Chain clock ${observedClock}; ${deadline - observedClock}s until resolution`); lastProgress = Date.now(); }
     await sleep(3000);
   } while (true);
+  const resolutionClock = await chainClock();
+  assert(resolutionClock.unixTimestamp >= deadline, 'Chain clock moved back before the deadline');
+  observedClock = resolutionClock.unixTimestamp;
+  journal.data.resolutionObservedClock = resolutionClock; journal.save();
   const event = signGameEvent({ appId, eventId, marketId, outcome: 1, timestamp: observedClock }, keys.game.secretKey);
   journal.data.signedEvent = event; journal.save();
   let originalRecord;
@@ -147,6 +151,7 @@ try {
   assert(replay.ok); assert.deepEqual(replayRecord, originalRecord, 'Replay must return the original resolution record');
   journal.data.replay = { originalRecord, replayRecord, resolutionSignatures: journal.data.stages.find(s => s.name === 'resolver-resolution').signatures };
   const resolutionStage = journal.data.stages.find(s => s.name === 'resolver-resolution');
+  assert(resolutionStage.confirmation.blockTime !== null && resolutionStage.confirmation.blockTime >= deadline, 'Resolution block timestamp does not establish after-deadline execution');
   assert.equal(new Set(resolutionStage.signatures).size, 1, 'Expected exactly one resolver transaction');
   journal.save();
   for (const [role, payout] of [['A', 183n], ['C', 366n]]) {
