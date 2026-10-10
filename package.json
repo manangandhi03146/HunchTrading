@@ -12,9 +12,12 @@
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "sdk": "npm run build --workspace @marketkit/sdk",
-    "resolver": "npm run dev --workspace @marketkit/resolver"
+    "resolver": "npm run dev --workspace @marketkit/resolver",
+    "dev": "npm run dev --workspace @marketkit/racing",
+    "dashboard": "npm run dev --workspace @marketkit/dashboard",
+    "esports": "npm run dev --workspace @marketkit/esports"
   },
   "engines": {
-    "node": ">=18"
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   }
 }

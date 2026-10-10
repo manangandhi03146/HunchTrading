@@ -1,8 +1,8 @@
 import { appUrl } from "../../shared/links";
+import { useTheme } from "../../shared/theme";
 import { useState } from "react";
 import {
   Crosshair,
-  Trophy,
   CalendarDays,
   ArrowUpRight,
   ChevronRight,
@@ -20,6 +20,8 @@ import {
   ErrorState,
   MarketStatus,
   PredictionMarket,
+  effectiveStatus,
+  useNow,
   formatTokens,
   useMarketKit,
   useMarkets,
@@ -44,6 +46,7 @@ function TeamMark({
   );
 }
 export default function App() {
+  const { theme } = useTheme();
   const { mode } = useMarketKit();
   const markets = useMarkets();
   const [selected, setSelected] = useState(
@@ -53,9 +56,15 @@ export default function App() {
     mode === "mock"
       ? markets.data?.filter((market) => MATCHES.includes(market.id))
       : markets.data;
-  const current = matches?.find((market) => market.id === selected);
+  const current =
+    matches?.find((market) => market.id === selected) ?? matches?.[0];
+  const selectedId = current?.id;
   const selectedIndex =
-    matches?.findIndex((market) => market.id === selected) ?? -1;
+    matches?.findIndex((market) => market.id === selectedId) ?? -1;
+  const now = useNow();
+  const openMatches =
+    matches?.filter((market) => effectiveStatus(market, now) === "open")
+      .length ?? 0;
   const teamCount = new Set(matches?.flatMap((market) => market.outcomes) ?? [])
     .size;
   return (
@@ -72,14 +81,10 @@ export default function App() {
       <main id="main" className="esports-main">
         <div className="tournament-hero">
           <div>
-            <div className="eyebrow">
-              <Trophy size={14} />
-              SEASON 04 · CHAMPIONSHIP WEEKEND
-            </div>
             <h1>
-              Built for the
+              Every match.
               <br />
-              <span>big moments.</span>
+              <span>Everyone's call.</span>
             </h1>
             <p>Follow the bracket. Back your team. Be part of the final.</p>
             <div className="tournament-facts">
@@ -93,14 +98,11 @@ export default function App() {
               </span>
               <span>
                 <Radio size={13} />
-                Predictions live
+                {markets.isPending
+                  ? "Loading matches…"
+                  : `${openMatches} open pools`}
               </span>
             </div>
-          </div>
-          <div className="tournament-emblem" aria-hidden="true">
-            <Trophy size={85} strokeWidth={0.8} />
-            <span>NEXUS</span>
-            <small>CHAMPIONSHIP</small>
           </div>
         </div>
         <div className="tournament-layout">
@@ -117,46 +119,44 @@ export default function App() {
                 }}
               />
             )}
-            <Card className="featured-match">
-              <div className="featured-top">
-                <span>
-                  {mode === "mock"
-                    ? selectedIndex === 0
-                      ? "GRAND FINAL · BEST OF FIVE"
-                      : "SEMIFINAL · BEST OF THREE"
-                    : "EXHIBITION MATCH"}
-                </span>
-                {current && <MarketStatus status={current.status} />}
-              </div>
-              <div className="team-versus">
-                <div>
-                  <TeamMark index={0} large />
-                  <h3>{current?.outcomes[0] ?? "Outcome A"}</h3>
-                  <span>CONTENDER 01</span>
+            {current && (
+              <Card className="featured-match">
+                <div className="featured-top">
+                  <span>
+                    {mode === "mock"
+                      ? selectedIndex === 0
+                        ? "GRAND FINAL · BEST OF FIVE"
+                        : "SEMIFINAL · BEST OF THREE"
+                      : "EXHIBITION MATCH"}
+                  </span>
+                  <MarketStatus status={effectiveStatus(current, now)} />
                 </div>
-                <span className="versus-text">
-                  VS<small>CHAMPIONSHIP</small>
-                </span>
-                <div>
-                  <TeamMark index={1} large />
-                  <h3>{current?.outcomes[1] ?? "Outcome B"}</h3>
-                  <span>CONTENDER 02</span>
+                <div className="team-versus">
+                  <div>
+                    <TeamMark index={selectedIndex * 2} large />
+                    <h3>{current.outcomes[0]}</h3>
+                    <span>CONTENDER 01</span>
+                  </div>
+                  <span className="versus-text">
+                    VS<small>CHAMPIONSHIP</small>
+                  </span>
+                  <div>
+                    <TeamMark index={selectedIndex * 2 + 1} large />
+                    <h3>{current.outcomes[1]}</h3>
+                    <span>CONTENDER 02</span>
+                  </div>
                 </div>
-              </div>
-              <div className="featured-bottom">
-                <span>
-                  {current?.status === "resolved" &&
-                  current.winningOutcome !== null
-                    ? `${current.outcomes[current.winningOutcome]} advances`
-                    : "The next chapter starts here."}
-                </span>
-                <span>
-                  {current
-                    ? `${formatTokens(current.totalPool)} TEST in pool`
-                    : "Loading pool…"}
-                </span>
-              </div>
-            </Card>
+                <div className="featured-bottom">
+                  <span>
+                    {current.status === "resolved" &&
+                    current.winningOutcome !== null
+                      ? `${current.outcomes[current.winningOutcome]} wins`
+                      : "The next chapter starts here."}
+                  </span>
+                  <span>{formatTokens(current.totalPool)} TEST in pool</span>
+                </div>
+              </Card>
+            )}
             <div className="match-list-head">
               <span>TOURNAMENT SCHEDULE</span>
               <span>{matches?.length ?? 0} MATCHES</span>
@@ -175,10 +175,10 @@ export default function App() {
               )}
               {matches?.map((market, index) => (
                 <button
-                  className={`match-row ${selected === market.id ? "match-row-selected" : ""}`}
+                  className={`match-row ${selectedId === market.id ? "match-row-selected" : ""}`}
                   key={market.id}
                   onClick={() => setSelected(market.id)}
-                  aria-pressed={selected === market.id}
+                  aria-pressed={selectedId === market.id}
                 >
                   <div className="match-round">
                     <span>0{index + 1}</span>
@@ -201,16 +201,13 @@ export default function App() {
                       {market.outcomes[1]}
                     </span>
                   </div>
-                  <MarketStatus status={market.status} />
+                  <MarketStatus status={effectiveStatus(market, now)} />
                   <ChevronRight size={15} />
                 </button>
               ))}
             </div>
             <div className="esports-integration">
               <div>
-                <span className="kicker">
-                  SAME INFRASTRUCTURE. DIFFERENT STAGE.
-                </span>
                 <h3>Predictions that belong in the action.</h3>
                 <p>
                   This tournament embeds the same hunch component as the racing
@@ -230,7 +227,21 @@ export default function App() {
               <h2>Your prediction</h2>
               <span>BY HUNCH</span>
             </div>
-            <PredictionMarket key={selected} marketId={selected} />
+            {current ? (
+              <PredictionMarket
+                key={current.id}
+                marketId={current.id}
+                theme={theme}
+              />
+            ) : (
+              <Card className="match-skeleton" role="status">
+                {markets.isPending
+                  ? "Loading your prediction market…"
+                  : markets.isError
+                    ? "Matches are unavailable. Retry loading the match center."
+                    : "Your prediction market will appear when a match is available."}
+              </Card>
+            )}
             <div className="tournament-disclaimer">
               <span className="network-badge">
                 <i />

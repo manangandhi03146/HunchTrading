@@ -41,6 +41,7 @@ interface Context {
   notify: (message: string) => void;
 }
 const MarketKitContext = createContext<Context | null>(null);
+let nextQueryScope = 0;
 export function useMarketKit() {
   const context = useContext(MarketKitContext);
   if (!context)
@@ -71,14 +72,6 @@ function Session({
   const { connection } = useConnection();
   const [demoConnected, setDemoConnected] = useState(defaultDemoConnected);
   const [toast, setToast] = useState("");
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: { retry: 1, staleTime: 1000, refetchOnWindowFocus: true },
-        },
-      }),
-  );
   const client = useMemo<MarketKitClient>(
     () =>
       supplied ??
@@ -92,6 +85,19 @@ function Session({
             getWallet: () => walletRef.current,
           })),
     [supplied, mode, connection, programId, tokenMint, sdkBindings],
+  );
+  // A replacement client may point at a different program, RPC, mint, or store.
+  // Remount query consumers as well so in-flight reads cannot cross sessions.
+  const { queryClient, queryScope } = useMemo(
+    () => ({
+      queryClient: new QueryClient({
+        defaultOptions: {
+          queries: { retry: 1, staleTime: 1000, refetchOnWindowFocus: true },
+        },
+      }),
+      queryScope: ++nextQueryScope,
+    }),
+    [client],
   );
   const notify = useCallback((message: string) => setToast(message), []);
   useEffect(() => {
@@ -135,7 +141,7 @@ function Session({
     [client, demoConnected, wallet, notify],
   );
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider key={queryScope} client={queryClient}>
       <MarketKitContext.Provider value={value}>
         {children}
         <div className="mk-toast" role="status" aria-live="polite">
@@ -167,6 +173,7 @@ export function MarketKitProvider(props: MarketKitProviderProps) {
               <div className="mk-wallet-error" role="alert">
                 {walletError}
                 <button
+                  type="button"
                   onClick={() => setWalletError("")}
                   aria-label="Dismiss wallet error"
                 >

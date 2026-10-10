@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { appUrl } from "./links";
 import { Logo, WalletButton, useMarketKit } from "@marketkit/react";
+import { ThemeSwitch } from "./theme";
 export function AppHeader({
   active,
   brand,
@@ -31,7 +32,8 @@ export function AppHeader({
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="app-header-actions">
+          <ThemeSwitch />
           <span className="network-badge">
             <i />
             {mode === "mock" ? "Demo mode" : "Solana Devnet"}

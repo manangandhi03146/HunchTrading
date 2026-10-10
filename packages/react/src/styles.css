@@ -1,24 +1,8 @@
-:root {
-  --mk-bg: #09090f;
-  --mk-surface: #12121c;
-  --mk-elevated: #1a1a27;
-  --mk-text: #f8fafc;
-  --mk-muted: #94a3b8;
-  --mk-border: #27273a;
-  --mk-primary: #8b5cf6;
-  --mk-radius: 14px;
-}
+@import "./tokens.css";
 .mk-widget,
 .mk-dialog {
   color: var(--mk-text);
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--hunch-font);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -26,14 +10,7 @@
 .mk-dialog * {
   box-sizing: border-box;
 }
-.mk-theme-light {
-  --mk-bg: #fff;
-  --mk-surface: #fff;
-  --mk-elevated: #f4f4fa;
-  --mk-text: #181827;
-  --mk-muted: #62677c;
-  --mk-border: #e3e4ed;
-}
+
 .mk-widget {
   container-type: inline-size;
   padding: 24px;
@@ -97,7 +74,7 @@
   border: 1px solid var(--mk-border);
   border-radius: 6px;
   color: var(--mk-muted);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   line-height: 1.4;
@@ -130,7 +107,7 @@
   background: #f59e0b08;
   color: #bba16c;
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   text-align: center;
 }
@@ -142,7 +119,7 @@
   align-items: center;
   gap: 6px;
   color: var(--mk-muted);
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 10px;
   font-variant-numeric: tabular-nums;
 }
@@ -168,7 +145,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border: 1px solid var(--mk-border);
+  border: 1px solid var(--mk-control-border);
   border-radius: 10px;
   padding: 15px 14px;
   cursor: pointer;
@@ -189,7 +166,7 @@
 }
 .mk-outcome-selected {
   border-color: var(--mk-primary);
-  background: #8b5cf610;
+  background: color-mix(in srgb, var(--mk-primary) 9%, var(--mk-surface));
 }
 .mk-outcome-winner {
   border-color: #10b98166;
@@ -199,7 +176,7 @@
   justify-content: space-between;
   gap: 4px;
   color: var(--mk-muted);
-  font-size: 12px;
+  font-size: 14px;
   align-items: center;
 }
 .mk-outcome-name {
@@ -208,7 +185,7 @@
   white-space: nowrap;
 }
 .mk-outcome-selected .mk-outcome-top {
-  color: #bca0fc;
+  color: var(--mk-primary);
 }
 .mk-outcome strong {
   font-size: 33px;
@@ -224,7 +201,7 @@
   margin-left: 2px;
 }
 .mk-outcome-caption {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--mk-muted);
 }
 .mk-pool {
@@ -234,18 +211,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--mk-muted);
   gap: 10px;
 }
 .mk-distribution-head strong {
   color: var(--mk-text);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   font-variant-numeric: tabular-nums;
 }
 .mk-distribution-head small {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--mk-muted);
   font-weight: 400;
 }
@@ -264,7 +241,7 @@
 }
 .mk-pool p {
   color: var(--mk-muted);
-  font-size: 10px;
+  font-size: 12px;
   margin: 8px 0 0;
   line-height: 1.5;
 }
@@ -273,18 +250,18 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 8px;
 }
 .mk-stake-label > span {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--mk-muted);
   font-variant-numeric: tabular-nums;
 }
 .mk-input-wrap {
   display: flex;
   align-items: center;
-  border: 1px solid var(--mk-border);
+  border: 1px solid var(--mk-control-border);
   border-radius: 8px;
   background: var(--mk-bg);
   padding: 0 13px;
@@ -306,10 +283,10 @@
 }
 .mk-input-wrap > span {
   color: var(--mk-muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 .mk-field-error {
-  font-size: 12px;
+  font-size: 14px;
   color: #fb7185;
   margin: 8px 0;
 }
@@ -318,23 +295,27 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 38px;
+  min-height: 42px;
   border-radius: 8px;
   padding: 9px 14px;
   border: 1px solid transparent;
   color: var(--mk-text);
   font: inherit;
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 14px;
+  font-weight: 650;
   cursor: pointer;
   text-decoration: none;
   transition:
-    opacity 150ms ease-out,
+    background-color 160ms ease-out,
     transform 150ms ease-out;
   line-height: 1.4;
 }
 .mk-button:hover:not(:disabled) {
-  opacity: 0.86;
+  background-color: color-mix(
+    in srgb,
+    var(--mk-primary) 12%,
+    var(--mk-elevated)
+  );
 }
 .mk-button:active:not(:disabled) {
   transform: translateY(1px);
@@ -351,11 +332,17 @@
 }
 .mk-button-primary {
   background: var(--mk-primary);
-  color: white;
+  color: var(--mk-primary-text);
+}
+.mk-button-primary:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--mk-primary) 85%, var(--mk-text));
+}
+.mk-theme-dark .mk-button-primary {
+  color: var(--mk-bg);
 }
 .mk-button-secondary {
   background: var(--mk-elevated);
-  border-color: var(--mk-border);
+  border-color: var(--mk-control-border);
 }
 .mk-button-ghost {
   background: transparent;
@@ -371,7 +358,7 @@
   margin-top: 17px;
 }
 .mk-connect p {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--mk-muted);
 }
 .mk-connect .mk-button {
@@ -383,14 +370,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--mk-muted);
   margin-top: 13px;
 }
 .mk-account .mk-button {
   padding: 4px 0;
   min-height: 25px;
-  font-size: 10px;
+  font-size: 12px;
   border: 0;
   background: transparent;
 }
@@ -401,7 +388,7 @@
 }
 .mk-wallet-live .wallet-adapter-button {
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   height: 38px;
   padding: 0 14px;
   border-radius: 8px;
@@ -417,7 +404,7 @@
   gap: 5px;
   align-items: center;
   color: var(--mk-muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 .mk-widget-footer > span {
   margin-left: auto;
@@ -431,7 +418,7 @@
   background: #ef444408;
   color: #fda4af;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
   margin: 14px 0;
   overflow-wrap: anywhere;
@@ -452,7 +439,7 @@
 }
 .mk-text-link {
   color: #c4b5fd;
-  font-size: 11px;
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -467,10 +454,10 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 11px;
+  font-size: 14px;
 }
 .mk-transaction-label {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--mk-muted);
 }
 .mk-claim {
@@ -491,7 +478,7 @@
 }
 .mk-claim-heading small {
   color: var(--mk-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .mk-claim-heading strong {
   font-size: 15px;
@@ -514,7 +501,7 @@
   color: #be123c;
 }
 .mk-claim p {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--mk-muted);
 }
 .mk-claim-amount {
@@ -523,7 +510,7 @@
   align-items: center;
   gap: 8px;
   margin: 18px 0 6px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--mk-muted);
 }
 .mk-claim-amount strong {
@@ -544,12 +531,12 @@
   color: var(--mk-muted);
 }
 .mk-waiting strong {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--mk-text);
 }
 .mk-waiting p {
   margin: 0;
-  font-size: 11px;
+  font-size: 14px;
 }
 .mk-card {
   background: var(--mk-surface);
@@ -610,7 +597,7 @@
   border: 1px solid #3b3b52;
   border-radius: 10px;
   box-shadow: 0 10px 30px #0004;
-  font-size: 13px;
+  font-size: 14px;
 }
 .mk-wallet-error {
   margin: 12px;
@@ -621,7 +608,7 @@
   color: #fecdd3;
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 14px;
 }
 .mk-wallet-error button {
   border: 0;
@@ -643,8 +630,8 @@
   transform: translate(-50%, -50%);
   width: min(440px, calc(100vw - 32px));
   z-index: 50;
-  background: #12121c;
-  border: 1px solid #36364a;
+  background: var(--mk-surface);
+  border: 1px solid var(--mk-border);
   border-radius: 14px;
   padding: 28px;
   box-shadow: 0 20px 60px #0006;
@@ -654,9 +641,15 @@
   margin: 0 0 12px;
 }
 .mk-dialog p {
-  color: #94a3b8;
-  font-size: 13px;
+  color: var(--mk-muted);
+  font-size: 14px;
   line-height: 1.8;
+}
+.mk-dialog .mk-field-error {
+  color: #fb7185;
+}
+.mk-dialog.mk-theme-light .mk-field-error {
+  color: #be123c;
 }
 .mk-dialog-actions {
   margin-top: 24px;
@@ -676,7 +669,7 @@
 .mk-copy-feedback {
   display: block;
   color: #fda4af;
-  font-size: 11px;
+  font-size: 14px;
   margin-top: 6px;
 }
 .mk-spin {
@@ -714,5 +707,178 @@
   }
   .mk-spin {
     animation: none;
+  }
+}
+
+.mk-logo {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  gap: 8px;
+}
+.mk-logomark {
+  background: var(--mk-text);
+  color: var(--mk-surface);
+  border-radius: 8px;
+}
+.mk-logo-dot {
+  display: none;
+}
+.mk-widget {
+  border-radius: 16px;
+  padding: 24px;
+}
+.mk-widget h2 {
+  font-size: 23px;
+  letter-spacing: -0.025em;
+}
+.mk-question {
+  padding-top: 24px;
+}
+.mk-badge {
+  font-size: 12px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+.mk-badge-success,
+.mk-theme-light .mk-badge-success,
+.mk-claim-heading,
+.mk-theme-light .mk-claim-heading {
+  color: var(--mk-success);
+}
+.mk-badge-success {
+  background: color-mix(in srgb, var(--mk-success) 7%, var(--mk-surface));
+  border-color: color-mix(in srgb, var(--mk-success) 30%, var(--mk-surface));
+}
+.mk-badge-warning,
+.mk-theme-light .mk-badge-warning,
+.mk-simulation,
+.mk-theme-light .mk-simulation {
+  color: var(--mk-warning);
+}
+.mk-badge-warning {
+  background: color-mix(in srgb, var(--mk-warning) 7%, var(--mk-surface));
+  border-color: color-mix(in srgb, var(--mk-warning) 30%, var(--mk-surface));
+}
+.mk-badge-violet,
+.mk-theme-light .mk-badge-violet,
+.mk-theme-light .mk-outcome-selected .mk-outcome-top,
+.mk-text-link,
+.mk-theme-light .mk-text-link {
+  color: var(--mk-primary);
+}
+.mk-badge-violet {
+  background: color-mix(in srgb, var(--mk-primary) 7%, var(--mk-surface));
+  border-color: color-mix(in srgb, var(--mk-primary) 30%, var(--mk-surface));
+}
+.mk-simulation {
+  font-size: 11px;
+  font-weight: 500;
+  border-color: color-mix(in srgb, var(--mk-warning) 25%, var(--mk-surface));
+  background: color-mix(in srgb, var(--mk-warning) 5%, var(--mk-surface));
+}
+.mk-outcome {
+  border-radius: 12px;
+  padding: 16px 14px;
+  transition:
+    background-color 180ms var(--hunch-ease),
+    border-color 180ms var(--hunch-ease);
+}
+.mk-outcome:hover:has(input:not(:disabled)) {
+  border-color: var(--mk-primary);
+}
+.mk-outcome-top {
+  font-size: 14px;
+}
+.mk-outcome-name {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.mk-outcome strong {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.mk-outcome-caption,
+.mk-pool p,
+.mk-connect p,
+.mk-account,
+.mk-claim p,
+.mk-waiting p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.mk-distribution-track {
+  background: color-mix(in srgb, var(--mk-muted) 60%, var(--mk-surface));
+  height: 7px;
+  transition: background-color 180ms var(--hunch-ease);
+}
+.mk-distribution-track span {
+  transition:
+    width 240ms var(--hunch-ease),
+    background-color 180ms var(--hunch-ease);
+}
+.mk-widget:has(.mk-outcome:last-child.mk-outcome-selected)
+  .mk-distribution-track {
+  background: var(--mk-primary);
+}
+.mk-widget:has(.mk-outcome:last-child.mk-outcome-selected)
+  .mk-distribution-track
+  span {
+  background: color-mix(in srgb, var(--mk-muted) 60%, var(--mk-surface));
+}
+.mk-widget-footer {
+  font-size: 11px;
+  gap: 6px;
+}
+.mk-error,
+.mk-theme-light .mk-error,
+.mk-field-error,
+.mk-theme-light .mk-field-error,
+.mk-dialog .mk-field-error,
+.mk-dialog.mk-theme-light .mk-field-error,
+.mk-copy-feedback {
+  color: var(--mk-danger);
+}
+.mk-error {
+  background: color-mix(in srgb, var(--mk-danger) 5%, var(--mk-surface));
+  border-color: color-mix(in srgb, var(--mk-danger) 25%, var(--mk-surface));
+}
+.mk-outcome-winner,
+.mk-claim {
+  border-color: color-mix(in srgb, var(--mk-success) 40%, var(--mk-surface));
+}
+.mk-claim {
+  background: color-mix(in srgb, var(--mk-success) 5%, var(--mk-surface));
+}
+.mk-dialog-close {
+  color: var(--mk-muted);
+  padding: 6px;
+}
+.mk-dialog-overlay {
+  background: #102a2299;
+}
+.mk-toast > span {
+  color: #f6f6ec;
+  background: #18392f;
+  border: 0;
+}
+.mk-widget-compact {
+  padding: 18px;
+}
+@container (max-width: 300px) {
+  .mk-widget h2 {
+    font-size: 21px;
+  }
+  .mk-outcome {
+    padding: 12px 10px;
+  }
+  .mk-outcome strong {
+    font-size: 27px;
+  }
+  .mk-outcome-top {
+    font-size: 13px;
+  }
+  .mk-widget-top {
+    flex-wrap: wrap;
   }
 }

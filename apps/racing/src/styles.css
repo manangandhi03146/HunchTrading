@@ -1,12 +1,12 @@
 @import "../../shared/styles.css";
 .racing-app {
-  --race-accent: #b9f56b;
-  background: #0b0e10;
+  --race-accent: var(--hunch-ink);
+  background: var(--hunch-paper);
   min-height: 100dvh;
 }
 .racing-app .app-header {
-  background: #0e1214;
-  border-color: #252c2f;
+  background: var(--hunch-moss);
+  border-color: var(--hunch-line);
 }
 .velocity-brand {
   display: flex;
@@ -17,11 +17,11 @@
   color: var(--race-accent);
 }
 .velocity-brand span {
-  border-left: 1px solid #344033;
+  border-left: 1px solid var(--hunch-line);
   padding-left: 11px;
   margin-left: 5px;
-  color: #7d9181;
-  font-size: 8px;
+  color: var(--hunch-muted);
+  font-size: 12px;
   font-weight: 500;
   max-width: 55px;
   line-height: 1.7;
@@ -39,8 +39,8 @@
   margin-bottom: 38px;
 }
 .racing-heading .eyebrow {
-  color: #9aaf96;
-  font-size: 10px;
+  color: var(--hunch-muted);
+  font-size: 12px;
 }
 .racing-heading h1 {
   font-size: clamp(34px, 4vw, 54px);
@@ -49,21 +49,21 @@
   font-weight: 550;
 }
 .racing-heading h1 > span {
-  color: #728078;
+  color: var(--hunch-muted);
 }
 .racing-heading p {
-  font-size: 13px;
-  color: #8c9c94;
+  font-size: 14px;
+  color: var(--hunch-muted);
   margin: 0;
 }
 .racing-round {
   width: 170px;
-  border-left: 1px solid #2a3530;
+  border-left: 1px solid var(--hunch-line);
   padding-left: 28px;
 }
 .racing-round > span {
-  font-size: 9px;
-  color: #8e9c90;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .racing-round > strong {
   display: block;
@@ -73,14 +73,14 @@
   font-variant-numeric: tabular-nums;
 }
 .racing-round > strong span {
-  color: #526058;
+  color: var(--hunch-muted);
   font-size: 26px;
 }
 .racing-round > div {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 8px;
+  font-size: 12px;
   color: var(--race-accent);
 }
 .racing-layout {
@@ -96,17 +96,17 @@
   min-width: 0;
 }
 .racing-left .mode-notice {
-  background: #141713;
-  border-color: #2d352a;
-  color: #95a18b;
+  background: var(--hunch-soft);
+  border-color: var(--hunch-line);
+  color: var(--hunch-muted);
 }
 .racing-left .mode-notice > span:last-child {
-  font-size: 8px;
+  font-size: 12px;
   white-space: nowrap;
 }
 .race-stage {
-  background: #141b1c;
-  border: 1px solid #2c3738;
+  background: var(--hunch-white);
+  border: 1px solid var(--hunch-line);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -117,8 +117,8 @@
   padding: 25px 26px 12px;
 }
 .race-stage-head .kicker {
-  font-size: 9px;
-  color: #73857e;
+  font-size: 12px;
+  color: var(--hunch-muted);
   margin-bottom: 8px;
 }
 .race-stage-head h2 {
@@ -130,17 +130,17 @@
   display: flex;
   gap: 18px;
   padding: 0 26px 22px;
-  color: #73857e;
-  font-size: 10px;
+  color: var(--hunch-muted);
+  font-size: 12px;
 }
 .circuit-info > span + span::before {
   content: "·";
   margin-right: 18px;
 }
 .race-lanes {
-  background: #0d1214;
+  background: var(--hunch-soft);
   padding: 5px 22px 22px;
-  border-block: 1px solid #273233;
+  border-block: 1px solid var(--hunch-line);
 }
 .race-lane {
   padding: 24px 0 10px;
@@ -157,13 +157,13 @@
   width: 34px;
   height: 34px;
   border-radius: 7px;
-  background: #23302c;
-  color: #b9f56b;
-  font-size: 12px;
+  background: var(--hunch-green-tint);
+  color: var(--hunch-ink);
+  font-size: 14px;
 }
 .racer-1 {
-  background: #202a35;
-  color: #8fa3c4;
+  background: var(--hunch-orange-tint);
+  color: var(--hunch-ink);
 }
 .racer-label > div {
   display: flex;
@@ -171,17 +171,17 @@
   gap: 4px;
 }
 .racer-label strong {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
 }
 .racer-label > div > span {
-  font-size: 8px;
-  color: #637471;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .racer-progress {
   margin-left: auto;
-  font-size: 11px;
-  color: #8ea096;
+  font-size: 14px;
+  color: var(--hunch-muted);
 }
 .lane-runway {
   container-type: inline-size;
@@ -191,24 +191,24 @@
     90deg,
     transparent 0,
     transparent 48px,
-    #22303155 48px,
-    #22303155 49px
+    #a4b39b66 48px,
+    #a4b39b66 49px
   );
-  border-block: 1px solid #283536;
+  border-block: 1px solid var(--hunch-line);
 }
 .lane-center {
   position: absolute;
   top: 36px;
   left: 0;
   right: 0;
-  border-top: 1px dashed #3f4f4c;
+  border-top: 1px dashed var(--hunch-muted);
 }
 .start-marker {
   position: absolute;
   top: 7px;
   left: 3px;
-  color: #53625b;
-  font-size: 7px;
+  color: var(--hunch-muted);
+  font-size: 12px;
 }
 .finish-marker {
   position: absolute;
@@ -216,9 +216,9 @@
   right: 8px;
   width: 16px;
   background: conic-gradient(
-      #8eaa9955 25%,
+      #a4b39b66 25%,
       transparent 0 50%,
-      #8eaa9955 0 75%,
+      #a4b39b66 0 75%,
       transparent 0
     )
     0 0/12px 12px;
@@ -279,8 +279,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 15px 24px;
-  color: #859890;
-  font-size: 10px;
+  color: var(--hunch-muted);
+  font-size: 12px;
 }
 .race-stage-bottom > span:first-child {
   display: flex;
@@ -288,30 +288,30 @@
   gap: 6px;
 }
 .race-stage-bottom > span:last-child {
-  font-size: 8px;
-  color: #53675d;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .race-winner {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 18px 24px;
-  border-top: 1px solid #334a2f;
-  background: #b9f56b0a;
-  color: #b9f56b;
-  font-size: 13px;
+  border-top: 1px solid var(--hunch-line);
+  background: var(--hunch-success-tint);
+  color: var(--hunch-ink);
+  font-size: 14px;
 }
 .race-winner .mk-badge {
   margin-left: auto;
 }
 .race-controls {
   padding: 23px;
-  background: #101618;
-  border-color: #263133;
+  background: var(--hunch-white);
+  border-color: var(--hunch-line);
 }
 .race-controls .kicker {
-  font-size: 9px;
-  color: #70857a;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .race-controls h3 {
   font-size: 17px;
@@ -319,8 +319,8 @@
   font-weight: 500;
 }
 .race-controls p {
-  font-size: 11px;
-  color: #7f9189;
+  font-size: 14px;
+  color: var(--hunch-muted);
   line-height: 1.7;
   margin: 0;
 }
@@ -331,12 +331,12 @@
   margin-top: 20px;
 }
 .race-control-buttons .mk-button-primary {
-  background: #b9f56b;
-  color: #14200b;
+  background: var(--hunch-ink);
+  color: #fffefa;
 }
 .race-control-buttons .mk-button-secondary {
-  background: #1e2927;
-  border-color: #324239;
+  background: var(--hunch-green-tint);
+  border-color: var(--hunch-line);
 }
 .race-lifecycle {
   display: grid;
@@ -355,14 +355,14 @@
   width: 28px;
   display: grid;
   place-items: center;
-  border: 1px solid #34433b;
+  border: 1px solid var(--hunch-line);
   border-radius: 50%;
-  font-size: 9px;
-  color: #6f8478;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .race-lifecycle .step-done {
-  color: #b9f56b;
-  border-color: #b9f56b55;
+  color: var(--hunch-ink);
+  border-color: var(--hunch-line);
 }
 .race-lifecycle > div > div {
   display: flex;
@@ -370,44 +370,44 @@
   gap: 5px;
 }
 .race-lifecycle strong {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 .race-lifecycle small {
-  font-size: 9px;
-  color: #71837a;
+  font-size: 12px;
+  color: var(--hunch-muted);
 }
 .step-chevron {
   margin-left: auto;
   margin-right: 12px;
-  color: #3a4a42;
+  color: var(--hunch-muted);
 }
 .widget-caption {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 3px 12px;
-  color: #83948a;
-  font-size: 9px;
+  color: var(--hunch-muted);
+  font-size: 12px;
 }
 .embed-note {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 20px 8px;
-  font-size: 11px;
-  color: #778780;
+  font-size: 14px;
+  color: var(--hunch-muted);
 }
 .embed-note code {
-  font-size: 10px;
-  color: #a6b8ad;
+  font-size: 12px;
+  color: var(--hunch-ink);
 }
 .embed-note a {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #b9f56b;
-  font-size: 10px;
+  color: var(--hunch-ink);
+  font-size: 12px;
 }
 @media (max-width: 1000px) {
   .racing-main {
@@ -446,12 +446,284 @@
     align-items: flex-start;
   }
   .race-lifecycle strong {
-    font-size: 9px;
+    font-size: 12px;
   }
   .race-stage-bottom {
     flex-wrap: wrap;
   }
   .velocity-brand {
     font-size: 17px;
+  }
+}
+
+@media (max-width: 480px) {
+  .circuit-info {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+  .circuit-info > span + span::before {
+    content: none;
+  }
+  .race-lifecycle {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .race-lifecycle > div {
+    align-items: center;
+  }
+  .race-lifecycle strong {
+    font-size: 14px;
+  }
+  .racer-label > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .racer-number,
+  .racer-progress {
+    flex-shrink: 0;
+  }
+  .race-winner {
+    flex-wrap: wrap;
+  }
+  .race-winner > span:not(.mk-badge) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .race-winner .mk-badge {
+    margin-left: 0;
+  }
+}
+
+.racing-app {
+  --race-accent: var(--hunch-green);
+}
+.velocity-brand {
+  color: #d1efa0;
+  letter-spacing: -0.025em;
+}
+.velocity-brand span {
+  color: #bfd0c4;
+  border-color: #476356;
+  font-size: 11px;
+  max-width: 70px;
+  line-height: 1.5;
+}
+.racing-main {
+  max-width: 1440px;
+  padding: 40px 48px 0;
+}
+.racing-heading {
+  margin-bottom: 32px;
+  gap: 24px;
+}
+.racing-heading h1 {
+  font-size: clamp(36px, 3.5vw, 50px);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  margin: 0 0 18px;
+  line-height: 1.13;
+}
+.racing-heading h1 > span {
+  color: var(--hunch-heading-green);
+}
+.racing-heading p {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.racing-round {
+  width: 190px;
+}
+.racing-round > span,
+.racing-round > div {
+  font-size: 12px;
+}
+.racing-round > strong {
+  font-size: 48px;
+  font-weight: 700;
+}
+.racing-round > strong span {
+  font-size: 18px;
+  margin-left: 6px;
+}
+.racing-layout {
+  grid-template-columns: minmax(0, 1.65fr) minmax(350px, 1fr);
+  gap: 32px;
+}
+.racing-left .mode-notice {
+  color: var(--hunch-muted);
+  background: var(--hunch-elevated);
+  border-color: var(--hunch-line);
+  font-size: 12px;
+}
+.racing-left .mode-notice > span:last-child {
+  font-size: 11px;
+}
+.race-stage-head {
+  padding: 24px 24px 14px;
+}
+.race-stage-head h2 {
+  font-size: 25px;
+  font-weight: 750;
+}
+.circuit-info {
+  font-size: 13px;
+  padding-inline: 24px;
+}
+.race-lanes {
+  padding: 4px 24px 24px;
+}
+.racer-number {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hunch-green);
+}
+.racer-1 {
+  color: var(--hunch-orange);
+}
+.racer-label strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+.racer-label > div > span {
+  font-size: 11px;
+}
+.racer-progress {
+  font-size: 14px;
+  font-weight: 600;
+}
+.start-marker {
+  font-size: 10px;
+  color: var(--hunch-muted);
+}
+.race-stage-bottom {
+  font-size: 12px;
+}
+.race-stage-bottom > span:last-child {
+  font-size: 11px;
+}
+.race-winner {
+  color: var(--hunch-success);
+  font-size: 14px;
+}
+.race-controls {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 12px 0 24px;
+  border-bottom: 1px solid var(--hunch-line);
+}
+.race-controls h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.race-controls p {
+  font-size: 14px;
+  max-width: 65ch;
+}
+.race-control-buttons {
+  gap: 10px;
+  margin-top: 20px;
+}
+.race-control-buttons .mk-button-primary {
+  background: var(--hunch-orange);
+  color: var(--hunch-primary-text);
+}
+.race-control-buttons .mk-button-primary:hover:not(:disabled) {
+  background: var(--hunch-orange-hover);
+}
+.race-control-buttons .mk-button-secondary {
+  background: var(--hunch-white);
+  border-color: var(--hunch-line);
+}
+.race-lifecycle {
+  padding: 0 0 20px;
+  gap: 16px;
+}
+.race-lifecycle strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+.race-lifecycle small {
+  font-size: 12px;
+}
+.race-lifecycle > div > span {
+  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.race-lifecycle .step-done {
+  color: var(--hunch-success);
+  background: var(--hunch-green-tint);
+  border-color: var(--hunch-line);
+}
+.widget-caption {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--hunch-ink);
+  padding-bottom: 16px;
+}
+.widget-caption h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.embed-note {
+  font-size: 13px;
+  padding: 20px 2px;
+}
+.embed-note code {
+  font-size: 12px;
+  color: var(--hunch-ink);
+}
+.embed-note a {
+  font-size: 13px;
+  color: var(--hunch-orange);
+  font-weight: 650;
+}
+@media (max-width: 1100px) {
+  .racing-main {
+    padding-inline: 28px;
+  }
+  .racing-layout {
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 24px;
+  }
+}
+@media (max-width: 800px) {
+  .racing-main {
+    padding: 30px 18px 0;
+  }
+  .racing-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .racing-heading h1 {
+    font-size: 38px;
+  }
+  .race-lifecycle {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .race-lifecycle > div {
+    align-items: center;
+  }
+  .race-lifecycle strong {
+    font-size: 14px;
+  }
+  .race-stage-head,
+  .race-stage-bottom {
+    padding-inline: 18px;
+  }
+  .race-lanes {
+    padding-inline: 18px;
+  }
+  .circuit-info {
+    padding-inline: 18px;
+    font-size: 12px;
+  }
+  .racing-left .mode-notice > span:last-child {
+    white-space: normal;
   }
 }

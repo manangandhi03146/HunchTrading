@@ -8,9 +8,11 @@ import { WalletButton } from "./WalletButton";
 export function ClaimPanel({
   market,
   onError,
+  showWalletButton = true,
 }: {
   market: Market;
   onError?: (error: Error) => void;
+  showWalletButton?: boolean;
 }) {
   const { walletAddress, client } = useMarketKit();
   const claimable = useClaimable(market.id, true);
@@ -41,7 +43,7 @@ export function ClaimPanel({
       {!walletAddress ? (
         <>
           <p>Connect your account to check your position.</p>
-          <WalletButton />
+          {showWalletButton && <WalletButton />}
         </>
       ) : (
         <>

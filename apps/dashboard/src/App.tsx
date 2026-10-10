@@ -1,4 +1,5 @@
 import { appUrl } from "../../shared/links";
+import { ThemeSwitch, useTheme, type Theme } from "../../shared/theme";
 import { useState, type FormEvent } from "react";
 import {
   Link,
@@ -52,6 +53,7 @@ import {
   useMarket,
   useMarketKit,
   useMarkets,
+  useNow,
   type CreateMarketParams,
   type Market,
   type MarketEvent,
@@ -88,7 +90,6 @@ function ModeNotice() {
   );
 }
 function PageTitle({
-  eyebrow,
   title,
   subtitle,
   action,
@@ -101,7 +102,6 @@ function PageTitle({
   return (
     <div className="page-title">
       <div>
-        <span className="eyebrow">{eyebrow}</span>
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
@@ -116,25 +116,26 @@ function MarketTable({
   markets: Market[];
   compact?: boolean;
 }) {
+  const now = useNow();
   return (
     <div className="market-table-wrap">
-      <table className="market-table">
-        <thead>
-          <tr>
-            <th>Market</th>
-            <th>Status</th>
-            <th>Pool</th>
-            {!compact && <th>Closes</th>}
-            {!compact && <th>Created</th>}
-            <th>
+      <table className="market-table" role="table">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th scope="col">Market</th>
+            <th scope="col">Status</th>
+            <th scope="col">Pool</th>
+            {!compact && <th scope="col">Closes</th>}
+            {!compact && <th scope="col">Created</th>}
+            <th scope="col">
               <span className="sr-only">View</span>
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody role="rowgroup">
           {markets.map((market) => (
-            <tr key={market.id}>
-              <td>
+            <tr key={market.id} role="row">
+              <td role="cell">
                 <Link
                   to={`/integration?market=${encodeURIComponent(market.id)}`}
                 >
@@ -147,24 +148,26 @@ function MarketTable({
                   </span>
                 </Link>
               </td>
-              <td>
-                <MarketStatus status={effectiveStatus(market)} />
+              <td role="cell">
+                <MarketStatus status={effectiveStatus(market, now)} />
               </td>
-              <td>
+              <td role="cell">
                 <strong className="tabular">
                   {formatTokens(market.totalPool)}
                 </strong>
                 <small> TEST</small>
               </td>
               {!compact && (
-                <td className="table-date">{date(market.closesAt)}</td>
+                <td className="table-date" role="cell" data-label="Closes">
+                  {date(market.closesAt)}
+                </td>
               )}
               {!compact && (
-                <td className="table-date">
+                <td className="table-date" role="cell" data-label="Created">
                   {market.createdAt ? date(market.createdAt) : "Not provided"}
                 </td>
               )}
-              <td>
+              <td role="cell">
                 <Link
                   className="table-open"
                   to={`/integration?market=${encodeURIComponent(market.id)}`}
@@ -181,11 +184,42 @@ function MarketTable({
   );
 }
 function Overview() {
+  const now = useNow();
   const { mode } = useMarketKit();
   const markets = useMarkets();
   const events = useEvents();
   const list = markets.data ?? [];
   const pool = list.reduce((sum, market) => sum + market.totalPool, 0n);
+  const applicationPools = new Map<string, bigint>();
+  for (const market of list) {
+    const application = market.application ?? "Your application";
+    applicationPools.set(
+      application,
+      (applicationPools.get(application) ?? 0n) + market.totalPool,
+    );
+  }
+  const rankedApplications = Array.from(
+    applicationPools,
+    ([name, totalPool]) => ({ name, totalPool }),
+  ).sort((a, b) =>
+    a.totalPool === b.totalPool
+      ? a.name.localeCompare(b.name)
+      : a.totalPool > b.totalPool
+        ? -1
+        : 1,
+  );
+  const visibleApplications =
+    rankedApplications.length > 5
+      ? [
+          ...rankedApplications.slice(0, 4),
+          {
+            name: "Other applications",
+            totalPool: rankedApplications
+              .slice(4)
+              .reduce((sum, item) => sum + item.totalPool, 0n),
+          },
+        ]
+      : rankedApplications;
   const stats = [
     {
       label: "Total markets",
@@ -196,7 +230,7 @@ function Overview() {
     {
       label: "Active markets",
       value: String(
-        list.filter((market) => effectiveStatus(market) === "open").length,
+        list.filter((market) => effectiveStatus(market, now) === "open").length,
       ),
       detail: "Accepting predictions",
       icon: Zap,
@@ -220,8 +254,8 @@ function Overview() {
     <>
       <PageTitle
         eyebrow="YOUR DEVELOPER WORKSPACE"
-        title="Good ideas. Shared outcomes."
-        subtitle="Everything you need to bring prediction markets into your product."
+        title="Your prediction workspace"
+        subtitle="Create markets, follow outcomes, and bring hunch into your product."
         action={
           <Link className="mk-button mk-button-primary" to="/markets/new">
             <Plus size={15} />
@@ -260,24 +294,22 @@ function Overview() {
             <Badge>{mode === "mock" ? "Sample data" : "Devnet"}</Badge>
           </div>
           <div className="pool-visualization">
-            {list.slice(0, 5).map((market, index) => (
-              <div key={market.id} className="pool-row">
+            {visibleApplications.map((application, index) => (
+              <div key={application.name} className="pool-row">
                 <span className="pool-row-icon">
                   <Layers3 size={14} />
                 </span>
                 <div>
                   <div>
-                    <span>
-                      {market.application ?? market.outcomes.join(" vs ")}
-                    </span>
+                    <span>{application.name}</span>
                     <strong className="tabular">
-                      {formatTokens(market.totalPool)} <small>TEST</small>
+                      {formatTokens(application.totalPool)} <small>TEST</small>
                     </strong>
                   </div>
                   <span className={`pool-row-track pool-color-${index % 3}`}>
                     <span
                       style={{
-                        transform: `scaleX(${pool === 0n ? 0 : Number((market.totalPool * 1000n) / pool) / 1000})`,
+                        transform: `scaleX(${pool === 0n ? 0 : Number((application.totalPool * 1000n) / pool) / 1000})`,
                       }}
                     />
                   </span>
@@ -303,12 +335,7 @@ function Overview() {
           <div className="quickstart-icon">
             <FileCode2 size={24} />
           </div>
-          <span className="kicker">BUILT FOR DEVELOPERS</span>
-          <h2>
-            From an idea
-            <br />
-            to an integration.
-          </h2>
+          <h2>Embed a prediction.</h2>
           <p>
             Create a market. Copy a component.
             <br />
@@ -374,15 +401,17 @@ function Overview() {
   );
 }
 function Markets() {
+  const { mode } = useMarketKit();
+  const now = useNow();
   const query = useMarkets();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const list = (query.data ?? []).filter(
     (market) =>
-      (filter === "all" || effectiveStatus(market) === filter) &&
+      (filter === "all" || effectiveStatus(market, now) === filter) &&
       `${market.question} ${market.id}`
         .toLowerCase()
-        .includes(search.toLowerCase()),
+        .includes(search.trim().toLowerCase()),
   );
   return (
     <>
@@ -433,20 +462,31 @@ function Markets() {
         ) : list.length > 0 ? (
           <MarketTable markets={list} />
         ) : (
-          <EmptyState title="No matching markets">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearch("");
-                setFilter("all");
-              }}
-            >
-              Clear filters
-            </Button>
+          <EmptyState
+            title={
+              query.data?.length ? "No matching markets" : "No markets yet"
+            }
+          >
+            {!query.data?.length ? (
+              <Link className="mk-button mk-button-primary" to="/markets/new">
+                Create your first market
+              </Link>
+            ) : (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSearch("");
+                  setFilter("all");
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
           </EmptyState>
         )}
         <div className="table-footnote">
-          {list.length} market{list.length !== 1 ? "s" : ""} · Solana Devnet
+          {list.length} market{list.length !== 1 ? "s" : ""} ·{" "}
+          {mode === "mock" ? "Local simulation" : "Solana Devnet"}
         </div>
       </Card>
     </>
@@ -652,15 +692,18 @@ function CreateMarket() {
   );
 }
 function Integration() {
+  const { theme: appTheme } = useTheme();
+  const now = useNow();
   const { client, mode } = useMarketKit();
   const markets = useMarkets();
   const [params, setParams] = useSearchParams();
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [widgetTheme, setWidgetTheme] = useState<Theme | "app">("app");
+  const theme = widgetTheme === "app" ? appTheme : widgetTheme;
   const [variant, setVariant] = useState<"default" | "compact">("default");
   const marketId =
     params.get("market") ??
-    markets.data?.[0]?.id ??
     import.meta.env.VITE_MARKETKIT_MARKET_ID ??
+    markets.data?.[0]?.id ??
     "race-42";
   const market = useMarket(marketId);
   const snippet = `import { PredictionMarket } from "@marketkit/react";\nimport "@marketkit/react/styles.css";\n\n// Inside the MarketKitProvider configured below:\n<PredictionMarket\n  marketId=${JSON.stringify(marketId)}\n  theme="${theme}"\n  variant="${variant}"\n/>`;
@@ -681,11 +724,20 @@ function Integration() {
               <Badge>React</Badge>
             </div>
             <div className="integration-fields">
+              {markets.error && (
+                <ErrorState
+                  error={markets.error}
+                  retry={() => {
+                    void markets.refetch();
+                  }}
+                />
+              )}
               <div className="form-field">
                 <label htmlFor="market-select">Market</label>
                 <select
                   id="market-select"
                   value={marketId}
+                  disabled={markets.isPending}
                   onChange={(event) =>
                     setParams({ market: event.target.value })
                   }
@@ -702,14 +754,15 @@ function Integration() {
               </div>
               <div className="form-outcomes">
                 <div className="form-field">
-                  <label htmlFor="theme">Theme</label>
+                  <label htmlFor="theme">Widget theme</label>
                   <select
                     id="theme"
-                    value={theme}
+                    value={widgetTheme}
                     onChange={(event) =>
-                      setTheme(event.target.value as "dark" | "light")
+                      setWidgetTheme(event.target.value as Theme | "app")
                     }
                   >
+                    <option value="app">Follow app theme</option>
                     <option value="dark">Dark</option>
                     <option value="light">Light</option>
                   </select>
@@ -782,7 +835,7 @@ function Integration() {
         </div>
         <aside>
           <div className="preview-heading">
-            <span>LIVE COMPONENT PREVIEW</span>
+            <h2>Widget preview</h2>
             <Badge>{mode === "mock" ? "Simulated" : "Devnet"}</Badge>
           </div>
           <PredictionMarket
@@ -800,7 +853,7 @@ function Integration() {
             <div>
               <span>Status</span>
               {market.data && (
-                <MarketStatus status={effectiveStatus(market.data)} />
+                <MarketStatus status={effectiveStatus(market.data, now)} />
               )}
             </div>
             <div>
@@ -920,6 +973,7 @@ function Events() {
             onChange={(event) => setFilter(event.target.value)}
           >
             <option value="all">All events</option>
+            <option value="created">Market creation</option>
             <option value="event_received">Event received</option>
             <option value="signature_verified">Signature verified</option>
             <option value="resolution_submitted">Resolution submitted</option>
@@ -938,6 +992,12 @@ function Events() {
           />
         ) : query.isPending ? (
           <Skeleton />
+        ) : events.length === 0 && filter !== "all" ? (
+          <EmptyState title="No events of this type yet">
+            <Button variant="secondary" onClick={() => setFilter("all")}>
+              Show all events
+            </Button>
+          </EmptyState>
         ) : (
           <EventRows events={events} />
         )}
@@ -960,7 +1020,7 @@ export default function App() {
           <Logo />
         </Link>
         <div className="workspace-switch">
-          <span className="workspace-avatar">M</span>
+          <span className="workspace-avatar">h</span>
           <div>
             <strong>HackRU workspace</strong>
             <small>
@@ -1033,6 +1093,7 @@ export default function App() {
             <strong>Developer console</strong>
           </div>
           <div className="topbar-actions">
+            <ThemeSwitch />
             <Badge tone={mode === "mock" ? "warning" : "violet"}>
               {mode === "mock" ? "Simulated demo" : "Devnet"}
             </Badge>

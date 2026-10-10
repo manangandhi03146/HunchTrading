@@ -30,3 +30,9 @@ wallet.json
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local Impeccable installation and review evidence
+.codex/hooks.json
+.impeccable/review/
+.impeccable/questions/
+.impeccable/config.local.json

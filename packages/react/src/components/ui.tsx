@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
@@ -22,7 +23,20 @@ export function Logo({ small = false }: { small?: boolean }) {
   return (
     <span className={cn("mk-logo", small && "mk-logo-small")}>
       <span className="mk-logomark" aria-hidden="true">
-        <Layers3 size={small ? 17 : 21} strokeWidth={2.2} />
+        <svg
+          width={small ? 18 : 22}
+          height={small ? 18 : 22}
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M5 4v16M5 13c0-3 2-5 5-5s5 2 5 5v7M19 4v4"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <circle cx="19" cy="13" r="2" fill="currentColor" />
+        </svg>
       </span>
       hunch
       <span className="mk-logo-dot" aria-hidden="true">
@@ -36,6 +50,7 @@ export function Button({
   className,
   busy,
   children,
+  type = "button",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost";
@@ -43,6 +58,7 @@ export function Button({
 }) {
   return (
     <button
+      type={type}
       {...props}
       className={cn("mk-button", `mk-button-${variant}`, className)}
       disabled={props.disabled || busy}
@@ -79,7 +95,7 @@ export function ErrorState({
       <div>
         {error instanceof Error ? error.message : String(error)}
         {retry && (
-          <button className="mk-text-button" onClick={retry}>
+          <button type="button" className="mk-text-button" onClick={retry}>
             Try again
           </button>
         )}
@@ -114,6 +130,12 @@ export function Skeleton() {
 }
 export function CopyButton({ text }: { text: string }) {
   const [status, setStatus] = useState("");
+  useEffect(() => setStatus(""), [text]);
+  useEffect(() => {
+    if (status !== "Copied") return;
+    const timer = setTimeout(() => setStatus(""), 2000);
+    return () => clearTimeout(timer);
+  }, [status]);
   return (
     <>
       <Button

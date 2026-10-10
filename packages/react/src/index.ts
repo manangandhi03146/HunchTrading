@@ -26,3 +26,5 @@ export * from "./components/ui";
 export { WalletButton, WalletAddress } from "./components/WalletButton";
 export { MarketStatus } from "./components/MarketStatus";
 import "./styles.css";
+
+export { useNow } from "./hooks/useNow";

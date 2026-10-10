@@ -2,7 +2,7 @@
 
 The product is **hunch**, at **https://hunchtrading.tech**. Existing `@marketkit/*` workspace names, SDK exports, and environment variables are retained for compatibility with Developer A/B's current integration contract.
 
-Reusable React widget, Velocity Racing demo, Nexus esports demo, and the developer console. All demo credits are nonredeemable; live signing is restricted to Solana Devnet. Changes are confined to frontend-owned code. The Anchor program, SDK, and resolver sources are untouched.
+Reusable React widget, Velocity Racing demo, Nexus esports demo, and the developer console. All demo credits are nonredeemable; live signing is restricted to Solana Devnet. The Anchor program and live SDK/resolver integration remain scaffolds; mock validation and the frontend demo are exercised by the workspace regression suite.
 
 ## Run
 
@@ -23,7 +23,7 @@ npm run build --workspace @marketkit/react   # distributable JS, declarations, C
 npm run test --workspace @marketkit/react    # Vitest + Testing Library
 ```
 
-The existing root scripts are preserved. Optional aliases `dev:racing`, `dev:esports`, and `dev:dashboard` can be added by the team; the commands above already work. Widget build first builds the SDK declarations it consumes. Vite development aliases resolve the workspace sources directly.
+Use the root shortcuts `npm run dev`, `npm run esports`, and `npm run dashboard` to start the three apps. Widget build first builds the SDK declarations it consumes. Vite development aliases resolve the workspace sources directly.
 
 ## Embed
 
@@ -41,6 +41,8 @@ export function App() {
 ```
 
 Configure the provider once, above all widgets. Supported widget options: `marketId`, `theme` (`dark`/`light`), `variant` (`default`/`compact`), `showPool`, `showWalletButton`, `className`, `onPredictionSuccess`, `onError`. `PredictionWidget` is a compatibility alias. The library includes its own styles and uses container queries for narrow embeds.
+
+The widget's explicit theme stays scoped to its own CSS variables, including the prediction review dialog. It can differ from the host page. The demo apps provide their own persistent Light/Dark switch in `apps/shared/theme.tsx`; that provider is not part of the public React package API. The console preview can follow the page or override its widget theme. See [the frontend handoff](../../DEVELOPER_C_HANDOFF.md) for the palette and preference contract.
 
 ## Configuration
 
@@ -62,7 +64,7 @@ Mock data is stored per browser origin in `localStorage` under `marketkit.fronte
 
 ## Developer B integration requirements
 
-The checked-in SDK currently exposes `MarketKit`, `getMarket`, and `getPositions`, but its live implementation throws “pending.” Its mock omits balances, claim status, close validation, and repeated-claim protection, so the frontend uses a separate demo client rather than weakening those guarantees.
+The checked-in SDK currently exposes `MarketKit`, `getMarket`, and `getPositions`, but its live implementation throws “pending.” Its mock validates closing times and rejects repeated claims, but does not expose frontend balances or enriched claim status, so the frontend uses a separate demo client.
 
 `SdkMarketKitClient` consumes the existing reads without inventing SDK exports. Supply typed `SdkBindings` through the provider once B implements the methods. See `src/adapters/SdkMarketKitClient.ts` for the exact TypeScript contract.
 

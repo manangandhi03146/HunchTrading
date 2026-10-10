@@ -1,4 +1,5 @@
 import { appUrl } from "../../shared/links";
+import { useTheme } from "../../shared/theme";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -41,6 +42,7 @@ function Car({ color }: { color: string }) {
   );
 }
 export default function App() {
+  const { theme } = useTheme();
   const { client, mode, notify } = useMarketKit();
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
@@ -88,6 +90,12 @@ export default function App() {
       void queryClient.invalidateQueries();
     },
   });
+  useEffect(() => {
+    start.reset();
+    close.reset();
+    reset.reset();
+  }, [marketId, start.reset, close.reset, reset.reset]);
+  const controlsPending = start.isPending || close.isPending || reset.isPending;
   const marketStatus = market.data ? effectiveStatus(market.data, now) : null;
   const state = race.data?.status ?? "upcoming";
   const elapsed = race.data?.startedAt
@@ -160,21 +168,17 @@ export default function App() {
       <main id="main" className="racing-main">
         <div className="racing-heading">
           <div>
-            <div className="eyebrow">
-              <Flag size={14} />
-              VELOCITY CIRCUIT · EXHIBITION RACE
-            </div>
             <h1>
-              The finish line
+              Make the call.
               <br />
-              <span>is just the beginning.</span>
+              <span>Then watch it unfold.</span>
             </h1>
             <p>A live race. A shared prediction pool. One seamless finish.</p>
           </div>
           <div className="racing-round">
             <span>EXHIBITION</span>
             <strong>
-              01<span>/03</span>
+              12<span>sec</span>
             </strong>
             <div>
               <Radio size={12} />{" "}
@@ -199,7 +203,6 @@ export default function App() {
             <section className="race-stage" aria-label="Racing circuit">
               <div className="race-stage-head">
                 <div>
-                  <span className="kicker">LIVE CIRCUIT</span>
                   <h2>Terminal Sprint</h2>
                 </div>
                 <Badge tone={state === "racing" ? "success" : "neutral"}>
@@ -256,7 +259,13 @@ export default function App() {
                               : undefined,
                         }}
                       >
-                        <Car color={index === 0 ? "#b9f56b" : "#8fa3c4"} />
+                        <Car
+                          color={
+                            index === 0
+                              ? "var(--hunch-green)"
+                              : "var(--hunch-orange)"
+                          }
+                        />
                       </div>
                     </div>
                   </div>
@@ -293,8 +302,9 @@ export default function App() {
             </section>
             <Card className="race-controls">
               <div>
-                <span className="kicker">DEMO CONTROLS</span>
-                <h3>From prediction to podium.</h3>
+                <h3>
+                  {mode === "mock" ? "Demo race controls" : "Race controls"}
+                </h3>
                 <p>
                   Start the race after the pool closes. The authorized result
                   drives settlement.
@@ -303,6 +313,7 @@ export default function App() {
               <div className="race-control-buttons">
                 <Button
                   disabled={
+                    controlsPending ||
                     marketStatus !== "closed" ||
                     state === "racing" ||
                     state === "finished" ||
@@ -319,7 +330,11 @@ export default function App() {
                 {mode === "mock" && (
                   <Button
                     variant="secondary"
-                    disabled={marketStatus !== "open" || state !== "upcoming"}
+                    disabled={
+                      controlsPending ||
+                      marketStatus !== "open" ||
+                      state !== "upcoming"
+                    }
                     busy={close.isPending}
                     onClick={() => close.mutate()}
                   >
@@ -328,7 +343,9 @@ export default function App() {
                 )}
                 <Button
                   variant="ghost"
-                  disabled={mode !== "mock" || state === "racing"}
+                  disabled={
+                    controlsPending || mode !== "mock" || state === "racing"
+                  }
                   busy={reset.isPending}
                   onClick={() => reset.mutate()}
                 >
@@ -385,10 +402,14 @@ export default function App() {
           </div>
           <aside>
             <div className="widget-caption">
-              <span>MAKE YOUR CALL</span>
+              <h2>Your prediction</h2>
               <ShieldCheck size={14} />
             </div>
-            <PredictionMarket key={marketId} marketId={marketId} />
+            <PredictionMarket
+              key={marketId}
+              marketId={marketId}
+              theme={theme}
+            />
             <div className="embed-note">
               <span>One component. Any application.</span>
               <code>{'<PredictionMarket marketId="…" />'}</code>
@@ -401,7 +422,9 @@ export default function App() {
         <footer className="app-footer">
           <span>Velocity Racing · A hunch integration demo</span>
           <span>
-            Solana Devnet infrastructure · nonredeemable test tokens only
+            {mode === "mock"
+              ? "Interactive simulation · nonredeemable demo credits"
+              : "Solana Devnet infrastructure · nonredeemable test tokens only"}
           </span>
         </footer>
       </main>

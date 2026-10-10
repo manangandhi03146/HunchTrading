@@ -1,7 +1,8 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowRight, Clock3, ShieldCheck, X } from "lucide-react";
 import { useMarket } from "../hooks/useMarket";
+import { useNow } from "../hooks/useNow";
 import { useBalance } from "../hooks/useMarket";
 import { useMarketPositions } from "../hooks/useMarketPositions";
 import { useTransaction } from "../hooks/usePrediction";
@@ -57,12 +58,9 @@ function PredictionMarketContent({
   const [amount, setAmount] = useState("10");
   const [fieldError, setFieldError] = useState("");
   const [review, setReview] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const reviewTrigger = useRef<HTMLButtonElement | null>(null);
+  const now = useNow();
   const id = useId();
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
   useEffect(() => {
     setOutcome(null);
     setReview(false);
@@ -85,6 +83,8 @@ function PredictionMarketContent({
     try {
       if (outcome === null)
         throw new Error("Choose an outcome before continuing.");
+      if (balance.isError)
+        throw new Error("Refresh your TEST balance before confirming.");
       if (balance.data === undefined)
         throw new Error("Wait until your TEST balance is available.");
       const stake = parseStake(amount, balance.data);
@@ -165,6 +165,7 @@ function PredictionMarketContent({
                 key={`${marketId}:${walletAddress}`}
                 market={market}
                 onError={onError}
+                showWalletButton={showWalletButton}
               />
             ) : status === "closed" ? (
               <div className="mk-waiting">
@@ -211,8 +212,11 @@ function PredictionMarketContent({
                       className="mk-full"
                       disabled={balance.data === undefined || balance.isError}
                       busy={transaction.isPending}
-                      onClick={() => {
-                        if (validate() !== null) setReview(true);
+                      onClick={(event) => {
+                        if (validate() !== null) {
+                          reviewTrigger.current = event.currentTarget;
+                          setReview(true);
+                        }
                       }}
                     >
                       {transaction.phase === "confirming" ? (
@@ -263,7 +267,15 @@ function PredictionMarketContent({
             <Dialog.Root open={review} onOpenChange={setReview}>
               <Dialog.Portal>
                 <Dialog.Overlay className="mk-dialog-overlay" />
-                <Dialog.Content className="mk-dialog">
+                <Dialog.Content
+                  className={cn("mk-dialog", `mk-theme-${theme}`)}
+                  onCloseAutoFocus={(event) => {
+                    if (reviewTrigger.current?.isConnected) {
+                      event.preventDefault();
+                      reviewTrigger.current.focus();
+                    }
+                  }}
+                >
                   <Dialog.Title>Review your prediction</Dialog.Title>
                   <Dialog.Description>
                     Commit {amount} TEST to{" "}
@@ -276,6 +288,11 @@ function PredictionMarketContent({
                       : "Your wallet will ask you to sign a Devnet transaction."}{" "}
                     Final payouts depend on the closed pool.
                   </Dialog.Description>
+                  {fieldError && (
+                    <p className="mk-field-error" role="alert">
+                      {fieldError}
+                    </p>
+                  )}
                   <div className="mk-dialog-actions">
                     <Dialog.Close asChild>
                       <Button variant="secondary">Go back</Button>

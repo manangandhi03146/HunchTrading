@@ -3,7 +3,9 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { MarketKitProvider, type Mode } from "@marketkit/react";
 import App from "./App";
+import { ThemeProvider } from "../../shared/theme";
 import "./styles.css";
+import "./layout.css";
 
 const mode = import.meta.env.VITE_MARKETKIT_MODE ?? "mock";
 const cluster = import.meta.env.VITE_SOLANA_CLUSTER ?? "devnet";
@@ -21,15 +23,17 @@ if ((mode !== "mock" && mode !== "sdk") || cluster !== "devnet") {
 } else {
   root.render(
     <React.StrictMode>
-      <MarketKitProvider
-        mode={mode as Mode}
-        programId={import.meta.env.VITE_MARKETKIT_PROGRAM_ID}
-        tokenMint={import.meta.env.VITE_TEST_TOKEN_MINT}
-      >
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </MarketKitProvider>
+      <ThemeProvider>
+        <MarketKitProvider
+          mode={mode as Mode}
+          programId={import.meta.env.VITE_MARKETKIT_PROGRAM_ID}
+          tokenMint={import.meta.env.VITE_TEST_TOKEN_MINT}
+        >
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </MarketKitProvider>
+      </ThemeProvider>
     </React.StrictMode>,
   );
 }

@@ -18,6 +18,105 @@ interface State {
   events: MarketEvent[];
   races: Record<string, RaceState>;
 }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isAmount(value: unknown): value is bigint {
+  return typeof value === "bigint" && value >= 0n;
+}
+function isTime(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+function isOutcome(value: unknown): value is Outcome {
+  return value === 0 || value === 1;
+}
+function isState(value: unknown): value is State {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value.markets) ||
+    !Array.isArray(value.positions) ||
+    !isRecord(value.balances) ||
+    !Array.isArray(value.events) ||
+    !isRecord(value.races)
+  )
+    return false;
+  const marketIds = new Set<string>();
+  for (const market of value.markets) {
+    if (
+      !isRecord(market) ||
+      typeof market.id !== "string" ||
+      !market.id ||
+      marketIds.has(market.id) ||
+      typeof market.question !== "string" ||
+      !Array.isArray(market.outcomes) ||
+      market.outcomes.length !== 2 ||
+      !market.outcomes.every((label) => typeof label === "string") ||
+      !Array.isArray(market.pools) ||
+      market.pools.length !== 2 ||
+      !market.pools.every(isAmount) ||
+      !isAmount(market.totalPool) ||
+      market.totalPool !== market.pools[0] + market.pools[1] ||
+      !isTime(market.closesAt) ||
+      !["open", "closed", "resolved", "cancelled"].includes(
+        String(market.status),
+      ) ||
+      !(market.winningOutcome === null || isOutcome(market.winningOutcome)) ||
+      (market.status === "resolved" && !isOutcome(market.winningOutcome))
+    )
+      return false;
+    marketIds.add(market.id);
+  }
+  if (
+    !value.positions.every(
+      (position) =>
+        isRecord(position) &&
+        typeof position.marketId === "string" &&
+        marketIds.has(position.marketId) &&
+        typeof position.wallet === "string" &&
+        isOutcome(position.outcome) &&
+        isAmount(position.amount) &&
+        typeof position.claimed === "boolean",
+    )
+  )
+    return false;
+  if (!Object.values(value.balances).every(isAmount)) return false;
+  if (
+    !value.events.every(
+      (event) =>
+        isRecord(event) &&
+        typeof event.id === "string" &&
+        typeof event.marketId === "string" &&
+        typeof event.message === "string" &&
+        isTime(event.timestamp) &&
+        event.simulated === true &&
+        [
+          "created",
+          "prediction",
+          "event_received",
+          "signature_verified",
+          "resolution_submitted",
+          "confirmed",
+          "failed",
+          "claim",
+        ].includes(String(event.type)),
+    )
+  )
+    return false;
+  return Object.entries(value.races).every(
+    ([id, race]) =>
+      marketIds.has(id) &&
+      isRecord(race) &&
+      race.marketId === id &&
+      ["upcoming", "racing", "finished"].includes(String(race.status)) &&
+      isTime(race.durationMs) &&
+      race.durationMs > 0 &&
+      race.simulated === true &&
+      (race.startedAt === undefined || isTime(race.startedAt)) &&
+      (race.status !== "racing" || isTime(race.startedAt)) &&
+      (race.winner === null || isOutcome(race.winner)) &&
+      (race.status !== "finished" || isOutcome(race.winner)),
+  );
+}
 const STORAGE_KEY = "marketkit.frontend.demo.v1";
 export const DEMO_WALLET = "DemoSpectator";
 // A deterministic game-server fixture, never an authoritative live result.
@@ -104,12 +203,14 @@ export class MockMarketKitClient implements MarketKitClient {
     if (options.persist !== false && typeof localStorage !== "undefined") {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved)
-          this.state = JSON.parse(saved, (_key, value) =>
+        if (saved) {
+          const restored: unknown = JSON.parse(saved, (_key, value) =>
             typeof value === "string" && /^bigint:\d+$/.test(value)
               ? BigInt(value.slice(7))
               : value,
           );
+          if (isState(restored)) this.state = restored;
+        }
       } catch {
         /* Unavailable storage starts a fresh fixture. */
       }
