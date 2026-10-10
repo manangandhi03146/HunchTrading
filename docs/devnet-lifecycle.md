@@ -31,7 +31,7 @@ Do not present simulated addresses, game signatures, mock receipts, or expected 
 | Observed treasury TEST balance | `999900` |
 | Observed resolver SOL balance | `0` |
 
-Re-query these values before a demo. `INTEGRATION.md` in the starting main has an incorrect Devnet genesis string; use the RPC-confirmed value above. The frontend owner should reconcile its network guard independently.
+Re-query these values before a demo. `INTEGRATION.md:74` in the starting main has an incorrect Devnet genesis string, and `packages/react/src/adapters/SdkMarketKitClient.ts:88` uses a truncated one. Use the RPC-confirmed value above. The frontend owner should reconcile its network guard independently; this branch does not change React files.
 
 ```sh
 npm ci
@@ -113,7 +113,9 @@ Preparation creates separate creator, A, B, C, and backend game signing keys wit
 
 ## Funding request to the authorized operator
 
-Preparation writes `funding-request.txt` next to the protected manifest. Share its **public addresses and commands**, not any private file. It requests transfers of **1000 existing TEST each** to A, B, C and **0.15 Devnet SOL each** to creator, A, B, C, resolver. The live preflight requires at least **0.1 SOL** per transaction signer and exactly 1000 TEST per participant. No replacement mint or minting instruction exists in this branch.
+Preparation writes `funding-request.txt` next to the protected manifest. Share its **public addresses and commands**, not any private file. It requests transfers of **1000 existing TEST each** to A, B, C and **0.15 Devnet SOL each** to creator, A, B, C, resolver. The live preflight requires at least **0.1 SOL** per transaction signer and exactly 1000 TEST per participant. Devnet tooling never creates a replacement mint or mints TEST; LiteSVM fixtures mint only inside the local simulator.
+
+One Devnet faucet request for 1 SOL to the existing resolver failed with RPC code `-32603`, returned no transaction signature, and left the resolver balance at zero on recheck. It was not blindly retried. The authorized operator must fund it or reconcile and complete a later faucet request. This attempt provides no lifecycle transaction evidence.
 
 The operator sets protected key paths in their own shell. Agave does not supply the separate SPL Token CLI; the operator should check `spl-token --version` before funding. If missing, install the [published SPL Token CLI](https://crates.io/crates/spl-token-cli/5.6.1) with `cargo +1.91.0 install spl-token-cli --version 5.6.1 --locked` in their Linux environment. Record its actual version with the funding evidence. Exact commands generated per recipient specify classic SPL Token and the funded treasury key as fee payer:
 
