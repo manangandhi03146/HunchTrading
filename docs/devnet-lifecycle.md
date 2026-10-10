@@ -7,8 +7,8 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does n
 | Result | Status |
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
-| Deadline fix | Added locally using existing `MarketStillOpen`; Rust execution pending working Linux toolchain/CI |
-| Original three LiteSVM suites and failing regression | Passed with exact pins in CI run 38094366570; regression failed for intended early-resolution success. Patched rerun pending the build-key check correction |
+| Deadline fix | Added locally using existing `MarketStillOpen`; patched execution pending CI rerun with isolated build outputs |
+| Original three LiteSVM suites and failing regression | Passed with exact pins in CI run 38095226793; regression failed for intended early-resolution success. Patched build reused baseline bytecode; the rerun separates output directories |
 | Harness safeguards | Six Node tests pass: mock rejection, protected JSON error redaction, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Real create → stake → signed event → resolve → claim | Pending live SDK merge, team key provisioning, funding and working WSL |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
@@ -74,7 +74,7 @@ Ordinary `npm test` does not broadcast Devnet transactions. The dedicated comman
 npm run test:contract
 ```
 
-The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. The baseline and patched builds share dependency artifacts, and the guard regression checks that the freshly compiled patched program rejects early resolution.
+The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. Baseline and patched builds use separate Cargo/SBF output directories because sharing them reused baseline bytecode despite the changed source. The patched bytecode must differ, and the guard regression must reject early resolution.
 
 For the equivalent manual baseline on Windows, make a temporary archive of the recorded SHA using host Git, extract it into a separate directory, copy this branch's exact dependency pins from `programs/marketkit/Cargo.toml` (without any behavior change), then run `anchor build --ignore-keys` and `cargo test -p marketkit` there using Ubuntu. Copy only `lifecycle_guards.rs` into that baseline tree and run:
 
@@ -159,7 +159,7 @@ Both winning positions must be claimed; B must remain unclaimed; escrow must ret
 
 ## Evidence and recovery
 
-Before each SDK mutation, the harness flushes a pending journal stage. Its wallet wrapper flushes each signed transaction's public signature before returning it to the SDK for broadcast. It does not persist a private key. After submission it fetches the actual transaction, rejects errors, checks a program reference, and records confirmation, slot, block time, fee and Explorer URL. Public snapshots record decoded market/position identities, amounts, claim flags, vault and wallet balances.
+Before each SDK mutation, the harness flushes a pending journal stage. Its wallet wrapper flushes each signed transaction's public signature before returning it to the SDK for broadcast. It does not persist a private key. After submission it fetches the actual transaction, rejects errors, checks an instruction invokes the hunch program, and records confirmation, slot, block time, fee and Explorer URL. Public snapshots record decoded market/position identities, amounts, claim flags, vault and wallet balances.
 
 On any uncertain mutation or failed assertion, **stop**. No automatic retry is performed. Inspect the ignored journal and resolver database, and use the read-only command:
 

@@ -26,8 +26,8 @@ jobs:
         shell: bash
         run: |
           export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
-          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target"
-          printf 'CARGO_TARGET_DIR=%s\n' "$CARGO_TARGET_DIR" >> "$GITHUB_ENV"
+          # Separate outputs: shared Cargo/SBF fingerprints reused baseline bytecode.
+          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/.data/contract-baseline-target"
           baseline=$(mktemp -d)
           git archive 49a5e7055d3a490c3c7791d03315ef6107fb28e9 | tar -x -C "$baseline"
           # Only exact dependency pins differ; baseline program logic/tests are unchanged.
@@ -44,7 +44,12 @@ jobs:
       - name: Build patched program and run all contract suites
         run: |
           export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
+          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target"
           npm run test:contract
+          if cmp -s .data/contract-baseline-target/deploy/marketkit.so target/deploy/marketkit.so; then
+            echo 'Patched bytecode unexpectedly equals baseline bytecode'
+            exit 1
+          fi
       - name: Upload compiler and test evidence
         if: always()
         uses: actions/upload-artifact@v4
