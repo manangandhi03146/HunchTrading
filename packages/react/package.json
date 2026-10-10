@@ -1,0 +1,23 @@
+{
+  "name": "@marketkit/react",
+  "version": "0.1.0",
+  "description": "MarketKit embeddable React prediction widget.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@marketkit/sdk": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,32 @@
+# === Node / TypeScript ===
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.npm/
+.eslintcache
+
+# === Env / secrets ===
+.env
+.env.*
+!.env.example
+*.pem
+
+# === Rust / Anchor / Solana ===
+target/
+.anchor/
+test-ledger/
+**/*.rs.bk
+Cargo.lock
+
+# IMPORTANT: never commit wallet keypairs / resolver keys
+*keypair*.json
+id.json
+wallet.json
+/**/deploy/*.json
+
+# === Editor / OS ===
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
