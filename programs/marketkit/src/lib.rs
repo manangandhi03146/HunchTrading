@@ -38,4 +38,14 @@ pub mod marketkit {
     ) -> Result<()> {
         instructions::place_prediction::handle_place_prediction(ctx, outcome, amount)
     }
+
+    /// A5 — the market's resolver records the verified winning outcome.
+    pub fn resolve_market(ctx: Context<ResolveMarket>, winning_outcome: u8) -> Result<()> {
+        instructions::resolve_market::handle_resolve_market(ctx, winning_outcome)
+    }
+
+    /// A6 — a winner claims their proportional share of the pool from escrow.
+    pub fn claim_winnings(ctx: Context<ClaimWinnings>) -> Result<()> {
+        instructions::claim_winnings::handle_claim_winnings(ctx)
+    }
 }
