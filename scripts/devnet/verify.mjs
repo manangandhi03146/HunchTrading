@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { getAccount, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AnchorMarketAdapter } from '@hunch/sdk';
 import { buildServer, ResolverStore, signGameEvent } from '@marketkit/resolver';
-import { requireOptIn, preflight, chainClock, loadProtectedKey, wallet, Journal, PROGRAM, MINT, RESOLVER,
+import { requireOptIn, preflight, chainClock, loadProtectedKey, readSafeJSON, wallet, Journal, PROGRAM, MINT, RESOLVER,
   RPC, connection, coder, snapshot, json, sleep } from './core.mjs';
 
 requireOptIn();
@@ -17,7 +17,7 @@ let observedClock = chain.chainClock.unixTimestamp;
 const adapter = new AnchorMarketAdapter({ rpcUrl: RPC, programId: PROGRAM.toBase58() });
 assert.equal(adapter.mode, 'anchor', 'Mock adapters are forbidden');
 assert(process.env.HUNCH_VERIFY_MANIFEST, 'HUNCH_VERIFY_MANIFEST must reference the protected WSL manifest');
-const manifest = JSON.parse(readFileSync(process.env.HUNCH_VERIFY_MANIFEST, 'utf8'));
+const manifest = readSafeJSON(process.env.HUNCH_VERIFY_MANIFEST);
 const keys = Object.fromEntries(['creator', 'A', 'B', 'C', 'game'].map(role => {
   const key = loadProtectedKey(manifest.wallets[role].path);
   assert.equal(key.publicKey.toBase58(), manifest.wallets[role].publicKey, `${role} identity mismatch`);

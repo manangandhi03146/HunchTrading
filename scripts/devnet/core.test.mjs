@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { Keypair, Transaction, TransactionInstruction, SystemProgram } from '@solana/web3.js';
-import { Journal, wallet, requireReceipt, connection, preflight, confirmedTransaction, PROGRAM } from './core.mjs';
+import { Journal, wallet, requireReceipt, connection, preflight, confirmedTransaction, readSafeJSON, PROGRAM } from './core.mjs';
 
 test('mock and failed receipts cannot count as real Devnet evidence', () => {
   for (const receipt of [{ mode: 'mock', signature: null, status: 'confirmed' },
@@ -12,6 +12,15 @@ test('mock and failed receipts cannot count as real Devnet evidence', () => {
     { mode: 'anchor', signature: '1'.repeat(88), status: 'failed' }]) {
     assert.throws(() => requireReceipt(receipt));
   }
+});
+
+test('malformed protected JSON never exposes its contents in an error', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'hunch-journal-'));
+  try {
+    const path = join(directory, 'invalid.json');
+    writeFileSync(path, 'SENSITIVE_TEST_MARKER_NOT_JSON');
+    assert.throws(() => readSafeJSON(path), error => !error.stack.includes('SENSITIVE') && error.message.includes('contents suppressed'));
+  } finally { rmSync(directory, { recursive: true }); }
 });
 
 test('wrong genesis prevents all subsequent account checks', async () => {

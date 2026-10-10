@@ -20,6 +20,13 @@ export const json = value => JSON.stringify(value, (_key, item) => typeof item =
 export const explorer = signature => `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
 export const sleep = ms => new Promise(done => setTimeout(done, ms));
 
+export function readSafeJSON(path) {
+  // Native JSON errors can echo malformed private-file contents into a stack trace.
+  const contents = readFileSync(path, 'utf8');
+  try { return JSON.parse(contents); }
+  catch { throw new Error('Invalid JSON file; contents suppressed to protect key material'); }
+}
+
 export async function chainClock() {
   const account = await connection.getAccountInfoAndContext(SYSVAR_CLOCK_PUBKEY);
   assert(account.value && account.value.data.length >= 40, 'Clock sysvar unavailable');
@@ -68,7 +75,7 @@ export function loadProtectedKey(path) {
   outsideRepository(absolute);
   const metadata = statSync(absolute);
   assert(metadata.isFile() && (metadata.mode & 0o077) === 0 && metadata.uid === process.getuid(), 'Key requires owner-only permissions and current-user ownership');
-  const bytes = JSON.parse(readFileSync(absolute, 'utf8'));
+  const bytes = readSafeJSON(absolute);
   assert(Array.isArray(bytes) && bytes.length === 64 && bytes.every(b => Number.isInteger(b) && b >= 0 && b <= 255), 'Invalid protected key file');
   return Keypair.fromSecretKey(Uint8Array.from(bytes));
 }
