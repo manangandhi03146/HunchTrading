@@ -28,4 +28,14 @@ pub mod marketkit {
             ctx, market_id, deadline, resolver, token_mint,
         )
     }
+
+    /// A4 — stake `amount` test-tokens on `outcome` (0 or 1). Transfers into
+    /// the market's escrow vault and records an accumulated Position.
+    pub fn place_prediction(
+        ctx: Context<PlacePrediction>,
+        outcome: u8,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::place_prediction::handle_place_prediction(ctx, outcome, amount)
+    }
 }
