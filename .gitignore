@@ -35,3 +35,14 @@ wallet.json
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# === Agent skills (installed per-dev via `npx skills add`) ===
+.agents/
+skills-lock.json
+.claude/skills/
+
+# === Local Impeccable installation and review evidence ===
+.codex/hooks.json
+.impeccable/review/
+.impeccable/questions/
+.impeccable/config.local.json

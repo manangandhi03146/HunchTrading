@@ -1,0 +1,119 @@
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("./assets/manrope-latin.woff2") format("woff2");
+}
+
+:root {
+  --hunch-paper: #f5f4ee;
+  --hunch-white: #fffefa;
+  --hunch-ink: #203b32;
+  --hunch-muted: #5b6b62;
+  --hunch-line: #d6dcd0;
+  --hunch-control-border: #77877b;
+  --hunch-moss: #18392f;
+  --hunch-moss-raised: #25483b;
+  --hunch-orange: #b74723;
+  --hunch-orange-hover: #993a1c;
+  --hunch-lime: #d1efa0;
+  --hunch-font: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --hunch-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --hunch-elevated: #eeefe7;
+  --hunch-soft: #eef0e6;
+  --hunch-green-tint: #e2e9d8;
+  --hunch-orange-tint: #f5e7da;
+  --hunch-green: #386c50;
+  --hunch-heading-green: #648455;
+  --hunch-row-hover: #f5f6ef;
+  --hunch-match-hover: #e9eedf;
+  --hunch-pool-track: #e1e6d9;
+  --hunch-pool-secondary: #7b985e;
+  --hunch-pool-muted: #b2c2a5;
+  --hunch-success: #287450;
+  --hunch-warning: #855820;
+  --hunch-danger: #9d3c2e;
+  --hunch-success-tint: #e8efdc;
+  --hunch-danger-tint: #fbece6;
+  --hunch-danger-border: #e4bcae;
+  --hunch-primary-text: #ffffff;
+  --hunch-scrollbar: #8b9e86;
+  --mk-bg: var(--hunch-paper);
+  --mk-surface: var(--hunch-white);
+  --mk-elevated: var(--hunch-elevated);
+  --mk-text: var(--hunch-ink);
+  --mk-muted: var(--hunch-muted);
+  --mk-border: var(--hunch-line);
+  --mk-control-border: var(--hunch-control-border);
+  --mk-primary: var(--hunch-orange);
+  --mk-primary-text: var(--hunch-primary-text);
+  --mk-radius: 14px;
+  --mk-success: var(--hunch-success);
+  --mk-warning: var(--hunch-warning);
+  --mk-danger: var(--hunch-danger);
+}
+
+/* App surfaces follow the page theme; explicit widget themes stay independent. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --hunch-paper: #102a22;
+  --hunch-white: #18392f;
+  --hunch-ink: #f6f6ec;
+  --hunch-muted: #bfd0c4;
+  --hunch-line: #476356;
+  --hunch-control-border: #779583;
+  --hunch-orange: #f3a575;
+  --hunch-orange-hover: #ffc09a;
+  --hunch-elevated: #25483b;
+  --hunch-soft: #1e3e31;
+  --hunch-green-tint: #254c3b;
+  --hunch-orange-tint: #553a2a;
+  --hunch-green: #9ac589;
+  --hunch-heading-green: #adcc97;
+  --hunch-row-hover: #203f33;
+  --hunch-match-hover: #234436;
+  --hunch-pool-track: #25483b;
+  --hunch-pool-secondary: #a4ce87;
+  --hunch-pool-muted: #628f71;
+  --hunch-success: #d1efa0;
+  --hunch-warning: #f8cf99;
+  --hunch-danger: #ffc2b6;
+  --hunch-success-tint: #254c3b;
+  --hunch-danger-tint: #452f2b;
+  --hunch-danger-border: #925c4e;
+  --hunch-primary-text: #102a22;
+  --hunch-scrollbar: #779785;
+}
+
+.mk-theme-light {
+  color-scheme: light;
+  --mk-bg: #f5f4ee;
+  --mk-surface: #fffefa;
+  --mk-elevated: #eeefe7;
+  --mk-text: #203b32;
+  --mk-muted: #5b6b62;
+  --mk-border: #d6dcd0;
+  --mk-control-border: #77877b;
+  --mk-primary: #b74723;
+  --mk-primary-text: #ffffff;
+  --mk-success: #287450;
+  --mk-warning: #855820;
+  --mk-danger: #9d3c2e;
+}
+
+.mk-theme-dark {
+  color-scheme: dark;
+  --mk-bg: #102a22;
+  --mk-surface: #18392f;
+  --mk-elevated: #25483b;
+  --mk-text: #f6f6ec;
+  --mk-muted: #bfd0c4;
+  --mk-border: #476356;
+  --mk-control-border: #779583;
+  --mk-primary: #f3a575;
+  --mk-primary-text: #102a22;
+  --mk-success: #d1efa0;
+  --mk-warning: #f8cf99;
+  --mk-danger: #ffc2b6;
+}

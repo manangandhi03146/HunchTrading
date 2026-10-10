@@ -22,7 +22,7 @@ export class AnchorMarketAdapter implements MarketAdapter {
     this.unavailable();
   }
   private unavailable(): never {
-    throw new HunchError("CONTRACT_UNAVAILABLE", "Anchor integration is blocked on Developer A's actual IDL and deployed contract", {
+    throw new HunchError("CONTRACT_UNAVAILABLE", "Anchor integration requires wiring Developer A's actual IDL and deployed contract", {
       requirements: ANCHOR_INTEGRATION_REQUIREMENTS,
     });
   }

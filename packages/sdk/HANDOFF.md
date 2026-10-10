@@ -2,9 +2,10 @@
 
 ## Developer A
 
-There are no Anchor artifacts in this repository yet. The SDK's `AnchorMarketAdapter`
-throws `CONTRACT_UNAVAILABLE` until actual contract integration is implemented.
-Please provide:
+Developer A's generated IDL and types now live in `src/idl/`, and the public Devnet
+program, mint, and resolver identities are recorded in the root `.env.example`.
+The SDK's `AnchorMarketAdapter` still throws `CONTRACT_UNAVAILABLE` until those
+artifacts are wired into actual contract calls. Confirm these details during that work:
 
 - Generated IDL JSON, generated TypeScript types, and Anchor version.
 - Deployed program address and cluster/RPC; test SPL mint and decimals.
@@ -15,15 +16,21 @@ Please provide:
   per-wallet/outcome position accumulation, proportional integer payouts, dust,
   double-claim prevention, and behavior when no one stakes on the winner.
 
-Once supplied, replace the explicitly blocked adapter with contract calls and add
+During real integration, replace the explicitly blocked adapter with contract calls and add
 an opt-in local-validator/Devnet integration flow. Do not infer the wire interface
 from README sketches. Real signed transaction recovery remains deferred.
 
 ## Developer C
 
 Your files are untouched. Existing `@marketkit/sdk` imports and `MarketKit` class
-continue working through a root npm alias. New development can import `Hunch` from
-`@hunch/sdk` with the same public methods. Run `npm install` and `npm run sdk` first.
+continue working through the `packages/marketkit-sdk` compatibility workspace. New development can import `Hunch` from
+`@hunch/sdk` with the same public methods. Run `npm install` and `npm run build` first.
+
+The compatibility workspace preserves the pre-existing `MarketKit` implementation
+and types unchanged. Its legacy in-memory mock is isolated and still returns the
+old `MOCK_SIGNATURE` placeholder. Use the exported `Hunch` and
+`HttpMockMarketAdapter` for the shared HTTP ledger and explicitly simulated
+receipts; the legacy `MarketKit` class does not accept an HTTP adapter.
 
 - For separately running React applications use `HttpMockMarketAdapter`, which
   connects both applications to the resolver's single authoritative mock ledger.
@@ -79,7 +86,7 @@ The racing app uses `appId: 'racing-demo'`; the esports app uses `'esports-demo'
 
 ```ts
 import { Hunch, HttpMockMarketAdapter } from '@hunch/sdk';
-// The same exports are available from '@marketkit/sdk'.
+// Hunch and HttpMockMarketAdapter are also exported by '@marketkit/sdk'.
 
 const adapter = await HttpMockMarketAdapter.connect({
   baseUrl: 'http://127.0.0.1:8787',

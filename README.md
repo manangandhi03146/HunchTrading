@@ -11,23 +11,23 @@ escrow vault.
 
 ## Locked MVP decisions (§2)
 
-| Decision | Choice |
-|---|---|
-| Blockchain | Solana **Devnet** |
-| Smart contracts | **Anchor** |
-| Assets | Single custom SPL test-token mint, **zero decimals** (integer amounts) |
-| Market type | **Binary** — outcome 0 or 1 |
-| Market model | Pooled stakes, **no trading** |
-| Market creation | Authorized developer / resolver |
-| Resolution | Verified game-server event |
-| Claiming | User-triggered transaction |
-| Market metadata | Off-chain JSON |
-| Fees | 0% |
-| Stack | TypeScript SDK · React widget · Node.js resolver |
+| Decision        | Choice                                                                 |
+| --------------- | ---------------------------------------------------------------------- |
+| Blockchain      | Solana **Devnet**                                                      |
+| Smart contracts | **Anchor**                                                             |
+| Assets          | Single custom SPL test-token mint, **zero decimals** (integer amounts) |
+| Market type     | **Binary** — outcome 0 or 1                                            |
+| Market model    | Pooled stakes, **no trading**                                          |
+| Market creation | Authorized developer / resolver                                        |
+| Resolution      | Verified game-server event                                             |
+| Claiming        | User-triggered transaction                                             |
+| Market metadata | Off-chain JSON                                                         |
+| Fees            | 0%                                                                     |
+| Stack           | TypeScript SDK · React widget · Node.js resolver                       |
 
 **Design note:** registered developers can create markets, but a single
 MarketKit-managed **resolver key** submits verified outcomes on-chain. A signed
-event from a game server is *evidence accepted by MarketKit*, not direct
+event from a game server is _evidence accepted by MarketKit_, not direct
 authorization to move escrowed funds.
 
 ---
@@ -51,29 +51,64 @@ npm workspaces tie `packages/*`, `services/*`, and `apps/*` together. See the
 
 ## Quick start
 
-```bash
-# Developer B & C — no Anchor needed to start (work against the SDK mock)
-npm install
-npm run sdk          # build @marketkit/sdk
-npm run resolver     # run the resolver dev server (:8787)
+Use Node 22.12+ (22 LTS), 24 LTS, or 26+ and npm 10+.
 
-# Developer A — install the Solana toolchain (see programs/README.md)
+```bash
+npm install
+npm run dev         # racing demo: http://127.0.0.1:5173
+# In separate terminals:
+npm run esports     # esports demo: http://127.0.0.1:5174
+npm run dashboard   # developer console: http://127.0.0.1:5175
+
+npm test            # widget, adapter, and SDK regression tests
+npm run build       # type-check and build every workspace
 ```
 
-The SDK ships a mock (`new MarketKit({ mock: true })`) so B and C build against
-the real interface before the contract exists. Flip `mock: false` after IDL
-integration (ticket B4). **Once integrated, the SDK returns real transaction
-signatures, never simulated ids.**
+The frontend is branded **hunch**; package names remain `@marketkit/*`.
+All three apps default to local simulation. Connect a demo account, commit
+nonredeemable TEST credits, close a race's prediction window, run the race,
+and claim the simulated result. See [apps/README.md](apps/README.md) for details.
+
+All app headers include a persistent Light/Dark switch. The complete frontend
+handoff, theme architecture, and remaining A/B integration requirements are in
+[DEVELOPER_C_HANDOFF.md](DEVELOPER_C_HANDOFF.md).
+
+**Current implementation:** the widgets and demos work locally; live on-chain
+settlement is not implemented yet. The `programs/` directory is a scaffold,
+the SDK's live methods fail with explicit integration errors, and the resolver
+rejects unverified events. Switching to SDK mode requires the deployed Anchor
+program, test-token mint, wallet bindings, and a trusted resolver. Simulated
+receipts are always labeled and never linked as real blockchain transactions.
+
+`npm run sdk` builds the SDK; `npm run resolver` starts the resolver scaffold
+on port 8787. The SDK also provides `new MarketKit({ mock: true })` for
+standalone integration tests. Browser demo state is stored per origin, so the
+apps on ports 5173, 5174, and 5175 have independent simulated accounts and markets.
+
+---
+
+## Live deployment
+
+The `marketkit` program is deployed and verifiable on **Solana Devnet**:
+
+| | |
+|---|---|
+| Program ID | `J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP` |
+| Cluster | Devnet — RPC `https://api.devnet.solana.com` |
+| Explorer | https://explorer.solana.com/address/J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP?cluster=devnet |
+
+Client IDL + types: [`packages/sdk/src/idl/`](packages/sdk/src/idl/). For local
+dev, run `solana-test-validator` and `anchor deploy --provider.cluster localnet`.
 
 ---
 
 ## Ownership & branches
 
-| Dev | Owns | Branch |
-|---|---|---|
-| A — Blockchain | `programs/` | `feat/anchor-contract` |
-| B — SDK + Automation | `packages/sdk/`, `services/` | `feat/sdk-resolver` |
-| C — Frontend + Demo | `packages/react/`, `apps/` | `feat/widget-demos` |
+| Dev                  | Owns                         | Branch                 |
+| -------------------- | ---------------------------- | ---------------------- |
+| A — Blockchain       | `programs/`                  | `feat/anchor-contract` |
+| B — SDK + Automation | `packages/sdk/`, `services/` | `feat/sdk-resolver`    |
+| C — Frontend + Demo  | `packages/react/`, `apps/`   | `feat/widget-demos`    |
 
 The shared contract interface lives in
 [`packages/sdk/src/types.ts`](packages/sdk/src/types.ts). **Changes to it are
@@ -84,8 +119,8 @@ agreed by the team before merging.**
 - **M1 · hour 6 — Go/No-Go:** Anchor builds & tests locally · a binary market
   initializes · a vault receives a stake · SDK mock works · widget renders.
 - **M2 · hour 12 — End-to-end:** one full `Create → Stake → Resolve → Claim`
-  runs on Devnet, ideally through the SDK. *If not working, freeze dashboard +
-  second app and move everyone to the broken path.*
+  runs on Devnet, ideally through the SDK. _If not working, freeze dashboard +
+  second app and move everyone to the broken path._
 - **M3 · hour 19 — Demo ready:** live race auto-settles a market, winner claims.
   After this, no new features — only reliability + presentation.
 

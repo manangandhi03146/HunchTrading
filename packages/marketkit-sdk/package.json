@@ -1,0 +1,31 @@
+{
+  "name": "@marketkit/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Compatibility workspace preserving the existing MarketKit frontend SDK.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "import": "./dist/events.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @hunch/sdk && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@hunch/sdk": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,7 +1,30 @@
-/**
- * @marketkit/react — embeddable prediction widget (plan §3, Developer C).
- *
- * C2 builds <PredictionWidget /> against the mock SDK; C5 wires the Solana
- * wallet + real SDK. Export the public components from here.
- */
-export const PLACEHOLDER = "Build <PredictionWidget /> here (ticket C2).";
+export {
+  PredictionMarket,
+  type PredictionMarketProps,
+} from "./components/PredictionMarket";
+export { PredictionMarket as PredictionWidget } from "./components/PredictionMarket";
+export {
+  MarketKitProvider,
+  useMarketKit,
+  type MarketKitProviderProps,
+} from "./providers/MarketKitProvider";
+export {
+  MockMarketKitClient,
+  DEMO_WALLET,
+} from "./adapters/MockMarketKitClient";
+export {
+  SdkMarketKitClient,
+  type SdkBindings,
+  type WalletSigner,
+} from "./adapters/SdkMarketKitClient";
+export type { MarketKitClient } from "./adapters/MarketKitClient";
+export * from "./types";
+export * from "./hooks/useMarket";
+export * from "./hooks/useMarketPositions";
+export { useTransaction } from "./hooks/usePrediction";
+export * from "./components/ui";
+export { WalletButton, WalletAddress } from "./components/WalletButton";
+export { MarketStatus } from "./components/MarketStatus";
+import "./styles.css";
+
+export { useNow } from "./hooks/useNow";

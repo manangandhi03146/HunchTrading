@@ -176,7 +176,7 @@ mock state. Use fresh market IDs, or a fresh development database and re-registe
 the apps; the demo does this automatically. Read filters are not ownership proofs.
 A SQLite commit and a future blockchain transaction are not one atomic operation.
 
-`RESOLVER_MODE=anchor` fails at startup on the missing real IDL and cannot switch
+`RESOLVER_MODE=anchor` fails at startup until the generated IDL is integrated and cannot switch
 to mock. The configured resolver private-key path is reserved for that integration
 and is not loaded today. Real wallet signing/submission/confirmation and real-chain
 tests remain blocked. See the [SDK handoff](../../packages/sdk/HANDOFF.md).

@@ -120,11 +120,14 @@ bigints with `.toString()` before serializing to JSON.
 ## Developer C compatibility
 
 Existing `import { MarketKit } from '@marketkit/sdk'` and `new MarketKit({ mock: true })`
-continue working through the root npm file alias. New imports should use
+continue working through the `packages/marketkit-sdk` compatibility workspace. New imports should use
 `@hunch/sdk` and `Hunch`. The resolver uses the same implementation.
 
-Claims and predictions now reject invalid operations; catch `HunchError` in the
-widget. Mock `signature` changed from the unsafe placeholder string to `null`.
+The compatibility workspace preserves the existing `MarketKit` class and types
+unchanged, including its isolated legacy mock and `MOCK_SIGNATURE` placeholder.
+Use `Hunch` with `HttpMockMarketAdapter` for a shared backend; the legacy class
+does not accept an adapter. Hunch claims and predictions reject invalid
+operations; catch `HunchError` in the widget. Hunch mock signatures are `null`.
 Use `HttpMockMarketAdapter` for separately running applications. The older
 in-memory `MockMarketAdapter` remains available for unit tests and embedded demos.
 HTTP exports are also available through `@marketkit/sdk`; no import migration is required.
@@ -135,13 +138,15 @@ HTTP exports are also available through `@marketkit/sdk`; no import migration is
 throw `CONTRACT_UNAVAILABLE`. `AnchorMarketAdapter` implements the adapter boundary
 but deliberately has no fabricated instructions or fallback.
 
-Developer A must supply the actual generated IDL/types and Anchor version, deployed
-address/cluster, SPL mint/decimals, exact PDA seeds and market ID encoding,
+Developer A's generated IDL/types are now checked into `src/idl/`, and public
+Devnet identities are in `.env.example`. The adapter still needs to integrate
+these artifacts and confirm the Anchor version, address/cluster, SPL mint/decimals,
+exact PDA seeds and market ID encoding,
 instruction parameters/accounts/signers, account layouts, error codes, and agreed
 deadline/resolution/claim semantics. README seed sketches are not contract artifacts.
 The dependencies include `@coral-xyz/anchor` 0.32.1, web3.js v1, and SPL Token; align
 the Anchor client with A's actual toolchain before enabling real mode.
 
-No real-chain integration test is claimed or run until the contract exists.
+No real-chain integration test is claimed or run until the adapter is implemented.
 Cancellation/refunds, balances, fees, and trading are outside the mock MVP.
 See [handoff notes](HANDOFF.md) and the [resolver README](../../services/resolver/README.md).
