@@ -38,7 +38,7 @@ for (const role of ['A', 'B', 'C']) {
 const runId = `hunch-${randomUUID()}`;
 const appId = `${runId}-game`;
 const eventId = `${runId}-result`;
-const marketId = runId;
+let marketId = runId;
 const directory = resolve('.data/devnet-lifecycle');
 mkdirSync(directory, { recursive: true, mode: 0o700 });
 const journalPath = join(directory, `${runId}.json`);
@@ -49,7 +49,7 @@ const participants = {
   B: { publicKey: keys.B.publicKey.toBase58(), outcome: 0 },
   C: { publicKey: keys.C.publicKey.toBase58(), outcome: 1 },
 };
-const journal = new Journal(journalPath, { runId, appId, eventId, marketId, chain,
+const journal = new Journal(journalPath, { runId, appId, eventId, requestedMarketId: runId, marketId: null, chain,
   creator: keys.creator.publicKey.toBase58(), resolver: RESOLVER, participants,
   gamePublicKeyBase64: keys.game.publicKey.toBuffer().toString('base64'),
   snapshots: [], conclusions: { currentDeploymentLifecycle: 'pending', localDeadlineFix: 'separate contract test report', onChainDeadlineEnforcement: 'requires approved upgrade' } });
@@ -69,7 +69,9 @@ try {
   const created = await journal.mutation('create', async () => {
     const result = await adapter.createMarket({ id: marketId, question: 'Deterministic signed hunch Devnet verification result',
       outcomes: ['Outcome 0', 'Outcome 1'], closesAt: deadline, resolverAuthority: RESOLVER }, signers.creator);
-    assert.equal(result.market.id, marketId, 'SDK market identifier differs from requested ID; coordinate integration');
+    assert(typeof result.market.id === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(result.market.id), 'SDK returned an identifier unsupported by the resolver');
+    marketId = result.market.id;
+    journal.data.marketId = marketId; journal.save();
     return result.transaction;
   });
   // Discover the actual address from the confirmed transaction. Never guess the SDK's identifier encoding.
@@ -89,6 +91,13 @@ try {
   assert.equal(markets.length, 1, 'Cannot uniquely discover the created market');
   const marketAddress = markets[0].toBase58();
   journal.data.marketAddress = marketAddress; journal.save();
+  const sdkMarket = await adapter.getMarket(marketId);
+  assert(sdkMarket, 'Resolver adapter cannot fetch the created market by its returned ID');
+  assert.equal(sdkMarket.authority, keys.creator.publicKey.toBase58());
+  assert.equal(sdkMarket.resolverAuthority, RESOLVER);
+  assert.equal(sdkMarket.tokenMint, MINT.toBase58());
+  assert.equal(sdkMarket.closesAt, deadline);
+  assert.deepEqual(sdkMarket.pools, [0n, 0n]);
   const recordSnapshot = async (stage, options) => {
     const state = { stage, ...await snapshot(marketAddress, participants, options), chainClock: await chainClock() };
     journal.data.snapshots.push(state);
