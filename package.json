@@ -9,12 +9,17 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run sdk && npm run build --workspaces --if-present",
+    "pretest": "npm run sdk",
     "test": "npm run test --workspaces --if-present",
-    "sdk": "npm run build --workspace @marketkit/sdk",
-    "resolver": "npm run dev --workspace @marketkit/resolver"
+    "sdk": "npm run build --workspace @hunch/sdk",
+    "resolver": "npm run sdk && npm run dev --workspace @marketkit/resolver",
+    "demo": "npm run sdk && npm run demo --workspace @marketkit/resolver"
+  },
+  "dependencies": {
+    "@marketkit/sdk": "file:packages/sdk"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

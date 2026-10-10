@@ -1,59 +1,39 @@
-/**
- * MarketKit resolver service (plan §3, Developer B — tickets B5/B6).
- *
- * Flow:
- *   game server signs canonical result -> POST /events
- *   -> verify signature -> check market+event+deadline
- *   -> resolver key signs Solana tx -> contract stores winning outcome
- *
- * Security rules (do not weaken):
- *   - Replay protection via unique eventId stored by the backend.
- *   - Only accept events from public keys registered to that developer app.
- *   - Validate market mapping + authoritative timestamp.
- *   - Never trust a client-supplied winner directly; a signed event is
- *     EVIDENCE accepted by MarketKit, not authorization to move funds.
- */
-import express from "express";
-import type { GameResultEvent } from "@marketkit/sdk";
+import { PublicKey } from "@solana/web3.js";
+import { AnchorMarketAdapter, MockMarketAdapter, createMockWallet } from "@hunch/sdk";
+import { buildServer } from "./server.js";
+import { ResolverStore } from "./store.js";
+import { loadConfig } from "./config.js";
+import { isLoopbackHost } from "./mock-http.js";
 
-const app = express();
-app.use(express.json());
-
-// Replace with a durable store for a real deployment.
-const seenEventIds = new Set<string>();
-// publicKey -> developer app id. Populate from your registry.
-const registeredKeys = new Map<string, string>();
-
-function verifySignature(_event: GameResultEvent): boolean {
-  // TODO(B5): ed25519 verify over the canonical payload using tweetnacl.
-  // Return false until implemented so we never resolve on unverified input.
-  return false;
+async function main() {
+  const config = loadConfig();
+  // Real mode fails before reading any key until Developer A supplies the IDL.
+  if (config.RESOLVER_MODE === "anchor") new AnchorMarketAdapter({ rpcUrl: config.SOLANA_RPC_URL, programId: config.HUNCH_PROGRAM_ID });
+  if (config.MOCK_HTTP_ENABLED && config.MOCK_HTTP_ACCESS === "local" && !isLoopbackHost(config.HOST)) {
+    throw new Error("Local mock HTTP access requires a loopback HOST; remote demos must explicitly use token access");
+  }
+  const resolverKey = new PublicKey(config.RESOLVER_PUBLIC_KEY ?? new Uint8Array(32).fill(2));
+  const creatorKey = new PublicKey(config.MOCK_CREATOR_PUBLIC_KEY ?? new Uint8Array(32).fill(1));
+  const adapter = new MockMarketAdapter({ resolverAuthority: resolverKey.toBase58(), authorizedCreators: [creatorKey.toBase58()] });
+  const store = new ResolverStore(config.RESOLVER_DB_PATH);
+  const server = buildServer({ adapter, signer: createMockWallet(resolverKey), store,
+    maxEventAgeSeconds: config.MAX_EVENT_AGE_SECONDS, maxFutureSkewSeconds: config.MAX_FUTURE_SKEW_SECONDS, logger: true,
+    mockHttp: config.MOCK_HTTP_ENABLED ? { creator: createMockWallet(creatorKey), access: config.MOCK_HTTP_ACCESS,
+      accessToken: config.MOCK_API_TOKEN, allowedOrigins: config.MOCK_ALLOWED_ORIGINS?.split(",").map((value) => value.trim()).filter(Boolean) } : undefined });
+  server.addHook("onClose", async () => store.close());
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.once(signal, () => { void server.close().catch(() => { process.exitCode = 1; }); });
+  }
+  try {
+    await server.listen({ port: config.PORT, host: config.HOST });
+    server.log.info("Resolver owns mock state. Connect frontend HTTP adapters to /v1/mock; identities and receipts are simulated.");
+  } catch (error) {
+    await server.close();
+    throw error;
+  }
 }
 
-app.post("/events", async (req, res) => {
-  const event = req.body as GameResultEvent;
-
-  if (!event?.eventId || !event.marketId || !event.publicKey) {
-    return res.status(400).json({ error: "missing required fields" });
-  }
-  if (seenEventIds.has(event.eventId)) {
-    return res.status(409).json({ error: "replay: eventId already processed" });
-  }
-  if (!registeredKeys.has(event.publicKey)) {
-    return res.status(403).json({ error: "unregistered public key" });
-  }
-  if (!verifySignature(event)) {
-    return res.status(401).json({ error: "invalid signature" });
-  }
-
-  // TODO(B6): validate market exists, outcome is 0|1, deadline passed,
-  // then call marketkit.resolveMarket(...) with the resolver keypair and
-  // return the REAL transaction signature.
-  seenEventIds.add(event.eventId);
-  return res.status(501).json({ error: "resolve_market wiring pending (B6)" });
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : "Resolver startup failed");
+  process.exitCode = 1;
 });
-
-app.get("/health", (_req, res) => res.json({ ok: true }));
-
-const PORT = Number(process.env.PORT ?? 8787);
-app.listen(PORT, () => console.log(`[resolver] listening on :${PORT}`));

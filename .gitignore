@@ -23,6 +23,11 @@ Cargo.lock
 *keypair*.json
 id.json
 wallet.json
+.keys/
+.data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 /**/deploy/*.json
 
 # === Editor / OS ===

@@ -1,37 +1,36 @@
-/**
- * MarketKit shared types — the agreed contract interface (plan §2).
- *
- * `MarketStatus` is an SDK-DERIVED view of on-chain state. The contract does
- * NOT store four separate states: `open`/`closed` are derived from the
- * deadline; only `resolved` and `cancelled` are final recorded on-chain states.
- */
-export type MarketStatus = "open" | "closed" | "resolved" | "cancelled";
+import type { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 
-/** Binary market: outcome 0 or 1. */
 export type Outcome = 0 | 1;
+export type MarketStatus = "open" | "closed" | "resolved" | "cancelled";
+export type AdapterMode = "mock" | "anchor";
+export type TransactionStatus = "submitted" | "confirmed" | "failed" | "not_found";
 
-export interface Market {
-  /** Fixed-size unique id (e.g. 32-byte value), not an unbounded string. */
+/** Authoritative state, separate from labels and application metadata. */
+export interface MarketState {
   id: string;
-  /** Off-chain metadata. */
-  question: string;
-  /** Off-chain metadata: labels for [outcome0, outcome1]. */
-  outcomes: [string, string];
-  /** Unix seconds. Past this, the market is `closed` (derived). */
+  authority: string;
+  resolverAuthority: string;
+  tokenMint: string | null;
   closesAt: number;
   status: MarketStatus;
-  /** Token base units (zero-decimal mint => integer amounts). */
   totalPool: bigint;
-  /** Staked per outcome: [pool0, pool1]. */
   pools: [bigint, bigint];
-  /** Set only once resolved. */
   winningOutcome: Outcome | null;
 }
 
-/**
- * One accumulated position per (wallet, outcome). A wallet may stake on both
- * outcomes, but each wallet/outcome combo collapses into a single position.
- */
+export interface MarketMetadata {
+  question: string;
+  outcomes: [string, string];
+  description?: string;
+}
+
+export interface Market extends MarketState {
+  metadata: MarketMetadata | null;
+  /** Compatibility aliases for the original MarketKit interface. */
+  question?: string;
+  outcomes?: [string, string];
+}
+
 export interface Prediction {
   marketId: string;
   wallet: string;
@@ -39,16 +38,121 @@ export interface Prediction {
   amount: bigint;
 }
 
-/** Signed event payload posted by a developer's game server to the resolver. */
-export interface GameResultEvent {
-  /** Unique id used for replay protection (stored by the backend). */
+export interface Position extends Prediction {
+  claimed: boolean;
+  payout: bigint;
+}
+
+/** Compatible with Solana wallet-adapter. The SDK never stores a private key. */
+export interface WalletSigner {
+  publicKey: PublicKey;
+  signTransaction<T extends Transaction | VersionedTransaction>(transaction: T): Promise<T>;
+}
+
+export type TransactionResult =
+  | { mode: "mock"; id: string; signature: null; status: "confirmed" }
+  | { mode: "anchor"; id: string; signature: string; status: "submitted" | "confirmed" | "failed" };
+
+export interface TransactionStatusResult {
+  mode: AdapterMode;
+  id: string;
+  signature: string | null;
+  status: TransactionStatus;
+  error?: string;
+}
+
+export interface CreateMarketParams {
+  /** Off-chain ID; its on-chain encoding must be supplied by Developer A. */
+  id?: string;
+  question: string;
+  outcomes: [string, string];
+  closesAt: number;
+  resolverAuthority?: string;
+  description?: string;
+}
+
+export interface PredictParams {
+  marketId: string;
+  outcome: Outcome;
+  amount: bigint;
+}
+
+export interface ListMarketsParams {
+  authority?: string;
+  status?: MarketStatus;
+}
+
+export interface CreateMarketResult {
+  market: Market;
+  transaction: TransactionResult;
+  signature: string | null;
+}
+export interface PredictResult {
+  position: Position;
+  transaction: TransactionResult;
+  signature: string | null;
+}
+export interface ClaimResult {
+  payout: bigint;
+  transaction: TransactionResult;
+  signature: string | null;
+}
+
+/** The same interface is used in mock and real modes. */
+export interface MarketAdapter {
+  readonly mode: AdapterMode;
+  createMarket(params: CreateMarketParams, signer: WalletSigner): Promise<CreateMarketResult>;
+  getMarket(marketId: string): Promise<Market | null>;
+  listMarkets(params?: ListMarketsParams): Promise<Market[]>;
+  predict(params: PredictParams, signer: WalletSigner): Promise<PredictResult>;
+  getPositions(marketId: string, wallet?: string): Promise<Position[]>;
+  claimWinnings(marketId: string, signer: WalletSigner): Promise<ClaimResult>;
+  getTransactionStatus(id: string): Promise<TransactionStatusResult>;
+  /** Trusted backend only. Implementations must enforce resolver authority. */
+  resolveMarket(marketId: string, outcome: Outcome, signer: WalletSigner): Promise<TransactionResult>;
+}
+
+export interface HunchConfig {
+  adapter?: MarketAdapter;
+  mode?: AdapterMode;
+  wallet?: WalletSigner;
+  rpcUrl?: string;
+  programId?: string;
+  resolverAuthority?: string;
+  authorizedCreators?: readonly string[];
+  clock?: () => number;
+  /** Legacy flag. false always selects real mode and never falls back. */
+  mock?: boolean;
+}
+
+export interface GameEventPayload {
+  appId: string;
   eventId: string;
   marketId: string;
-  winningOutcome: Outcome;
-  /** Authoritative server timestamp (unix seconds). */
+  outcome: Outcome;
   timestamp: number;
-  /** base58/base64 signature over the canonical payload. */
+}
+export interface SignedGameEvent extends GameEventPayload {
   signature: string;
-  /** Developer app's registered public key that produced the signature. */
-  publicKey: string;
+}
+export type GameResultEvent = SignedGameEvent;
+
+export type HunchErrorCode =
+  | "INVALID_INPUT" | "INVALID_OUTCOME" | "INVALID_AMOUNT" | "INVALID_DEADLINE"
+  | "MARKET_NOT_FOUND" | "MARKET_EXISTS" | "MARKET_CLOSED" | "MARKET_NOT_CLOSED"
+  | "MARKET_RESOLVED" | "MARKET_NOT_RESOLVED" | "UNAUTHORIZED" | "NO_WINNING_POSITION"
+  | "ALREADY_CLAIMED" | "WALLET_REQUIRED" | "CONFIGURATION_ERROR"
+  | "CONTRACT_UNAVAILABLE" | "TRANSACTION_FAILED" | "TRANSACTION_UNCERTAIN"
+  | "HTTP_ERROR" | "NETWORK_ERROR" | "INVALID_RESPONSE";
+
+export class HunchError extends Error {
+  readonly name = "HunchError";
+  constructor(
+    readonly code: HunchErrorCode,
+    message: string,
+    readonly details?: Readonly<Record<string, unknown>>,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
 }
