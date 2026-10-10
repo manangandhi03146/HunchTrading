@@ -147,9 +147,9 @@ describe("SDK foundation and mock", () => {
     expect((await legacy.createMarket(params())).market.question).toBe("Who wins?");
     await expect(alice.signTransaction({} as never)).rejects.toMatchObject({ code: "CONFIGURATION_ERROR" });
   });
-  it("fails explicitly in real mode and rejects conflicting configuration", () => {
-    expect(() => new AnchorMarketAdapter()).toThrow(/Developer A/);
-    expect(() => new Hunch({ mock: false })).toThrow(/IDL/);
+  it("constructs read-only real mode and rejects conflicting configuration", () => {
+    expect(new AnchorMarketAdapter().mode).toBe("anchor");
+    expect(new Hunch({ mock: false }).adapter.mode).toBe("anchor");
     expect(() => new Hunch({ mode: "anchor", adapter })).toThrow(/does not match/);
     expect(() => new Hunch({ mode: "anchor", mock: true })).toThrow(/disagree/);
   });

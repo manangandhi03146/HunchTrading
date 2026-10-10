@@ -14,6 +14,14 @@ export interface MarketMapping {
   resolverAuthority: string;
   eventId: string;
 }
+/** Written only after the resolved market itself was read back with the event's outcome. */
+export interface Settlement {
+  marketStatus: "resolved";
+  winningOutcome: Outcome;
+  verifiedAt: number;
+  /** "market-state": reconciled from the market account when no signature status was available. */
+  source: "transaction" | "market-state";
+}
 export interface EventRecord {
   eventId: string;
   appId: string;
@@ -24,6 +32,9 @@ export interface EventRecord {
   mode: AdapterMode;
   transaction: TransactionResult | null;
   error: { code: string; message: string } | null;
+  /** Anchor: block height after which an unseen recorded signature can never land. */
+  lastValidBlockHeight: number | null;
+  settlement: Settlement | null;
   receivedAt: number;
   updatedAt: number;
 }
@@ -31,8 +42,10 @@ interface EventRow {
   event_id: string; app_id: string; market_id: string; outcome: Outcome;
   timestamp: number; status: EventStatus; mode: AdapterMode; payload_hash: string;
   transaction_json: string | null; error_json: string | null;
+  last_valid_block_height: number | null; settlement_json: string | null;
   received_at: number; updated_at: number;
 }
+const SCHEMA_VERSION = 2;
 
 /** Small concrete SQLite repository. No storage framework or worker is needed. */
 export class ResolverStore {
@@ -44,7 +57,7 @@ export class ResolverStore {
     this.db.pragma("journal_mode = WAL");
     this.db.pragma("busy_timeout = 5000");
     const version = this.db.pragma("user_version", { simple: true });
-    if (version !== 0 && version !== 1) {
+    if (!Number.isInteger(version) || (version as number) < 0 || (version as number) > SCHEMA_VERSION) {
       this.db.close();
       throw new Error(`Unsupported resolver database version: ${version}`);
     }
@@ -77,6 +90,14 @@ export class ResolverStore {
           updated_at INTEGER NOT NULL
         );
         PRAGMA user_version = 1;
+      `);
+    }).immediate();
+    // v2: pre-broadcast signature expiry and verified on-chain settlement. Additive only.
+    if (this.db.pragma("user_version", { simple: true }) === 1) this.db.transaction(() => {
+      this.db.exec(`
+        ALTER TABLE events ADD COLUMN last_valid_block_height INTEGER;
+        ALTER TABLE events ADD COLUMN settlement_json TEXT;
+        PRAGMA user_version = 2;
       `);
     }).immediate();
   }
@@ -139,6 +160,8 @@ export class ResolverStore {
       timestamp: row.timestamp, status: row.status, mode: row.mode,
       transaction: row.transaction_json ? JSON.parse(row.transaction_json) as TransactionResult : null,
       error: row.error_json ? JSON.parse(row.error_json) as EventRecord["error"] : null,
+      lastValidBlockHeight: row.last_valid_block_height ?? null,
+      settlement: row.settlement_json ? JSON.parse(row.settlement_json) as Settlement : null,
       receivedAt: row.received_at, updatedAt: row.updated_at,
     };
   }
@@ -170,12 +193,37 @@ export class ResolverStore {
   }
 
   updateEvent(eventId: string, expected: EventStatus, status: EventStatus, now: number,
-    transaction: TransactionResult | null = null, error: EventRecord["error"] = null): EventRecord {
-    const result = this.db.prepare(`UPDATE events SET status = ?, updated_at = ?, transaction_json = ?, error_json = ?
+    transaction: TransactionResult | null = null, error: EventRecord["error"] = null, settlement: Settlement | null = null): EventRecord {
+    const result = this.db.prepare(`UPDATE events SET status = ?, updated_at = ?, transaction_json = ?, error_json = ?, settlement_json = ?
       WHERE event_id = ? AND status = ?`).run(status, now, transaction ? JSON.stringify(transaction) : null,
-      error ? JSON.stringify(error) : null, eventId, expected);
+      error ? JSON.stringify(error) : null, settlement ? JSON.stringify(settlement) : null, eventId, expected);
     if (result.changes !== 1) throw new Error("Event processing state changed unexpectedly");
     return this.getEvent(eventId)!;
+  }
+
+  /** Persist a signed resolution before broadcast so a crash or timeout can always be reconciled. */
+  recordSigned(eventId: string, signature: string, lastValidBlockHeight: number, now: number): EventRecord {
+    if (!Number.isSafeInteger(lastValidBlockHeight) || lastValidBlockHeight < 0) throw new Error("Invalid expiry block height");
+    const transaction: TransactionResult = { mode: "anchor", id: signature, signature, status: "submitted" };
+    const result = this.db.prepare(`UPDATE events SET status = 'submitted', updated_at = ?, transaction_json = ?, last_valid_block_height = ?
+      WHERE event_id = ? AND status = 'processing' AND transaction_json IS NULL`).run(now, JSON.stringify(transaction), lastValidBlockHeight, eventId);
+    if (result.changes !== 1) throw new Error("Event processing state changed unexpectedly");
+    return this.getEvent(eventId)!;
+  }
+
+  /** Events awaiting a terminal, verified outcome. */
+  unsettledEvents(): EventRecord[] {
+    return (this.db.prepare("SELECT * FROM events WHERE status IN ('received','processing','submitted') ORDER BY received_at").all() as EventRow[])
+      .map((row) => this.record(row));
+  }
+
+  /**
+   * Remove a definitively failed reservation so the app can sign a fresh event.
+   * Callers must first prove on-chain that nothing landed (see reconcileEvent).
+   */
+  releaseFailedEvent(eventId: string): void {
+    const result = this.db.prepare("DELETE FROM events WHERE event_id = ? AND status = 'failed'").run(eventId);
+    if (result.changes !== 1) throw new Error("Only a failed event can be released");
   }
 
   pendingCount(): number {

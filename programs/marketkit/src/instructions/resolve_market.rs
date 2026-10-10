@@ -22,6 +22,12 @@ pub fn handle_resolve_market(ctx: Context<ResolveMarket>, winning_outcome: u8) -
 
     let market = &mut ctx.accounts.market;
     require!(market.status == MarketStatus::Active, MarketError::MarketNotActive);
+    // Betting is open while now < deadline (place_prediction), so an outcome may only be
+    // recorded once the deadline has passed. Prevents settling while stakes are still accepted.
+    require!(
+        Clock::get()?.unix_timestamp >= market.deadline,
+        MarketError::MarketStillOpen
+    );
 
     market.winning_outcome = Some(winning_outcome);
     market.status = MarketStatus::Resolved;

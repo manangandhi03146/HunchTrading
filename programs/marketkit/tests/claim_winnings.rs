@@ -1,7 +1,7 @@
 use {
     anchor_lang::{
         prelude::Pubkey,
-        solana_program::{instruction::Instruction, system_instruction, system_program},
+        solana_program::{clock::Clock, instruction::Instruction, system_instruction, system_program},
         AccountDeserialize, InstructionData, ToAccountMetas,
     },
     anchor_spl::token::spl_token,
@@ -205,7 +205,10 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     assert_eq!(token_balance(&svm, &b_ata), 750);
     assert_eq!(token_balance(&svm, &vault_pda), 350);
 
-    // --- Resolve: outcome 1 wins (submitted by the resolver = payer) ---
+    // --- Resolve: only after the deadline; outcome 1 wins (submitted by the resolver = payer) ---
+    let mut clock = svm.get_sysvar::<Clock>();
+    clock.unix_timestamp = deadline;
+    svm.set_sysvar::<Clock>(&clock);
     send_tx(
         &mut svm,
         &[Instruction::new_with_bytes(
