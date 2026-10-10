@@ -9,7 +9,10 @@ fi
 source "$HOME/.cargo/env"
 rustup toolchain install 1.89.0 --profile minimal --component rustfmt
 rustup default 1.89.0
-cargo +1.89.0 install --git https://github.com/otter-sec/anchor --tag v1.1.2 avm --locked
+# AVM's released lockfile includes cargo-platform 0.3.3 (MSRV 1.91).
+# Bootstrap AVM with 1.91; host contract tests remain explicitly on 1.89.
+rustup toolchain install 1.91.0 --profile minimal
+cargo +1.91.0 install --git https://github.com/otter-sec/anchor --tag v1.1.2 avm --locked
 export PATH="$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
 avm install 1.1.2
 avm use 1.1.2

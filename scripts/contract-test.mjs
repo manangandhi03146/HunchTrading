@@ -13,6 +13,8 @@ for (const [command, args, version] of checks) {
 const sbf = spawnSync('cargo-build-sbf', ['--version'], { encoding: 'utf8' });
 assert.equal(sbf.status, 0, 'SBF builder unavailable');
 versions.sbf = sbf.stdout.trim(); versions.node = process.version;
+const bootstrap = spawnSync('rustup', ['run', '1.91.0', 'rustc', '--version'], { encoding: 'utf8' });
+versions.avmBootstrapRust = bootstrap.status === 0 ? bootstrap.stdout.trim() : 'not recorded';
 assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use Node 24 LTS');
 mkdirSync('.data/devnet-lifecycle', { recursive: true });
 const report = { observedAt: new Date().toISOString(), versions, commands: [], passed: false };
