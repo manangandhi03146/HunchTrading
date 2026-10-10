@@ -19,17 +19,25 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "vitest run"
+    "test": "vitest run",
+    "smoke:devnet": "npm run build && node scripts/devnet-read-smoke.mjs",
+    "create:devnet": "npm run build && node scripts/devnet-create-market.mjs",
+    "stake:devnet": "npm run build && node scripts/devnet-stake.mjs",
+    "claim:devnet": "npm run build && node scripts/devnet-claim.mjs",
+    "resolve:devnet": "npm run build && node scripts/devnet-resolve.mjs"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.98.4",
     "@coral-xyz/anchor": "0.32.1",
     "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "bn.js": "^5.2.5",
+    "buffer": "^6.0.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.2.0",
+    "@types/node": "^22.18.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
-    "@types/node": "^22.18.0"
+    "vitest": "^3.2.4"
   }
 }

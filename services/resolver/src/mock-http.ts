@@ -1,5 +1,4 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
-import cors from "@fastify/cors";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { PublicKey } from "@solana/web3.js";
 import { HunchError, createMockWallet } from "@hunch/sdk";
@@ -45,20 +44,35 @@ const errorStatuses: Partial<Record<HunchError["code"], number>> = {
   NO_WINNING_POSITION: 422, ALREADY_CLAIMED: 409,
 };
 
-export function registerMockHttp(app: FastifyInstance, options: MockHttpOptions, adapter: MarketAdapter,
-  signer: WalletSigner, store: ResolverStore): void {
+/** Exact HTTP(S) origins only: no wildcards, paths, or credentials. */
+export function validateOrigins(origins: readonly string[], loopbackOnly = false): string[] {
+  for (const origin of origins) {
+    let url: URL;
+    try { url = new URL(origin); } catch { url = new URL("invalid:"); }
+    if (url.origin !== origin || !["http:", "https:"].includes(url.protocol) || (loopbackOnly && !isLoopbackHost(url.hostname))) {
+      throw new HunchError("CONFIGURATION_ERROR", loopbackOnly
+        ? "Allowed origins must be exact HTTP(S) origins; local access requires loopback origins"
+        : "Allowed origins must be exact HTTP(S) origins");
+    }
+  }
+  return [...origins];
+}
+
+/** Validates mock access settings; returns the browser origins the mock API admits. */
+export function mockHttpOrigins(options: MockHttpOptions, adapter: MarketAdapter): string[] {
   if (adapter.mode !== "mock") throw new HunchError("CONFIGURATION_ERROR", "Mock HTTP endpoints cannot be enabled for a real-chain adapter");
   if (options.access === "token" && (!options.accessToken || options.accessToken.length < 32)) {
     throw new HunchError("CONFIGURATION_ERROR", "Authenticated demo access requires MOCK_API_TOKEN of at least 32 characters");
   }
-  const origins = [...(options.allowedOrigins ?? DEFAULT_MOCK_ORIGINS)];
-  for (const origin of origins) {
-    const url = new URL(origin);
-    if (url.origin !== origin || !["http:", "https:"].includes(url.protocol) ||
-        (options.access === "local" && !isLoopbackHost(url.hostname))) {
-      throw new HunchError("CONFIGURATION_ERROR", "Allowed origins must be exact HTTP(S) origins; local access requires loopback origins");
-    }
-  }
+  return validateOrigins(options.allowedOrigins ?? DEFAULT_MOCK_ORIGINS, options.access === "local");
+}
+
+export const MOCK_CORS_HEADERS = ["Authorization", "X-Hunch-Mock-Session"];
+
+/** The caller registers CORS once for the whole server (see buildServer). */
+export function registerMockHttp(app: FastifyInstance, options: MockHttpOptions, adapter: MarketAdapter,
+  signer: WalletSigner, store: ResolverStore): void {
+  const origins = mockHttpOrigins(options, adapter);
   const sessions = new Map<string, { wallet: WalletSigner; label: string }>();
   const expectedToken = options.accessToken ? createHash("sha256").update(options.accessToken).digest() : null;
   function checkAccess(request: FastifyRequest): void {
@@ -104,7 +118,6 @@ export function registerMockHttp(app: FastifyInstance, options: MockHttpOptions,
     };
 
   // CORS is a browser transport policy; each actual route independently checks access.
-  app.register(cors, { origin: origins, methods: ["GET", "POST"], allowedHeaders: ["Content-Type", "Authorization", "X-Hunch-Mock-Session"], maxAge: 600 });
   app.post("/v1/mock/sessions", wrap(async (request, reply) => {
     const { label } = parse(z.strictObject({ label: z.string().trim().min(1).max(80).default("Simulated player") }), request.body ?? {});
     if (sessions.size >= 1024) throw new ResolverError(503, "MOCK_SESSION_LIMIT", "Mock session limit reached; restart this development server");

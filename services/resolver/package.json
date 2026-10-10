@@ -19,7 +19,8 @@
     "demo": "node --import tsx src/demo.ts",
     "register": "node --import tsx src/register.ts",
     "sign-event": "node --import tsx src/sign-event.ts",
-    "submit-event": "node --import tsx src/submit-event.ts"
+    "submit-event": "node --import tsx src/submit-event.ts",
+    "reconcile": "node --import tsx src/reconcile.ts"
   },
   "dependencies": {
     "@hunch/sdk": "*",
@@ -29,13 +30,15 @@
     "zod": "^4.1.12",
     "better-sqlite3": "^12.4.1",
     "dotenv": "^16.6.1",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "@solana/spl-token": "^0.4.14"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.18.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@coral-xyz/anchor": "0.32.1"
   }
 }

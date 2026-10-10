@@ -2,8 +2,10 @@
 
 Fastify service that verifies registered game-server Ed25519 results, checks market
 ownership and deadlines, and immediately resolves through the trusted backend
-adapter. SQLite persists registrations, market mappings, event IDs, and processing
-status. No background worker is required.
+adapter: the in-memory mock ledger (`RESOLVER_MODE=mock`, default) or real Devnet
+`resolve_market` transactions (`RESOLVER_MODE=anchor`). SQLite persists
+registrations, market mappings, event IDs, signatures, and verified settlement.
+No background worker is required.
 
 ## Run locally
 
@@ -70,11 +72,13 @@ There is no direct HTTP resolve endpoint.
 
 ## HTTP API
 
-- `GET /health`: `{ ok, mode, pendingEvents }`.
+- `GET /health`: `{ ok, mode, pendingEvents }`; real mode adds `network` and the
+  resolver public key.
 - `POST /v1/events`: verify and resolve immediately; `200` confirmed, `202` pending,
   `400` malformed/expired, `401` invalid signature, `403` unauthorized,
   `404` missing adapter market, `409` conflicting replay, `422` ineligible market,
-  `502` definite resolution failure.
+  `502` definite resolution failure, `503` market state temporarily unreadable
+  (nothing reserved; resend the same signed event).
 - `GET /v1/events/:eventId`: durable event status (`200`), or `404`.
 
 POST payload:
@@ -162,11 +166,10 @@ one resolution. Identical duplicates return the existing record; changed signed
 payloads return `409`. Failed duplicates return their recorded failure with `200`.
 A `200` response means inspect `status`; it does not always mean confirmed.
 
-Accepted events are never automatically retried, including failures. A timeout
-reported as `TRANSACTION_UNCERTAIN` remains `submitted`; a process interrupted
-during resolution leaves `processing`. Inspect transaction/on-chain state manually
-before any later retry. Signed-byte persistence, rebroadcast, automatic recovery,
-and expiry reconciliation are deferred until real contract integration.
+Accepted events are never automatically retried, including failures. A
+`TRANSACTION_UNCERTAIN` or `VERIFICATION_PENDING` event stays `submitted`; in real
+mode its signature and expiry height are recorded before broadcast. Reconcile it
+(below) before any retry.
 
 Mock pools, positions, receipts and identity sessions are in backend memory; SQLite
 persists only registrations/events. Restarting the resolver invalidates sessions
@@ -176,7 +179,72 @@ mock state. Use fresh market IDs, or a fresh development database and re-registe
 the apps; the demo does this automatically. Read filters are not ownership proofs.
 A SQLite commit and a future blockchain transaction are not one atomic operation.
 
-`RESOLVER_MODE=anchor` fails at startup until the generated IDL is integrated and cannot switch
-to mock. The configured resolver private-key path is reserved for that integration
-and is not loaded today. Real wallet signing/submission/confirmation and real-chain
-tests remain blocked. See the [SDK handoff](../../packages/sdk/HANDOFF.md).
+## Real Devnet mode
+
+`RESOLVER_MODE=anchor` connects verified signed events to the contract's actual
+`resolve_market` instruction. Startup fails closed, before listening, unless:
+
+1. `RESOLVER_KEYPAIR_PATH` names an absolute (or `~/`) path to a 64-byte Solana
+   keypair JSON file **outside this repository**, with mode `600`. The key is loaded
+   only by the server entrypoint, never logged, and never offered to browsers.
+2. Its public key equals `RESOLVER_PUBLIC_KEY`/`RESOLVER_PUBKEY` (default: the
+   approved Devnet resolver `6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt`).
+3. `MOCK_HTTP_ENABLED` is unset or `false`. All `/v1/mock` routes are absent.
+4. The RPC's genesis hash is Devnet, the program is deployed, and `TEST_TOKEN_MINT`
+   (default the approved TEST mint) is an initialized classic SPL mint.
+
+The resolver's SOL balance is logged; at 0 SOL every resolution fails with
+`INSUFFICIENT_FUNDS` (recorded as a definitive failure, nothing sent).
+
+Per event, after signature, application, mapping, and exact event-ID checks, the
+service reads the on-chain Market PDA and requires: the registered creator and
+resolver, the server's resolver key, the approved mint (creation is permissionless
+on-chain, so unregistered or foreign-mint markets are never settled), a closed
+market, and a result timestamp at or after the deadline. The SDK then re-checks the
+deadline against the cluster `Clock` sysvar, because the **deployed program does not
+enforce the deadline in `resolve_market`**. A proposed contract fix is in
+`programs/marketkit` (not deployed; see the SDK handoff).
+
+The signed transaction's signature and `lastValidBlockHeight` are persisted
+(`status: submitted`) before broadcast. After confirmation, the service reads the
+market back independently and records `confirmed` with
+`settlement: { marketStatus: "resolved", winningOutcome, verifiedAt, source }` only
+if the market shows this event's outcome. Otherwise it stays `submitted` with
+`VERIFICATION_PENDING`. `transaction.signature` is a genuine Devnet signature.
+
+```sh
+# .env: RESOLVER_MODE=anchor, MOCK_HTTP_ENABLED=false, RESOLVER_KEYPAIR_PATH=~/.config/solana/marketkit-resolver.json
+npm run build && npm run resolver
+
+# Register the app key and each real market (market ID = Market PDA, base58):
+npm run register --workspace @marketkit/resolver -- --app-id racing-demo --public-key '<base64 app key>'
+npm run register --workspace @marketkit/resolver -- --app-id racing-demo \
+  --market-id <MARKET_PDA> --event-id race-42-finished \
+  --authority <creator base58> --resolver-authority 6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt
+```
+
+Use a separate `RESOLVER_DB_PATH` per mode. Set `CORS_ALLOWED_ORIGINS` to exact
+origins for browsers that poll `GET /v1/events/:eventId`; unset means no CORS.
+
+### Reconciliation (read-only; loads no key)
+
+```sh
+npm run reconcile --workspace @marketkit/resolver -- --list
+npm run reconcile --workspace @marketkit/resolver -- --event-id race-42-finished
+npm run reconcile --workspace @marketkit/resolver -- --event-id race-42-finished --release
+```
+
+Reconciliation reads the market and the recorded signature's status (with history):
+
+| On-chain finding | Result |
+| --- | --- |
+| Market resolved with the event's outcome | `confirmed` (source `transaction` or `market-state`) |
+| Market resolved with another outcome | `failed`, `OUTCOME_CONFLICT`, never releasable |
+| Signature failed on-chain | `failed`, `TRANSACTION_FAILED`, releasable |
+| Signature unseen and block height past `lastValidBlockHeight` | `failed`, `TRANSACTION_EXPIRED`, releasable |
+| No signature recorded (stopped before signing) | `failed`, releasable |
+| Anything that could still land | stays `submitted` (`pending`) |
+
+`--release` deletes only a definitively failed reservation on a still-unresolved
+market, after these checks. The game server then signs a fresh event (same event
+ID, current timestamp) and posts it. Nothing is ever resent automatically.

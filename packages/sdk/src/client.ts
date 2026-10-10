@@ -3,7 +3,7 @@ import { AnchorMarketAdapter } from "./anchor.js";
 import { MockMarketAdapter, createMockWallet } from "./mock.js";
 import { HunchError } from "./types.js";
 import type {
-  HunchConfig, CreateMarketParams, PredictParams, ListMarketsParams,
+  HunchConfig, CreateMarketParams, PredictParams, ListMarketsParams, ClaimOptions, ResolveOptions,
   MarketAdapter, Outcome, WalletSigner,
 } from "./types.js";
 
@@ -50,12 +50,12 @@ export class Hunch {
   getPositions(marketId: string, wallet?: string) {
     return this.adapter.getPositions(marketId, wallet ?? this.wallet?.publicKey.toBase58());
   }
-  claimWinnings(marketId: string) { return this.adapter.claimWinnings(marketId, this.signer()); }
+  claimWinnings(marketId: string, options?: ClaimOptions) { return this.adapter.claimWinnings(marketId, this.signer(), options); }
   getTransactionStatus(id: string) { return this.adapter.getTransactionStatus(id); }
 
   /** Trusted backend only. Resolver authority is enforced by the adapter. */
-  resolveMarket(marketId: string, outcome: Outcome) {
-    return this.adapter.resolveMarket(marketId, outcome, this.signer());
+  resolveMarket(marketId: string, outcome: Outcome, options?: ResolveOptions) {
+    return this.adapter.resolveMarket(marketId, outcome, this.signer(), options);
   }
 }
 
