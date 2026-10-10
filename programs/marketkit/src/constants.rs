@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
 
 #[constant]
-pub const COUNTER_SEED: &[u8] = b"counter";
+pub const MARKET_SEED: &[u8] = b"market";
 
 #[constant]
-pub const HELLO_WORLD_LAMPORTS: u64 = 1;
+pub const POSITION_SEED: &[u8] = b"position";
 
+/// Seed for the per-market escrow vault token account (used from A4 onward).
 #[constant]
-pub const MAX_COUNT: u64 = 10;
+pub const VAULT_SEED: &[u8] = b"vault";

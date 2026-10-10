@@ -15,11 +15,17 @@ declare_id!("J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP");
 pub mod marketkit {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        crate::instructions::initialize::handle_initialize(ctx)
-    }
-
-    pub fn increment(ctx: Context<Increment>) -> Result<()> {
-        crate::instructions::increment::handle_increment(ctx)
+    /// A3 — create a binary prediction market. Records the market metadata
+    /// on-chain; the escrow vault + staking arrive in A4.
+    pub fn create_market(
+        ctx: Context<CreateMarket>,
+        market_id: [u8; 32],
+        deadline: i64,
+        resolver: Pubkey,
+        token_mint: Pubkey,
+    ) -> Result<()> {
+        instructions::create_market::handle_create_market(
+            ctx, market_id, deadline, resolver, token_mint,
+        )
     }
 }
