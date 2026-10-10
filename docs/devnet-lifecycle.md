@@ -115,10 +115,10 @@ Preparation creates separate creator, A, B, C, and backend game signing keys wit
 
 Preparation writes `funding-request.txt` next to the protected manifest. Share its **public addresses and commands**, not any private file. It requests transfers of **1000 existing TEST each** to A, B, C and **0.15 Devnet SOL each** to creator, A, B, C, resolver. The live preflight requires at least **0.1 SOL** per transaction signer and exactly 1000 TEST per participant. No replacement mint or minting instruction exists in this branch.
 
-The operator sets protected key paths in their own shell. Exact commands generated per recipient are:
+The operator sets protected key paths in their own shell. Agave does not supply the separate SPL Token CLI; the operator should check `spl-token --version` before funding. If missing, install the [published SPL Token CLI](https://crates.io/crates/spl-token-cli/5.6.1) with `cargo +1.91.0 install spl-token-cli --version 5.6.1 --locked` in their Linux environment. Record its actual version with the funding evidence. Exact commands generated per recipient specify classic SPL Token and the funded treasury key as fee payer:
 
 ```sh
-spl-token --url devnet --owner "$TEST_TREASURY_KEYPAIR" transfer 9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs 1000 RECIPIENT_PUBLIC_KEY --from 7mRZVNDvywk9DHtbvEsBP2KMGdPKLQW383RWt2k9p1VM --fund-recipient --allow-unfunded-recipient
+spl-token --url devnet --program-id TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA --owner "$TEST_TREASURY_KEYPAIR" --fee-payer "$TEST_TREASURY_KEYPAIR" transfer 9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs 1000 RECIPIENT_PUBLIC_KEY --from 7mRZVNDvywk9DHtbvEsBP2KMGdPKLQW383RWt2k9p1VM --fund-recipient --allow-unfunded-recipient
 solana --url devnet --keypair "$SOL_OPERATOR_KEYPAIR" transfer RECIPIENT_PUBLIC_KEY 0.15 --allow-unfunded-recipient
 # SOL faucet alternative, subject to rate limits:
 solana --url devnet airdrop 1 RECIPIENT_PUBLIC_KEY

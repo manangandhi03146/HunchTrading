@@ -28,7 +28,7 @@ const manifestPath = join(directory, 'manifest.json');
 writeFileSync(manifestPath, json(manifest), { mode: 0o600, flag: 'wx' });
 const commands = [];
 for (const role of ['A', 'B', 'C']) {
-  commands.push(`spl-token --url devnet --owner "$TEST_TREASURY_KEYPAIR" transfer ${MINT} 1000 ${wallets[role].publicKey} --from ${TREASURY_TOKEN} --fund-recipient --allow-unfunded-recipient`);
+  commands.push(`spl-token --url devnet --program-id TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA --owner "$TEST_TREASURY_KEYPAIR" --fee-payer "$TEST_TREASURY_KEYPAIR" transfer ${MINT} 1000 ${wallets[role].publicKey} --from ${TREASURY_TOKEN} --fund-recipient --allow-unfunded-recipient`);
 }
 for (const entry of [wallets.creator, wallets.A, wallets.B, wallets.C, manifest.resolver]) {
   commands.push(`solana --url devnet --keypair "$SOL_OPERATOR_KEYPAIR" transfer ${entry.publicKey} 0.15 --allow-unfunded-recipient`);
