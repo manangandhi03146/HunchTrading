@@ -89,14 +89,24 @@ try {
   assert.equal(markets.length, 1, 'Cannot uniquely discover the created market');
   const marketAddress = markets[0].toBase58();
   journal.data.marketAddress = marketAddress; journal.save();
+  const recordSnapshot = async (stage, options) => {
+    const state = { stage, ...await snapshot(marketAddress, participants, options), chainClock: await chainClock() };
+    journal.data.snapshots.push(state);
+    const record = journal.data.stages.find(item => item.name === stage);
+    if (record) record.snapshotSlot = state.slot;
+    journal.save();
+    return state;
+  };
+  await recordSnapshot('create', { allowMissingPositions: true, allowMissingVault: true });
   store.registerMarket({ marketId, appId, authority: keys.creator.publicKey.toBase58(), resolverAuthority: RESOLVER, eventId });
   journal.data.registration = store.getMarketMapping(marketId); journal.save();
   for (const [role, outcome, amount] of [['A', 1, 100n], ['C', 1, 200n], ['B', 0, 250n]]) {
     observedClock = (await chainClock()).unixTimestamp;
     assert(observedClock < deadline, 'Deadline elapsed before stakes completed; stop and reconcile');
     await journal.mutation(`stake-${role}`, async () => (await adapter.predict({ marketId, outcome, amount }, signers[role])).transaction);
+    await recordSnapshot(`stake-${role}`, { allowMissingPositions: true });
   }
-  const beforeClaims = await snapshot(marketAddress, participants);
+  const beforeClaims = await recordSnapshot('after-stakes');
   assert.deepEqual(beforeClaims.pools, ['250', '300']);
   assert.equal(beforeClaims.vaultBalance, 550n);
   assert.equal(beforeClaims.authority, keys.creator.publicKey.toBase58());
@@ -108,7 +118,6 @@ try {
     const position = beforeClaims.positions.find(p => p.label === role);
     assert.equal(position.amount, amount); assert.equal(position.tokenBalance, balance); assert.equal(position.claimed, false);
   }
-  journal.data.snapshots.push({ stage: 'after-stakes', ...beforeClaims }); journal.save();
   console.log(`Stakes confirmed. Waiting for chain deadline ${deadline}; journal: ${journalPath}`);
   const waitStarted = Date.now();
   let lastProgress = 0;
@@ -129,11 +138,10 @@ try {
     assert(response.ok && originalRecord.mode === 'anchor' && !originalRecord.error, 'Signed event did not resolve successfully');
     return originalRecord.transaction;
   });
-  const resolvedState = await snapshot(marketAddress, participants);
+  const resolvedState = await recordSnapshot('resolver-resolution');
   assert.equal(resolvedState.winningOutcome, 1);
   assert.equal(resolvedState.status.toLowerCase(), 'resolved');
   assert.equal(resolvedState.vaultBalance, 550n);
-  journal.data.snapshots.push({ stage: 'resolved-before-claims', ...resolvedState }); journal.save();
   const replay = await fetch(`${resolverUrl}/v1/events`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(event) });
   const replayRecord = await replay.json();
   assert(replay.ok); assert.deepEqual(replayRecord, originalRecord, 'Replay must return the original resolution record');
@@ -147,8 +155,9 @@ try {
       assert.equal(result.payout, payout, 'SDK payout differs from expected integer payout');
       return result.transaction;
     });
+    await recordSnapshot(`claim-${role}`);
   }
-  const finalState = await snapshot(marketAddress, participants);
+  const finalState = await recordSnapshot('final');
   assert.deepEqual(finalState.pools, ['250', '300']);
   assert.equal(finalState.vaultBalance, 1n);
   for (const [role, balance, claimed] of [['A', 1083n, true], ['C', 1166n, true], ['B', 750n, false]]) {
@@ -156,13 +165,15 @@ try {
     assert.equal(position.tokenBalance, balance); assert.equal(position.claimed, claimed);
   }
   assert.equal(finalState.positions.reduce((total, p) => total + p.tokenBalance, finalState.vaultBalance), 3000n);
-  journal.data.snapshots.push({ stage: 'final', ...finalState });
   journal.data.complete = true; journal.data.conclusions.currentDeploymentLifecycle = 'verified'; journal.save();
   const evidenceDirectory = resolve('docs/evidence/devnet');
   mkdirSync(evidenceDirectory, { recursive: true });
   const evidencePath = join(evidenceDirectory, `${runId}.json`);
   writeFileSync(evidencePath, json(journal.data), { flag: 'wx' });
   console.log(`Verified lifecycle. Public evidence: ${evidencePath}`);
+} catch (error) {
+  journal.data.stoppedAt = new Date().toISOString(); journal.data.reconciliationRequired = true; journal.save();
+  throw error;
 } finally {
   await server.close(); store.close();
 }

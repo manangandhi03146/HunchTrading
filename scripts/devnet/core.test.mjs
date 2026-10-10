@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { Keypair, Transaction, SystemProgram } from '@solana/web3.js';
-import { Journal, wallet, requireReceipt, connection, preflight } from './core.mjs';
+import { Keypair, Transaction, TransactionInstruction, SystemProgram } from '@solana/web3.js';
+import { Journal, wallet, requireReceipt, connection, preflight, confirmedTransaction, PROGRAM } from './core.mjs';
 
 test('mock and failed receipts cannot count as real Devnet evidence', () => {
   for (const receipt of [{ mode: 'mock', signature: null, status: 'confirmed' },
@@ -46,4 +46,20 @@ test('signature is flushed before SDK can broadcast; uncertain mutation never re
     assert.equal(disk.complete, false);
     assert(!readFileSync(path, 'utf8').includes('secretKey'));
   } finally { rmSync(directory, { recursive: true }); }
+});
+
+test('a confirmed signature must invoke hunch, not merely list its program as an account', async () => {
+  const originalGet = connection.getTransaction;
+  const originalStatuses = connection.getSignatureStatuses;
+  const payer = Keypair.generate().publicKey;
+  const tx = new Transaction({ feePayer: payer, recentBlockhash: Keypair.generate().publicKey.toBase58() });
+  tx.add(new TransactionInstruction({ programId: SystemProgram.programId, keys: [{ pubkey: PROGRAM, isWritable: false, isSigner: false }], data: Buffer.alloc(0) }));
+  connection.getTransaction = async () => ({ slot: 123, blockTime: 456, meta: { err: null, fee: 5000 }, transaction: { message: tx.compileMessage() } });
+  connection.getSignatureStatuses = async () => ({ value: [{ err: null, confirmationStatus: 'confirmed' }] });
+  try {
+    await assert.rejects(confirmedTransaction('public-fixture'), /does not invoke hunch/);
+    tx.instructions[0] = new TransactionInstruction({ programId: PROGRAM, keys: [], data: Buffer.alloc(0) });
+    const receipt = await confirmedTransaction('public-fixture');
+    assert.equal(receipt.slot, 123); assert.equal(receipt.status, 'confirmed'); assert.equal(receipt.feeLamports, 5000);
+  } finally { connection.getTransaction = originalGet; connection.getSignatureStatuses = originalStatuses; }
 });

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, openSync, writeSync, fsyncSync, closeSync, statSync, realpathSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, openSync, fsyncSync, closeSync, statSync, realpathSync, renameSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { resolve, relative, isAbsolute, dirname } from 'node:path';
 import { Connection, PublicKey, Keypair, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
@@ -41,7 +41,7 @@ export async function preflight() {
   assert(mint.isInitialized, 'Mint is not initialized');
   const treasury = await getAccount(connection, TREASURY_TOKEN, 'confirmed', TOKEN_PROGRAM_ID);
   assert(treasury.mint.equals(MINT) && treasury.owner.toBase58() === TREASURY_OWNER);
-  return { observedAt: new Date().toISOString(), rpc: RPC, genesisHash: GENESIS,
+  return { observedAt: new Date().toISOString(), rpc: new URL(RPC).origin, genesisHash: GENESIS,
     program: PROGRAM.toBase58(), programData: programDataAddress.toBase58(),
     deploymentSlot: programData.data.readBigUInt64LE(4).toString(),
     upgradeAuthority: programData.data[12] ? new PublicKey(programData.data.subarray(13, 45)).toBase58() : null,
@@ -90,7 +90,7 @@ export class Journal {
     // Flush before invoking SDK/network mutations. File is private local recovery data.
     const temporary = `${this.path}.${randomUUID()}.tmp`;
     const fd = openSync(temporary, 'wx', 0o600);
-    try { writeSync(fd, json(this.data)); fsyncSync(fd); } finally { closeSync(fd); }
+    try { writeFileSync(fd, json(this.data)); fsyncSync(fd); } finally { closeSync(fd); }
     renameSync(temporary, this.path);
     if (process.platform === 'linux') {
       const directory = openSync(dirname(this.path), 'r');
@@ -107,7 +107,8 @@ export class Journal {
       this.save();
       stage.confirmation = await confirmedTransaction(signature);
       stage.state = 'confirmed'; this.save(); return receipt;
-    } catch {
+    } catch (error) {
+      if (typeof error?.code === 'string' && /^[A-Z_]{1,64}$/.test(error.code)) stage.errorCode = error.code;
       stage.state = 'reconcile-required'; this.save();
       throw new Error(`${name} did not verify. Stop; inspect ${this.path} with devnet:reconcile before any retry.`);
     } finally { this.active = undefined; }
@@ -137,7 +138,7 @@ export async function confirmedTransaction(signature) {
     if (tx) {
       assert(tx.meta && tx.meta.err === null, `Transaction failed: ${signature}`);
       const keys = tx.transaction.message.getAccountKeys({ accountKeysFromLookups: tx.meta.loadedAddresses });
-      assert([...Array(keys.length)].some((_, i) => keys.get(i)?.equals(PROGRAM)), 'Transaction does not reference hunch program');
+      assert(tx.transaction.message.compiledInstructions.some(ix => keys.get(ix.programIdIndex)?.equals(PROGRAM)), 'Transaction does not invoke hunch program');
       const statuses = await connection.getSignatureStatuses([signature], { searchTransactionHistory: true });
       assert(statuses.value[0] && !statuses.value[0].err);
       assert(['confirmed', 'finalized'].includes(statuses.value[0].confirmationStatus));
@@ -160,27 +161,31 @@ export async function decodedMarket(address) {
   return { key, raw, vault, slot: account.context.slot };
 }
 
-export async function snapshot(marketAddress, participants) {
+export async function snapshot(marketAddress, participants, { allowMissingPositions = false, allowMissingVault = false } = {}) {
   const { key, raw, vault, slot } = await decodedMarket(marketAddress);
-  const escrow = await getAccount(connection, vault, 'confirmed', TOKEN_PROGRAM_ID);
-  assert(escrow.owner.equals(key) && escrow.mint.equals(MINT), 'Escrow authority/mint mismatch');
+  const vaultAccount = await connection.getAccountInfo(vault);
+  assert(vaultAccount || allowMissingVault, 'Expected escrow account does not exist');
+  const escrow = vaultAccount ? await getAccount(connection, vault, 'confirmed', TOKEN_PROGRAM_ID) : null;
+  if (escrow) assert(escrow.owner.equals(key) && escrow.mint.equals(MINT), 'Escrow authority/mint mismatch');
   const positions = [];
   for (const [label, info] of Object.entries(participants)) {
     const owner = new PublicKey(info.publicKey);
     const address = PublicKey.findProgramAddressSync([Buffer.from('position'), key.toBuffer(), owner.toBuffer(), Buffer.from([info.outcome])], PROGRAM)[0];
     const account = await connection.getAccountInfo(address);
-    assert(account?.owner.equals(PROGRAM), 'Position owner mismatch');
-    const state = coder.decode('Position', account.data);
-    assert(state.market.equals(key) && state.wallet.equals(owner) && state.outcome === info.outcome, 'Position identity mismatch');
+    assert(account || allowMissingPositions, 'Expected position does not exist');
+    if (account) assert(account.owner.equals(PROGRAM), 'Position owner mismatch');
+    const state = account ? coder.decode('Position', account.data) : null;
+    if (state) assert(state.market.equals(key) && state.wallet.equals(owner) && state.outcome === info.outcome, 'Position identity mismatch');
     const ata = getAssociatedTokenAddressSync(MINT, owner);
     const token = await getAccount(connection, ata, 'confirmed', TOKEN_PROGRAM_ID);
     assert(token.owner.equals(owner) && token.mint.equals(MINT));
     positions.push({ label, publicKey: owner.toBase58(), tokenAccount: ata.toBase58(), tokenBalance: token.amount,
-      positionAddress: address.toBase58(), amount: state.amount.toString(), outcome: state.outcome, claimed: state.claimed,
+      positionAddress: address.toBase58(), positionExists: Boolean(state), amount: state?.amount.toString() ?? null,
+      outcome: state?.outcome ?? null, claimed: state?.claimed ?? null,
       solLamports: await connection.getBalance(owner) });
   }
   return { observedAt: new Date().toISOString(), slot, marketAddress: key.toBase58(), authority: raw.authority.toBase58(),
     resolver: raw.resolver.toBase58(), mint: raw.token_mint.toBase58(), deadline: raw.deadline.toString(),
     pools: raw.pool.map(n => n.toString()), winningOutcome: raw.winning_outcome, status: Object.keys(raw.status)[0],
-    vault: vault.toBase58(), vaultBalance: escrow.amount, positions };
+    vault: vault.toBase58(), vaultExists: Boolean(escrow), vaultBalance: escrow?.amount ?? null, positions };
 }

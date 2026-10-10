@@ -13,7 +13,7 @@ for (const stage of journal.stages) {
     signatures: signatures.map((signature, i) => ({ signature, status: statuses.value[i] })) });
 }
 if (journal.marketAddress && journal.participants) {
-  try { report.onChainState = await snapshot(journal.marketAddress, journal.participants); }
+  try { report.onChainState = await snapshot(journal.marketAddress, journal.participants, { allowMissingPositions: true, allowMissingVault: true }); }
   catch { report.onChainState = 'Full snapshot unavailable (possibly partial staking). Inspect the recorded market and position addresses individually before recovery.'; }
 }
 report.instruction = 'No transactions retried. Unknown signatures require RPC/history and signer review. Reconcile market, vault, positions and resolver event database before recovering; do not rerun verification blindly.';
