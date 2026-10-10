@@ -20,37 +20,30 @@ import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
-import {
-  MockMarketKitClient,
-  DEMO_WALLET,
-} from "../adapters/MockMarketKitClient";
-import {
-  SdkMarketKitClient,
-  type SdkBindings,
-} from "../adapters/SdkMarketKitClient";
-import type { MarketKitClient } from "../adapters/MarketKitClient";
+import { MockHunchClient, DEMO_WALLET } from "../adapters/MockHunchClient";
+import { SdkHunchClient, type SdkBindings } from "../adapters/SdkHunchClient";
+import type { HunchClient } from "../adapters/HunchClient";
 import type { Mode } from "../types";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 interface Context {
-  client: MarketKitClient;
+  client: HunchClient;
   walletAddress: string | null;
   mode: Mode;
   demoConnect: () => void;
   disconnect: () => void;
   notify: (message: string) => void;
 }
-const MarketKitContext = createContext<Context | null>(null);
+const HunchContext = createContext<Context | null>(null);
 let nextQueryScope = 0;
-export function useMarketKit() {
-  const context = useContext(MarketKitContext);
-  if (!context)
-    throw new Error("Wrap your application in <MarketKitProvider>.");
+export function useHunch() {
+  const context = useContext(HunchContext);
+  if (!context) throw new Error("Wrap your application in <HunchProvider>.");
   return context;
 }
-export interface MarketKitProviderProps extends PropsWithChildren {
+export interface HunchProviderProps extends PropsWithChildren {
   mode?: Mode;
-  client?: MarketKitClient;
+  client?: HunchClient;
   programId?: string;
   tokenMint?: string;
   rpcUrl?: string;
@@ -65,19 +58,19 @@ function Session({
   tokenMint,
   sdkBindings,
   defaultDemoConnected = false,
-}: MarketKitProviderProps) {
+}: HunchProviderProps) {
   const wallet = useWallet();
   const walletRef = useRef(wallet);
   walletRef.current = wallet;
   const { connection } = useConnection();
   const [demoConnected, setDemoConnected] = useState(defaultDemoConnected);
   const [toast, setToast] = useState("");
-  const client = useMemo<MarketKitClient>(
+  const client = useMemo<HunchClient>(
     () =>
       supplied ??
       (mode === "mock"
-        ? new MockMarketKitClient()
-        : new SdkMarketKitClient({
+        ? new MockHunchClient()
+        : new SdkHunchClient({
             connection,
             programId,
             tokenMint,
@@ -142,16 +135,16 @@ function Session({
   );
   return (
     <QueryClientProvider key={queryScope} client={queryClient}>
-      <MarketKitContext.Provider value={value}>
+      <HunchContext.Provider value={value}>
         {children}
-        <div className="mk-toast" role="status" aria-live="polite">
+        <div className="hunch-toast" role="status" aria-live="polite">
           {toast && <span>{toast}</span>}
         </div>
-      </MarketKitContext.Provider>
+      </HunchContext.Provider>
     </QueryClientProvider>
   );
 }
-export function MarketKitProvider(props: MarketKitProviderProps) {
+export function HunchProvider(props: HunchProviderProps) {
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
@@ -170,7 +163,7 @@ export function MarketKitProvider(props: MarketKitProviderProps) {
         <WalletModalProvider>
           <Session {...props}>
             {walletError && (
-              <div className="mk-wallet-error" role="alert">
+              <div className="hunch-wallet-error" role="alert">
                 {walletError}
                 <button
                   type="button"

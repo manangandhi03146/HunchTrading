@@ -146,7 +146,7 @@ components:
     rounded: "{rounded.control}"
     padding: "9px 14px"
   "button-primary-hover":
-    backgroundColor: "color-mix(in srgb, var(--mk-primary) 85%, var(--mk-text))"
+    backgroundColor: "color-mix(in srgb, var(--hunch-widget-primary) 85%, var(--hunch-widget-text))"
   "button-race-hover":
     backgroundColor: "{colors.orange-hover}"
   "button-secondary":
@@ -205,7 +205,7 @@ components:
     rounded: "{rounded.outcome}"
     padding: "16px 14px"
   "outcome-selected":
-    backgroundColor: "color-mix(in srgb, var(--mk-primary) 9%, var(--mk-surface))"
+    backgroundColor: "color-mix(in srgb, var(--hunch-widget-primary) 9%, var(--hunch-widget-surface))"
     textColor: "{colors.orange}"
     rounded: "{rounded.outcome}"
     padding: "16px 14px"
@@ -259,24 +259,24 @@ Theme assignment is semantic; colors are not an automatically inverted palette:
 
 | Widget variable | Light theme token | Dark theme token |
 | --- | --- | --- |
-| `--mk-bg` | paper | dark-bg |
-| `--mk-surface` | white | moss |
-| `--mk-elevated` | elevated | moss-raised |
-| `--mk-text` | ink | dark-text |
-| `--mk-muted` | muted | dark-muted |
-| `--mk-border` | line | dark-border |
-| `--mk-control-border` | control-border | dark-control-border |
-| `--mk-primary` | orange | dark-primary |
-| `--mk-primary-text` | white (#ffffff) | dark-bg |
-| `--mk-success` | success | lime |
-| `--mk-warning` | warning | dark-warning |
-| `--mk-danger` | danger | dark-danger |
+| `--hunch-widget-bg` | paper | dark-bg |
+| `--hunch-widget-surface` | white | moss |
+| `--hunch-widget-elevated` | elevated | moss-raised |
+| `--hunch-widget-text` | ink | dark-text |
+| `--hunch-widget-muted` | muted | dark-muted |
+| `--hunch-widget-border` | line | dark-border |
+| `--hunch-widget-control-border` | control-border | dark-control-border |
+| `--hunch-widget-primary` | orange | dark-primary |
+| `--hunch-widget-primary-text` | white (#ffffff) | dark-bg |
+| `--hunch-widget-success` | success | lime |
+| `--hunch-widget-warning` | warning | dark-warning |
+| `--hunch-widget-danger` | danger | dark-danger |
 
-The dashboard rail locally assigns lime to `--mk-primary`; dark application headers use soft orange. Preserve these contextual assignments. Status backgrounds mix their semantic color at 7% with the surface, with a 30% border mix. Error surfaces use 5% and 25%; selected outcomes use 9%.
+The dashboard rail locally assigns lime to `--hunch-widget-primary`; dark application headers use soft orange. Preserve these contextual assignments. Status backgrounds mix their semantic color at 7% with the surface, with a 30% border mix. Error surfaces use 5% and 25%; selected outcomes use 9%.
 
 ### Page theme and widget theme
 
-`packages/react/src/tokens.css` holds both palettes. Page surfaces consume semantic `--hunch-*` variables; `:root[data-theme="dark"]` assigns the dark palette. Widgets explicitly scope `--mk-*` variables with `.mk-theme-light` and `.mk-theme-dark`, so a host page can show either widget theme independently. The racing and esports widgets follow the app preference. The console integration preview defaults to **Follow app theme** and also accepts explicit Light or Dark overrides.
+`packages/react/src/tokens.css` holds both palettes. Page surfaces consume semantic `--hunch-*` variables; `:root[data-theme="dark"]` assigns the dark palette. Widgets explicitly scope `--hunch-widget-*` variables with `.hunch-theme-light` and `.hunch-theme-dark`, so a host page can show either widget theme independently. The racing and esports widgets follow the app preference. The console integration preview defaults to **Follow app theme** and also accepts explicit Light or Dark overrides.
 
 The header switch first follows the device's `prefers-color-scheme`. An explicit choice persists as `hunch.theme.v1` per origin and syncs with other tabs of that origin. The Vite bootstrap applies the same preference before the app's first paint; the provider updates native `color-scheme` and browser theme color. Blocked storage keeps the current tab usable. Theme changes preserve the provider, selected outcome, stake input, and account state.
 

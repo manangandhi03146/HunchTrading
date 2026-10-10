@@ -1,4 +1,4 @@
-# MarketKit
+# hunch
 
 **Embeddable on-chain prediction markets on Solana.** Any game or app can drop
 in a prediction widget; outcomes are settled automatically by a signed event
@@ -26,8 +26,8 @@ escrow vault.
 | Stack           | TypeScript SDK · React widget · Node.js resolver                       |
 
 **Design note:** registered developers can create markets, but a single
-MarketKit-managed **resolver key** submits verified outcomes on-chain. A signed
-event from a game server is _evidence accepted by MarketKit_, not direct
+hunch-managed **resolver key** submits verified outcomes on-chain. A signed
+event from a game server is _evidence accepted by hunch_, not direct
 authorization to move escrowed funds.
 
 ---
@@ -38,8 +38,8 @@ authorization to move escrowed funds.
 .
 ├── programs/            # Developer A — Anchor smart contract (Rust)
 ├── packages/
-│   ├── sdk/             # Developer B — @marketkit/sdk (TypeScript client)
-│   └── react/           # Developer C — @marketkit/react (embeddable widget)
+│   ├── sdk/             # Developer B — @hunch/sdk (TypeScript client)
+│   └── react/           # Developer C — @hunch/react (embeddable widget)
 ├── services/
 │   └── resolver/        # Developer B — signed-event API + on-chain resolver
 ├── apps/                # Developer C — racing / esports / dashboard demos
@@ -64,7 +64,10 @@ npm test            # widget, adapter, and SDK regression tests
 npm run build       # type-check and build every workspace
 ```
 
-The frontend is branded **hunch**; package names remain `@marketkit/*`.
+The app, SDK, widget, and workspaces all use **hunch**. Packages use `@hunch/*`,
+the React provider is `HunchProvider`, and app settings use `VITE_HUNCH_*`.
+After merging a branding update, rerun `npm install` and update local environment
+variable names to match each app's `.env.example`.
 All three apps default to local simulation. Connect a demo account, commit
 nonredeemable TEST credits, close a race's prediction window, run the race,
 and claim the simulated result. See [apps/README.md](apps/README.md) for details.
@@ -81,7 +84,7 @@ program, test-token mint, wallet bindings, and a trusted resolver. Simulated
 receipts are always labeled and never linked as real blockchain transactions.
 
 `npm run sdk` builds the SDK; `npm run resolver` starts the resolver scaffold
-on port 8787. The SDK also provides `new MarketKit({ mock: true })` for
+on port 8787. The SDK also provides `new Hunch({ mock: true })` for
 standalone integration tests. Browser demo state is stored per origin, so the
 apps on ports 5173, 5174, and 5175 have independent simulated accounts and markets.
 

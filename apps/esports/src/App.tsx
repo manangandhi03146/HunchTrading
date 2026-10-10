@@ -23,9 +23,9 @@ import {
   effectiveStatus,
   useNow,
   formatTokens,
-  useMarketKit,
+  useHunch,
   useMarkets,
-} from "@marketkit/react";
+} from "@hunch/react";
 import { AppHeader } from "../../shared/AppHeader";
 const MATCHES = ["nova-titan", "orbit-echo", "zenith-pulse"];
 const ICONS = [Triangle, Hexagon, Orbit, AudioLines];
@@ -47,10 +47,10 @@ function TeamMark({
 }
 export default function App() {
   const { theme } = useTheme();
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   const markets = useMarkets();
   const [selected, setSelected] = useState(
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ?? "nova-titan",
+    import.meta.env.VITE_HUNCH_MARKET_ID ?? "nova-titan",
   );
   const matches =
     mode === "mock"

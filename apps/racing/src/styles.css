@@ -301,7 +301,7 @@
   color: var(--hunch-ink);
   font-size: 14px;
 }
-.race-winner .mk-badge {
+.race-winner .hunch-badge {
   margin-left: auto;
 }
 .race-controls {
@@ -330,11 +330,11 @@
   flex-wrap: wrap;
   margin-top: 20px;
 }
-.race-control-buttons .mk-button-primary {
+.race-control-buttons .hunch-button-primary {
   background: var(--hunch-ink);
   color: #fffefa;
 }
-.race-control-buttons .mk-button-secondary {
+.race-control-buttons .hunch-button-secondary {
   background: var(--hunch-green-tint);
   border-color: var(--hunch-line);
 }
@@ -485,11 +485,11 @@
   .race-winner {
     flex-wrap: wrap;
   }
-  .race-winner > span:not(.mk-badge) {
+  .race-winner > span:not(.hunch-badge) {
     min-width: 0;
     overflow-wrap: anywhere;
   }
-  .race-winner .mk-badge {
+  .race-winner .hunch-badge {
     margin-left: 0;
   }
 }
@@ -625,14 +625,14 @@
   gap: 10px;
   margin-top: 20px;
 }
-.race-control-buttons .mk-button-primary {
+.race-control-buttons .hunch-button-primary {
   background: var(--hunch-orange);
   color: var(--hunch-primary-text);
 }
-.race-control-buttons .mk-button-primary:hover:not(:disabled) {
+.race-control-buttons .hunch-button-primary:hover:not(:disabled) {
   background: var(--hunch-orange-hover);
 }
-.race-control-buttons .mk-button-secondary {
+.race-control-buttons .hunch-button-secondary {
   background: var(--hunch-white);
   border-color: var(--hunch-line);
 }

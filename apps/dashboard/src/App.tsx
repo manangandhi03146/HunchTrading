@@ -51,13 +51,13 @@ import {
   formatTokens,
   useEvents,
   useMarket,
-  useMarketKit,
+  useHunch,
   useMarkets,
   useNow,
   type CreateMarketParams,
   type Market,
   type MarketEvent,
-} from "@marketkit/react";
+} from "@hunch/react";
 
 const NAV = [
   { path: "/", label: "Overview", icon: LayoutDashboard },
@@ -74,7 +74,7 @@ function date(seconds: number) {
   });
 }
 function ModeNotice() {
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   return (
     <div className="mode-notice">
       <span>
@@ -185,7 +185,7 @@ function MarketTable({
 }
 function Overview() {
   const now = useNow();
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   const markets = useMarkets();
   const events = useEvents();
   const list = markets.data ?? [];
@@ -257,7 +257,7 @@ function Overview() {
         title="Your prediction workspace"
         subtitle="Create markets, follow outcomes, and bring hunch into your product."
         action={
-          <Link className="mk-button mk-button-primary" to="/markets/new">
+          <Link className="hunch-button hunch-button-primary" to="/markets/new">
             <Plus size={15} />
             Create market
           </Link>
@@ -319,7 +319,7 @@ function Overview() {
             {!markets.isPending && list.length === 0 && (
               <EmptyState title="Your first market starts here">
                 <Link
-                  className="mk-button mk-button-secondary"
+                  className="hunch-button hunch-button-secondary"
                   to="/markets/new"
                 >
                   Create a market
@@ -345,7 +345,7 @@ function Overview() {
             <code>
               <span>import</span> {"{ PredictionMarket }"}
               {"\n"}
-              <span>from</span> <b>'@marketkit/react'</b>;{"\n\n"}
+              <span>from</span> <b>'@hunch/react'</b>;{"\n\n"}
               {"<PredictionMarket"}
               {'\n  marketId="race-42"\n/>'}
             </code>
@@ -371,7 +371,10 @@ function Overview() {
           <MarketTable markets={list.slice(0, 4)} compact />
         ) : (
           <EmptyState title="No markets yet">
-            <Link className="mk-button mk-button-secondary" to="/markets/new">
+            <Link
+              className="hunch-button hunch-button-secondary"
+              to="/markets/new"
+            >
               Create your first market
             </Link>
           </EmptyState>
@@ -401,7 +404,7 @@ function Overview() {
   );
 }
 function Markets() {
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   const now = useNow();
   const query = useMarkets();
   const [search, setSearch] = useState("");
@@ -420,7 +423,7 @@ function Markets() {
         title="Your markets"
         subtitle="Create, monitor, and embed markets across your applications."
         action={
-          <Link className="mk-button mk-button-primary" to="/markets/new">
+          <Link className="hunch-button hunch-button-primary" to="/markets/new">
             <Plus size={15} />
             Create market
           </Link>
@@ -468,7 +471,10 @@ function Markets() {
             }
           >
             {!query.data?.length ? (
-              <Link className="mk-button mk-button-primary" to="/markets/new">
+              <Link
+                className="hunch-button hunch-button-primary"
+                to="/markets/new"
+              >
                 Create your first market
               </Link>
             ) : (
@@ -499,7 +505,7 @@ function localDatetime(milliseconds: number) {
     .slice(0, 16);
 }
 function CreateMarket() {
-  const { client, mode, notify } = useMarketKit();
+  const { client, mode, notify } = useHunch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [question, setQuestion] = useState("");
@@ -641,7 +647,7 @@ function CreateMarket() {
             {validation && <ErrorState error={validation} />}
             {create.error && <ErrorState error={create.error} />}
             <div className="form-submit">
-              <Link className="mk-button mk-button-ghost" to="/markets">
+              <Link className="hunch-button hunch-button-ghost" to="/markets">
                 Cancel
               </Link>
               <Button type="submit" busy={create.isPending}>
@@ -694,7 +700,7 @@ function CreateMarket() {
 function Integration() {
   const { theme: appTheme } = useTheme();
   const now = useNow();
-  const { client, mode } = useMarketKit();
+  const { client, mode } = useHunch();
   const markets = useMarkets();
   const [params, setParams] = useSearchParams();
   const [widgetTheme, setWidgetTheme] = useState<Theme | "app">("app");
@@ -702,12 +708,12 @@ function Integration() {
   const [variant, setVariant] = useState<"default" | "compact">("default");
   const marketId =
     params.get("market") ??
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ??
+    import.meta.env.VITE_HUNCH_MARKET_ID ??
     markets.data?.[0]?.id ??
     "race-42";
   const market = useMarket(marketId);
-  const snippet = `import { PredictionMarket } from "@marketkit/react";\nimport "@marketkit/react/styles.css";\n\n// Inside the MarketKitProvider configured below:\n<PredictionMarket\n  marketId=${JSON.stringify(marketId)}\n  theme="${theme}"\n  variant="${variant}"\n/>`;
-  const providerSnippet = `import { MarketKitProvider } from "@marketkit/react";\n\n<MarketKitProvider mode="${mode}">\n  <App />\n</MarketKitProvider>`;
+  const snippet = `import { PredictionMarket } from "@hunch/react";\nimport "@hunch/react/styles.css";\n\n// Inside the HunchProvider configured below:\n<PredictionMarket\n  marketId=${JSON.stringify(marketId)}\n  theme="${theme}"\n  variant="${variant}"\n/>`;
+  const providerSnippet = `import { HunchProvider } from "@hunch/react";\n\n<HunchProvider mode="${mode}">\n  <App />\n</HunchProvider>`;
   return (
     <>
       <PageTitle
@@ -886,7 +892,7 @@ function EventRows({
   if (!events.length)
     return (
       <EmptyState title="No events yet">
-        <Link className="mk-button mk-button-secondary" to="/markets/new">
+        <Link className="hunch-button hunch-button-secondary" to="/markets/new">
           Create a market
         </Link>
       </EmptyState>
@@ -1009,7 +1015,7 @@ function RadioIcon(props: { size?: number }) {
   return <Activity {...props} />;
 }
 export default function App() {
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   return (
     <div className="dashboard-app">
       <a className="skip-link" href="#main">

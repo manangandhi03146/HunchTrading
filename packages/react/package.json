@@ -1,5 +1,5 @@
 {
-  "name": "@marketkit/react",
+  "name": "@hunch/react",
   "version": "0.1.0",
   "description": "hunch embeddable React prediction widget.",
   "type": "module",
@@ -19,7 +19,7 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "npm run build --workspace @marketkit/sdk && tsc -p tsconfig.json && vite build",
+    "build": "npm run build --workspace @hunch/sdk && vite build && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "dev": "vite build --watch"
@@ -29,7 +29,7 @@
     "react-dom": "^19.1.1"
   },
   "dependencies": {
-    "@marketkit/sdk": "*",
+    "@hunch/sdk": "*",
     "@tanstack/react-query": "^5.90.2",
     "@solana/web3.js": "^1.98.4",
     "@solana/wallet-adapter-base": "^0.9.27",

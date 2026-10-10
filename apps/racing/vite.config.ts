@@ -7,10 +7,10 @@ export default defineConfig({
   plugins: [themeBootstrap(), react(), tailwindcss()],
   resolve: {
     alias: {
-      "@marketkit/react": fileURLToPath(
+      "@hunch/react": fileURLToPath(
         new URL("../../packages/react/src/index.ts", import.meta.url),
       ),
-      "@marketkit/sdk": fileURLToPath(
+      "@hunch/sdk": fileURLToPath(
         new URL("../../packages/sdk/src/index.ts", import.meta.url),
       ),
     },

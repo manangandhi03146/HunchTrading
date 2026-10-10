@@ -7,8 +7,8 @@ import {
   useTheme,
 } from "../../../../apps/shared/theme";
 import { THEME_STORAGE_KEY } from "../../../../apps/shared/theme-preference";
-import { MarketKitProvider } from "../providers/MarketKitProvider";
-import { MockMarketKitClient } from "../adapters/MockMarketKitClient";
+import { HunchProvider } from "../providers/HunchProvider";
+import { MockHunchClient } from "../adapters/MockHunchClient";
 import { PredictionMarket } from "../components/PredictionMarket";
 
 function deviceTheme(initialDark: boolean) {
@@ -112,7 +112,7 @@ describe("application themes", () => {
     act(() => {
       window.dispatchEvent(
         new StorageEvent("storage", {
-          key: "marketkit.frontend.demo.v1",
+          key: "hunch.frontend.demo.v1",
           newValue: "dark",
         }),
       );
@@ -165,14 +165,14 @@ describe("application themes", () => {
       return <PredictionMarket marketId="race-42" theme={theme} />;
     }
     const user = userEvent.setup();
-    const mock = new MockMarketKitClient({ persist: false, latencyMs: 0 });
+    const mock = new MockHunchClient({ persist: false, latencyMs: 0 });
     const predict = vi.spyOn(mock, "predict");
     render(
       <ThemeProvider>
         <ThemeSwitch />
-        <MarketKitProvider client={mock} defaultDemoConnected>
+        <HunchProvider client={mock} defaultDemoConnected>
           <ThemedWidget />
-        </MarketKitProvider>
+        </HunchProvider>
       </ThemeProvider>,
     );
     const choice = await screen.findByRole("radio", { name: /Player B/ });
@@ -185,7 +185,7 @@ describe("application themes", () => {
     expect(stake).toHaveValue("21");
     expect(
       screen.getByRole("region", { name: "Prediction market" }),
-    ).toHaveClass("mk-theme-dark");
+    ).toHaveClass("hunch-theme-dark");
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: /Review prediction/ }),

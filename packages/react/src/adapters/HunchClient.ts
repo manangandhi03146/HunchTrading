@@ -10,7 +10,7 @@ import type {
   TransactionResult,
 } from "../types";
 
-export interface MarketKitClient {
+export interface HunchClient {
   readonly mode: Mode;
   readonly programId?: string;
   getMarket(id: string): Promise<Market>;

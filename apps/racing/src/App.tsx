@@ -20,12 +20,12 @@ import {
   Button,
   Card,
   ErrorState,
-  MockMarketKitClient,
+  MockHunchClient,
   PredictionMarket,
   effectiveStatus,
   useMarket,
-  useMarketKit,
-} from "@marketkit/react";
+  useHunch,
+} from "@hunch/react";
 import { AppHeader } from "../../shared/AppHeader";
 
 function Car({ color }: { color: string }) {
@@ -43,13 +43,11 @@ function Car({ color }: { color: string }) {
 }
 export default function App() {
   const { theme } = useTheme();
-  const { client, mode, notify } = useMarketKit();
+  const { client, mode, notify } = useHunch();
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
   const marketId =
-    params.get("market") ??
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ??
-    "race-42";
+    params.get("market") ?? import.meta.env.VITE_HUNCH_MARKET_ID ?? "race-42";
   const market = useMarket(marketId);
   const race = useQuery({
     queryKey: ["race", marketId, mode],
@@ -82,7 +80,7 @@ export default function App() {
   });
   const close = useMutation({
     mutationFn: () => {
-      if (!(client instanceof MockMarketKitClient))
+      if (!(client instanceof MockHunchClient))
         throw new Error("Only simulated markets support early close.");
       return client.closeDemoMarket(marketId);
     },

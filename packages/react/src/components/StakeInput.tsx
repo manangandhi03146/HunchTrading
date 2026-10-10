@@ -15,8 +15,8 @@ export function StakeInput({
   disabled: boolean;
 }) {
   return (
-    <div className="mk-stake">
-      <div className="mk-stake-label">
+    <div className="hunch-stake">
+      <div className="hunch-stake-label">
         <label htmlFor={id}>Your stake</label>
         <span>
           {balance === undefined
@@ -24,7 +24,7 @@ export function StakeInput({
             : `${formatTokens(balance)} TEST available`}
         </span>
       </div>
-      <div className="mk-input-wrap">
+      <div className="hunch-input-wrap">
         <input
           id={id}
           type="text"
@@ -40,7 +40,7 @@ export function StakeInput({
         <span>TEST</span>
       </div>
       {error && (
-        <p className="mk-field-error" id={`${id}-error`} role="alert">
+        <p className="hunch-field-error" id={`${id}-error`} role="alert">
           {error}
         </p>
       )}

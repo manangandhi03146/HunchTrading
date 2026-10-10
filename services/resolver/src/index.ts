@@ -1,5 +1,5 @@
 /**
- * MarketKit resolver service (plan §3, Developer B — tickets B5/B6).
+ * hunch resolver service (plan §3, Developer B — tickets B5/B6).
  *
  * Flow:
  *   game server signs canonical result -> POST /events
@@ -11,10 +11,10 @@
  *   - Only accept events from public keys registered to that developer app.
  *   - Validate market mapping + authoritative timestamp.
  *   - Never trust a client-supplied winner directly; a signed event is
- *     EVIDENCE accepted by MarketKit, not authorization to move funds.
+ *     EVIDENCE accepted by hunch, not authorization to move funds.
  */
 import express from "express";
-import type { GameResultEvent } from "@marketkit/sdk";
+import type { GameResultEvent } from "@hunch/sdk";
 
 const app = express();
 app.use(express.json());
@@ -47,7 +47,7 @@ app.post("/events", async (req, res) => {
   }
 
   // TODO(B6): validate market exists, outcome is 0|1, deadline passed,
-  // then call marketkit.resolveMarket(...) with the resolver keypair and
+  // then call hunch.resolveMarket(...) with the resolver keypair and
   // return the REAL transaction signature.
   seenEventIds.add(event.eventId);
   return res.status(501).json({ error: "resolve_market wiring pending (B6)" });

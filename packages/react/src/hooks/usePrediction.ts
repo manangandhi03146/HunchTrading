@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 import type { TransactionResult } from "../types";
 
 export function useTransaction<T>(
   operation: (params: T) => Promise<TransactionResult>,
 ) {
-  const { client, notify } = useMarketKit();
+  const { client, notify } = useHunch();
   const queryClient = useQueryClient();
   const lock = useRef(false);
   const [receipt, setReceipt] = useState<TransactionResult | null>(null);

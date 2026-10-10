@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 export function useMarketPositions(id: string) {
-  const { client, walletAddress } = useMarketKit();
+  const { client, walletAddress } = useHunch();
   return useQuery({
     queryKey: ["positions", id, walletAddress, client.mode],
     queryFn: () => client.getPositions(id, walletAddress!),
@@ -10,7 +10,7 @@ export function useMarketPositions(id: string) {
   });
 }
 export function useClaimable(id: string, enabled: boolean) {
-  const { client, walletAddress } = useMarketKit();
+  const { client, walletAddress } = useHunch();
   return useQuery({
     queryKey: ["claimable", id, walletAddress, client.mode],
     queryFn: () => client.getClaimableAmount(id, walletAddress!),

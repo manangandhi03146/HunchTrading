@@ -1,4 +1,4 @@
-import type { Market as SdkMarket, Outcome, Prediction } from "@marketkit/sdk";
+import type { Market as SdkMarket, Outcome, Prediction } from "@hunch/sdk";
 export type { Outcome };
 export type Mode = "mock" | "sdk";
 export interface Market extends SdkMarket {

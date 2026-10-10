@@ -1,6 +1,6 @@
 # hunch demo applications
 
-Three React/Vite applications consume the shared `@marketkit/react` widget:
+Three React/Vite applications consume the shared `@hunch/react` widget:
 
 | Application        | Development URL       | Preview URL           |
 | ------------------ | --------------------- | --------------------- |
@@ -24,7 +24,7 @@ On Windows PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`. T
 ```sh
 npm run build
 npm test
-npm run preview --workspace @marketkit/racing
+npm run preview --workspace @hunch/racing
 ```
 
 Preview requires a successful build; replace the workspace name to preview another app. Development uses workspace source aliases, so separate library builds are unnecessary for `dev`.
@@ -51,14 +51,16 @@ Mock mode is the default and requires no wallet extension.
 
 TEST credits have no value. Race results are deterministic fixtures: Player A wins. The race animation is illustrative. No blockchain transactions or real signature verification occur in mock mode. Nexus has no automatic tournament progression; its open fixtures close at their configured deadlines, and its resolved match is preloaded.
 
-Mock state persists in browser local storage under `marketkit.frontend.demo.v1`. Storage is separate for each origin, so different ports and `localhost` versus `127.0.0.1` do not share markets, balances, positions, or events. The console's Events page displays that origin's activity. Removing only that storage entry and reloading restores fresh fixtures.
+Mock state persists in browser local storage under `hunch.frontend.demo.v1`. A single valid previous namespace ledger migrates automatically when the hunch entry is absent; the previous entry is removed after a successful write. Existing hunch state takes precedence. Storage is separate for each origin, so different ports and `localhost` versus `127.0.0.1` do not share markets, balances, positions, or events. The console's Events page displays that origin's activity. Removing only the migrated storage entry and reloading restores fresh fixtures.
 
 ## Configure a Devnet integration
 
-Each app has an `.env.example`; copy it to `.env.local` in that app's directory. `VITE_MARKETKIT_MODE` accepts `mock` or `sdk`; `VITE_SOLANA_CLUSTER` must be `devnet`.
+Each app has an `.env.example`; copy it to `.env.local` in that app's directory. `VITE_HUNCH_MODE` accepts `mock` or `sdk`; `VITE_SOLANA_CLUSTER` must be `devnet`.
 
-SDK mode is an integration surface, not a completed live demo. The checked-in live SDK and required game-server bindings are unfinished. Setting environment variables alone does not enable live settlement. Implement the SDK and provide `sdkBindings` to the app's `MarketKitProvider`; missing capabilities report errors rather than substituting fixtures. See [the React package integration contract](../packages/react/README.md#developer-b-integration-requirements).
+After merging the branding update, rerun `npm install` to relink `@hunch/*` workspaces and update `.env.local` to the variable names in `.env.example`. Only the hunch names are read by the apps.
 
-Use `VITE_MARKETKIT_MARKET_ID` for an initial market. Racing also accepts `?market=<id>`. Nexus selects the configured market when present in the returned index, otherwise the first available match. A live race must obtain its authoritative result from the game server. Browser code must not choose or sign a live winner.
+SDK mode is an integration surface, not a completed live demo. The checked-in live SDK and required game-server bindings are unfinished. Setting environment variables alone does not enable live settlement. Implement the SDK and provide `sdkBindings` to the app's `HunchProvider`; missing capabilities report errors rather than substituting fixtures. See [the React package integration contract](../packages/react/README.md#developer-b-integration-requirements).
+
+Use `VITE_HUNCH_MARKET_ID` for an initial market. Racing also accepts `?market=<id>`. Nexus selects the configured market when present in the returned index, otherwise the first available match. A live race must obtain its authoritative result from the game server. Browser code must not choose or sign a live winner.
 
 For deployed cross-app navigation, configure `VITE_RACING_APP_URL`, `VITE_ESPORTS_APP_URL`, and `VITE_DASHBOARD_APP_URL`. Their defaults point to the local development ports. Vite variables are public; never include private keys or signing secrets.

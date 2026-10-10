@@ -342,7 +342,7 @@
   .tournament-emblem {
     display: none;
   }
-  .match-row .mk-badge {
+  .match-row .hunch-badge {
     font-size: 12px;
   }
   .match-teams > span {
@@ -405,7 +405,7 @@
   .match-teams > small {
     width: 100%;
   }
-  .match-row > .mk-badge {
+  .match-row > .hunch-badge {
     flex-shrink: 0;
   }
 }
@@ -628,7 +628,7 @@
   .match-teams {
     flex-basis: calc(100% - 55px);
   }
-  .match-row .mk-badge {
+  .match-row .hunch-badge {
     margin-left: 43px;
     font-size: 11px;
   }

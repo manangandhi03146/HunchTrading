@@ -1,6 +1,6 @@
 import { Trophy, CheckCircle2 } from "lucide-react";
 import { useClaimable } from "../hooks/useMarketPositions";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 import { useTransaction } from "../hooks/usePrediction";
 import { formatTokens, type Market } from "../types";
 import { Button, ErrorState, TransactionLink } from "./ui";
@@ -14,7 +14,7 @@ export function ClaimPanel({
   onError?: (error: Error) => void;
   showWalletButton?: boolean;
 }) {
-  const { walletAddress, client } = useMarketKit();
+  const { walletAddress, client } = useHunch();
   const claimable = useClaimable(market.id, true);
   const transaction = useTransaction(async () =>
     client.claimWinnings({
@@ -24,8 +24,8 @@ export function ClaimPanel({
     }),
   );
   return (
-    <div className="mk-claim">
-      <div className="mk-claim-heading">
+    <div className="hunch-claim">
+      <div className="hunch-claim-heading">
         <Trophy size={19} />
         <div>
           <small>
@@ -47,7 +47,7 @@ export function ClaimPanel({
         </>
       ) : (
         <>
-          <div className="mk-claim-amount">
+          <div className="hunch-claim-amount">
             <span>
               {claimable.data?.claimed
                 ? "Already claimed"
@@ -72,7 +72,7 @@ export function ClaimPanel({
             />
           )}
           <Button
-            className="mk-full"
+            className="hunch-full"
             disabled={
               !claimable.data ||
               claimable.data.claimed ||

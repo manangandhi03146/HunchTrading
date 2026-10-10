@@ -12,18 +12,18 @@ curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev 
 rustc --version && solana --version && anchor --version
 ```
 
-## Initialize the Anchor program *inside this monorepo*
+## Initialize the Anchor program _inside this monorepo_
 
 `anchor init` wants to create its own folder. Scaffold it in a temp dir and
-move the program here so it lives under `programs/marketkit/`:
+move the program here so it lives under `programs/hunch/`:
 
 ```bash
 # from repo root
-anchor init marketkit_tmp
+anchor init hunch
 # move the program crate in and keep the root Anchor.toml at repo root
-mv marketkit_tmp/programs/marketkit programs/marketkit
-mv marketkit_tmp/Anchor.toml ./Anchor.toml   # adjust [programs] paths
-# (keep marketkit_tmp/tests as a reference, then delete the tmp dir)
+mv hunch/programs/hunch programs/hunch
+mv hunch/Anchor.toml ./Anchor.toml   # adjust [programs] paths
+# (keep hunch/tests as a reference, then delete the scaffold directory)
 anchor build && anchor test
 ```
 
@@ -48,16 +48,16 @@ Vault Token Account  authority: Market PDA   mint: test-token mint
 
 ## Tickets (ordered)
 
-| ID | Task | Priority |
-|----|------|----------|
-| A1 | Install toolchain + run starter test | P0 |
-| A2 | `Market` + `Position` accounts | P0 |
-| A3 | `create_market` | P0 |
-| A4 | Test-token escrow + `place_prediction` | P0 |
-| A5 | `resolve_market` | P0 |
-| A6 | `claim_winnings` | P0 |
-| A7 | Integration tests + Devnet deploy | P0 |
-| A8 | Cancellation / refunds | P1 |
+| ID  | Task                                   | Priority |
+| --- | -------------------------------------- | -------- |
+| A1  | Install toolchain + run starter test   | P0       |
+| A2  | `Market` + `Position` accounts         | P0       |
+| A3  | `create_market`                        | P0       |
+| A4  | Test-token escrow + `place_prediction` | P0       |
+| A5  | `resolve_market`                       | P0       |
+| A6  | `claim_winnings`                       | P0       |
+| A7  | Integration tests + Devnet deploy      | P0       |
+| A8  | Cancellation / refunds                 | P1       |
 
 **`claim_winnings` must:** prevent double claims, require the winning position,
 use checked arithmetic, and transfer via the Market PDA's signing authority.

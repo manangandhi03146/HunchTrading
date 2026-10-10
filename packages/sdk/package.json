@@ -1,7 +1,7 @@
 {
-  "name": "@marketkit/sdk",
+  "name": "@hunch/sdk",
   "version": "0.1.0",
-  "description": "MarketKit TypeScript SDK — prediction market client for Solana.",
+  "description": "hunch TypeScript SDK — prediction market client for Solana.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

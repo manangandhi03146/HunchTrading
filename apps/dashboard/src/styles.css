@@ -54,11 +54,11 @@
   font-size: 12px;
   color: var(--hunch-muted);
 }
-.workspace-switch .mk-badge {
+.workspace-switch .hunch-badge {
   font-size: 12px;
   padding: 3px 4px;
 }
-.workspace-switch .mk-badge > span {
+.workspace-switch .hunch-badge > span {
   display: none;
 }
 .sidebar-section-label {
@@ -284,7 +284,7 @@
   color: var(--hunch-muted);
   margin: 7px 0 0;
 }
-.panel-heading .mk-badge {
+.panel-heading .hunch-badge {
   font-size: 12px;
 }
 .pool-visualization {
@@ -488,7 +488,7 @@
   border-radius: 7px;
   color: var(--hunch-muted);
 }
-.market-table .mk-badge {
+.market-table .hunch-badge {
   font-size: 12px;
 }
 .table-open {
@@ -758,7 +758,7 @@
   font-size: 14px;
   color: var(--hunch-muted);
 }
-.code-header .mk-button {
+.code-header .hunch-button {
   min-height: 30px;
   font-size: 12px;
 }
@@ -827,7 +827,7 @@
   font-size: 12px;
   color: var(--hunch-muted);
 }
-.preview-heading .mk-badge {
+.preview-heading .hunch-badge {
   font-size: 12px;
 }
 .network-info {
@@ -859,7 +859,7 @@
   font-weight: 400;
   color: var(--hunch-ink);
 }
-.network-info .mk-badge {
+.network-info .hunch-badge {
   font-size: 12px;
 }
 .event-pipeline {
@@ -916,10 +916,10 @@
     width: 178px;
     padding: 25px 10px;
   }
-  .dashboard-sidebar .mk-logo {
+  .dashboard-sidebar .hunch-logo {
     font-size: 18px;
   }
-  .workspace-switch .mk-badge {
+  .workspace-switch .hunch-badge {
     display: none;
   }
   .dashboard-main {
@@ -1054,7 +1054,7 @@
   font-size: 14px;
 }
 .market-table small,
-.market-table .mk-badge {
+.market-table .hunch-badge {
   font-size: 12px;
 }
 .market-table td:first-child > a > span:last-child {

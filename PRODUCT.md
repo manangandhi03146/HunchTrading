@@ -28,7 +28,7 @@ React, TypeScript, Vite, npm workspaces, TanStack Query, React Router, Solana Wa
 
 ## Brand Commitments
 
-The public app name is **hunch**, lowercase, and the domain is **hunchtrading.tech**. Workspace identifiers retain `@marketkit/*` for integration compatibility. The user delegated the visual redesign direction to the agent after installing Impeccable.
+The public app name is **hunch**, lowercase, and the domain is **hunchtrading.tech**. Packages use `@hunch/*`, React integrations use `HunchProvider` and `useHunch`, and app configuration uses `VITE_HUNCH_*`. The user delegated the visual redesign direction to the agent after installing Impeccable.
 
 ## Evidence on Hand
 

@@ -4,18 +4,18 @@
   background: var(--hunch-moss);
   border: 0;
   color: #f6f6ec;
-  --mk-text: #f6f6ec;
-  --mk-muted: #bfd0c4;
-  --mk-border: #476356;
-  --mk-control-border: #779583;
-  --mk-primary: #d1efa0;
-  --mk-surface: #18392f;
-  --mk-elevated: #25483b;
+  --hunch-widget-text: #f6f6ec;
+  --hunch-widget-muted: #bfd0c4;
+  --hunch-widget-border: #476356;
+  --hunch-widget-control-border: #779583;
+  --hunch-widget-primary: #d1efa0;
+  --hunch-widget-surface: #18392f;
+  --hunch-widget-elevated: #25483b;
 }
-.dashboard-sidebar .mk-logo {
+.dashboard-sidebar .hunch-logo {
   font-size: 28px;
 }
-.dashboard-sidebar .mk-logomark {
+.dashboard-sidebar .hunch-logomark {
   color: #18392f;
   background: #d1efa0;
 }
@@ -43,7 +43,7 @@
   color: #bfd0c4;
   font-size: 12px;
 }
-.workspace-switch .mk-badge {
+.workspace-switch .hunch-badge {
   font-size: 11px;
   color: #d1efa0;
   border-color: #476356;
@@ -209,7 +209,7 @@
   font-size: 13px;
   margin-top: 6px;
 }
-.panel-heading .mk-badge {
+.panel-heading .hunch-badge {
   font-size: 11px;
 }
 .pool-visualization {
@@ -332,7 +332,7 @@
   width: 36px;
   height: 36px;
 }
-.market-table .mk-badge {
+.market-table .hunch-badge {
   font-size: 11px;
 }
 .table-date {
@@ -433,7 +433,7 @@
   color: #bfd0c4;
   font-size: 13px;
 }
-.code-header .mk-button {
+.code-header .hunch-button {
   font-size: 12px;
   background: #18392f;
   color: #f6f6ec;
@@ -472,7 +472,7 @@
   font-size: 18px;
   font-weight: 700;
 }
-.preview-heading .mk-badge {
+.preview-heading .hunch-badge {
   font-size: 11px;
 }
 .network-info h3 {
@@ -483,7 +483,7 @@
   font-size: 12px;
 }
 .network-info code,
-.network-info .mk-badge {
+.network-info .hunch-badge {
   font-size: 11px;
 }
 .event-pipeline {
@@ -508,7 +508,7 @@
   .overview-columns {
     gap: 24px;
   }
-  .workspace-switch .mk-badge {
+  .workspace-switch .hunch-badge {
     display: none;
   }
 }
@@ -543,7 +543,7 @@
     width: auto;
     padding: 22px 18px 12px;
   }
-  .dashboard-sidebar .mk-logo {
+  .dashboard-sidebar .hunch-logo {
     font-size: 25px;
   }
   .dashboard-sidebar nav {

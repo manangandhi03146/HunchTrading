@@ -1,5 +1,5 @@
 /**
- * MarketKit shared types — the agreed contract interface (plan §2).
+ * hunch shared types — the agreed contract interface (plan §2).
  *
  * `MarketStatus` is an SDK-DERIVED view of on-chain state. The contract does
  * NOT store four separate states: `open`/`closed` are derived from the

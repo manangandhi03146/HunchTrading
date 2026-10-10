@@ -2,11 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Connection, PublicKey } from "@solana/web3.js";
-import {
-  MockMarketKitClient,
-  DEMO_WALLET,
-} from "../adapters/MockMarketKitClient";
-import { SdkMarketKitClient } from "../adapters/SdkMarketKitClient";
+import { MockHunchClient, DEMO_WALLET } from "../adapters/MockHunchClient";
+import { SdkHunchClient } from "../adapters/SdkHunchClient";
 import { parseStake } from "../types";
 
 describe("adapter contract", () => {
@@ -14,7 +11,7 @@ describe("adapter contract", () => {
     expect(parseStake("9007199254740993")).toBe(9007199254740993n);
   });
   it("accumulates positions, changes balances, and rejects late stakes", async () => {
-    const client = new MockMarketKitClient({ persist: false, latencyMs: 0 });
+    const client = new MockHunchClient({ persist: false, latencyMs: 0 });
     await client.predict({
       marketId: "race-42",
       outcome: 0,
@@ -42,7 +39,7 @@ describe("adapter contract", () => {
     ).rejects.toThrow("closed");
   });
   it("completes a race, resolves its fixture, and pays a position only once", async () => {
-    const client = new MockMarketKitClient({ persist: false, latencyMs: 0 });
+    const client = new MockHunchClient({ persist: false, latencyMs: 0 });
     await expect(client.startRace("race-42")).rejects.toThrow("close");
     await client.predict({
       marketId: "race-42",
@@ -82,7 +79,7 @@ describe("adapter contract", () => {
     clock.mockRestore();
   });
   it("creates a fresh demo race without resetting existing stakes", async () => {
-    const client = new MockMarketKitClient({ persist: false, latencyMs: 0 });
+    const client = new MockHunchClient({ persist: false, latencyMs: 0 });
     await client.predict({
       marketId: "race-42",
       outcome: 0,
@@ -96,7 +93,7 @@ describe("adapter contract", () => {
     );
   });
   it("fails explicitly when live SDK capabilities are missing", async () => {
-    const client = new SdkMarketKitClient({
+    const client = new SdkHunchClient({
       connection: new Connection("https://api.devnet.solana.com"),
       getWallet: () => ({ publicKey: null }),
     });
@@ -118,7 +115,7 @@ describe("adapter contract", () => {
       "different-network",
     );
     const predict = vi.fn();
-    const client = new SdkMarketKitClient({
+    const client = new SdkHunchClient({
       connection,
       getWallet: () => ({ publicKey: PublicKey.default }),
       bindings: { predict },
@@ -140,12 +137,12 @@ describe("adapter contract", () => {
         "utf8",
       );
       expect(source).toContain("PredictionMarket");
-      expect(source).toMatch(/from ["']@marketkit\/react["']/);
+      expect(source).toMatch(/from ["']@hunch\/react["']/);
       expect(source).not.toContain("function PredictionMarket");
     }
   });
   it("starts a live race after the deadline even before status polling closes it", async () => {
-    const client = new SdkMarketKitClient({
+    const client = new SdkHunchClient({
       connection: new Connection("https://api.devnet.solana.com"),
       getWallet: () => ({ publicKey: null }),
       bindings: {

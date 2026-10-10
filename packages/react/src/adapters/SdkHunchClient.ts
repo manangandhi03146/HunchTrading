@@ -1,11 +1,11 @@
-import { MarketKit } from "@marketkit/sdk";
+import { Hunch } from "@hunch/sdk";
 import {
   Connection,
   PublicKey,
   type Transaction,
   type VersionedTransaction,
 } from "@solana/web3.js";
-import type { MarketKitClient } from "./MarketKitClient";
+import type { HunchClient } from "./HunchClient";
 import { effectiveStatus } from "../types";
 import type {
   Claimable,
@@ -27,7 +27,7 @@ export interface WalletSigner {
     transactions: T[],
   ) => Promise<T[]>;
 }
-/** Frontend integration seam, not invented @marketkit/sdk exports. Developer B supplies these bindings. */
+/** Frontend integration seam, not invented @hunch/sdk exports. Developer B supplies these bindings. */
 export interface SdkBindings {
   predict?: (
     params: { marketId: string; outcome: Outcome; amount: bigint },
@@ -54,10 +54,10 @@ export interface SdkBindings {
   getRace?: (marketId: string) => Promise<RaceState>;
   startRace?: (marketId: string) => Promise<RaceState>;
 }
-export class SdkMarketKitClient implements MarketKitClient {
+export class SdkHunchClient implements HunchClient {
   readonly mode = "sdk" as const;
   readonly programId?: string;
-  private readonly sdk: MarketKit;
+  private readonly sdk: Hunch;
   constructor(
     private readonly config: {
       connection: Connection;
@@ -65,13 +65,13 @@ export class SdkMarketKitClient implements MarketKitClient {
       bindings?: SdkBindings;
       programId?: string;
       tokenMint?: string;
-      sdk?: MarketKit;
+      sdk?: Hunch;
     },
   ) {
     this.programId = config.programId;
     this.sdk =
       config.sdk ??
-      new MarketKit({
+      new Hunch({
         mock: false,
         rpcUrl: config.connection.rpcEndpoint,
         programId: config.programId,
@@ -79,7 +79,7 @@ export class SdkMarketKitClient implements MarketKitClient {
   }
   private missing(method: string): never {
     throw new Error(
-      `Live ${method} is not connected yet. Developer B must provide the ${method} SDK binding. Switch VITE_MARKETKIT_MODE=mock to run the simulated demo.`,
+      `Live ${method} is not connected yet. Developer B must provide the ${method} SDK binding. Switch VITE_HUNCH_MODE=mock to run the simulated demo.`,
     );
   }
   private async signer(walletAddress?: string) {

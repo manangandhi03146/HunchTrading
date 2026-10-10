@@ -1,6 +1,6 @@
 import type { Market, Outcome, Prediction } from "./types.js";
 
-export interface MarketKitConfig {
+export interface HunchConfig {
   /** Solana RPC endpoint. Defaults to Devnet. */
   rpcUrl?: string;
   /** Deployed Anchor program id (set once Developer A deploys — ticket B4). */
@@ -48,9 +48,9 @@ function marketSnapshot(market: Market): Market {
   };
 }
 
-export class MarketKit {
-  private readonly config: Required<Pick<MarketKitConfig, "rpcUrl" | "mock">> &
-    MarketKitConfig;
+export class Hunch {
+  private readonly config: Required<Pick<HunchConfig, "rpcUrl" | "mock">> &
+    HunchConfig;
 
   // --- mock state (removed once mock:false everywhere) ---
   private markets = new Map<string, Market>();
@@ -58,7 +58,7 @@ export class MarketKit {
 
   private claimedPositions = new Set<string>();
 
-  constructor(config: MarketKitConfig = {}) {
+  constructor(config: HunchConfig = {}) {
     this.config = {
       ...config,
       rpcUrl: config.rpcUrl ?? "https://api.devnet.solana.com",

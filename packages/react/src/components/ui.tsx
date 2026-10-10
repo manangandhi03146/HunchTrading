@@ -21,8 +21,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 export function Logo({ small = false }: { small?: boolean }) {
   return (
-    <span className={cn("mk-logo", small && "mk-logo-small")}>
-      <span className="mk-logomark" aria-hidden="true">
+    <span className={cn("hunch-logo", small && "hunch-logo-small")}>
+      <span className="hunch-logomark" aria-hidden="true">
         <svg
           width={small ? 18 : 22}
           height={small ? 18 : 22}
@@ -39,7 +39,7 @@ export function Logo({ small = false }: { small?: boolean }) {
         </svg>
       </span>
       hunch
-      <span className="mk-logo-dot" aria-hidden="true">
+      <span className="hunch-logo-dot" aria-hidden="true">
         .
       </span>
     </span>
@@ -60,23 +60,23 @@ export function Button({
     <button
       type={type}
       {...props}
-      className={cn("mk-button", `mk-button-${variant}`, className)}
+      className={cn("hunch-button", `hunch-button-${variant}`, className)}
       disabled={props.disabled || busy}
     >
-      {busy && <Loader2 size={16} className="mk-spin" aria-hidden="true" />}
+      {busy && <Loader2 size={16} className="hunch-spin" aria-hidden="true" />}
       {children}
     </button>
   );
 }
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div {...props} className={cn("mk-card", className)} />;
+  return <div {...props} className={cn("hunch-card", className)} />;
 }
 export function Badge({
   children,
   tone = "neutral",
 }: PropsWithChildren<{ tone?: "neutral" | "success" | "warning" | "violet" }>) {
   return (
-    <span className={`mk-badge mk-badge-${tone}`}>
+    <span className={`hunch-badge hunch-badge-${tone}`}>
       <span aria-hidden="true" />
       {children}
     </span>
@@ -90,12 +90,12 @@ export function ErrorState({
   retry?: () => void;
 }) {
   return (
-    <div className="mk-error" role="alert">
+    <div className="hunch-error" role="alert">
       <AlertCircle size={17} aria-hidden="true" />
       <div>
         {error instanceof Error ? error.message : String(error)}
         {retry && (
-          <button type="button" className="mk-text-button" onClick={retry}>
+          <button type="button" className="hunch-text-button" onClick={retry}>
             Try again
           </button>
         )}
@@ -108,7 +108,7 @@ export function EmptyState({
   children,
 }: PropsWithChildren<{ title: string }>) {
   return (
-    <div className="mk-empty">
+    <div className="hunch-empty">
       <Layers3 size={28} aria-hidden="true" />
       <strong>{title}</strong>
       {children}
@@ -117,7 +117,7 @@ export function EmptyState({
 }
 export function Skeleton() {
   return (
-    <div className="mk-skeleton" role="status" aria-label="Loading market">
+    <div className="hunch-skeleton" role="status" aria-label="Loading market">
       <span />
       <span />
       <div>
@@ -152,7 +152,7 @@ export function CopyButton({ text }: { text: string }) {
         {status === "Copied" ? <Check size={15} /> : <Copy size={15} />}{" "}
         {status === "Copied" ? "Copied" : "Copy code"}
       </Button>
-      <span className="mk-copy-feedback" role="status">
+      <span className="hunch-copy-feedback" role="status">
         {status !== "Copied" ? status : ""}
       </span>
     </>
@@ -160,12 +160,12 @@ export function CopyButton({ text }: { text: string }) {
 }
 export function TransactionLink({ result }: { result: TransactionResult }) {
   return result.simulated ? (
-    <span className="mk-transaction-label">
+    <span className="hunch-transaction-label">
       Simulated receipt · not on-chain
     </span>
   ) : (
     <a
-      className="mk-text-link"
+      className="hunch-text-link"
       href={explorerUrl(result.signature)}
       target="_blank"
       rel="noopener noreferrer"
