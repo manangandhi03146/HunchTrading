@@ -14,8 +14,8 @@ is to connect the frontend to the live program. Priority order:
 | Devnet RPC | `https://api.devnet.solana.com` |
 | Explorer | https://explorer.solana.com/address/J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP?cluster=devnet |
 | IDL + types | `packages/sdk/src/idl/marketkit.{json,ts}` |
-| TEST mint (0 decimals) | ⏳ Dev A to create on Devnet → `VITE_TEST_TOKEN_MINT` |
-| Resolver pubkey | ⏳ Dev A to generate → set as each market's `resolver` |
+| TEST mint (0 decimals) | `9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs` → `VITE_TEST_TOKEN_MINT` |
+| Resolver pubkey | `6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt` → set as each market's `resolver` |
 
 ### On-chain PDA seeds (for the SDK to derive accounts)
 - **Market**: `["market", authority, market_id(32 bytes)]`
@@ -82,12 +82,21 @@ solid by the freeze, present mock mode and **clearly label it simulated**.
 
 ---
 
-## Developer A — Blockchain (me) — remaining
+## Developer A — Blockchain (me)
 
-- **Create the zero-decimal TEST mint on Devnet** + mint TEST to demo wallets; publish the mint address as `VITE_TEST_TOKEN_MINT`. *(Unblocks B's staking + C's balance display.)*
-- **Generate the resolver keypair**; share the pubkey (market `resolver`) publicly and the secret to B's resolver via env only — never commit it.
-- Support B's PDA derivations / account layout questions (seeds above).
-- **A8** cancellation + refunds (P1, optional).
+- ✅ **TEST mint created** — `9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs` (0 decimals, classic SPL Token), 1,000,000 TEST minted to Dev A's treasury.
+- ✅ **Resolver key generated** — pubkey `6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt`. Secret lives at `~/.config/solana/marketkit-resolver.json` (uncommitted); Dev A hands it to whoever runs the resolver, out-of-band.
+- ⏳ Support B's PDA derivations / account-layout questions (seeds above).
+- ⏳ **A8** cancellation + refunds (P1, optional).
+
+### TEST faucet (fund a demo wallet)
+Dev A (mint authority) tops up any wallet with TEST — run per demo wallet:
+```sh
+spl-token mint 9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs 1000 \
+  --recipient-owner <DEMO_WALLET_PUBKEY> --url devnet
+```
+(Creates the recipient's token account if needed. Recipients also need a little
+Devnet SOL for rent/fees — point them at `mlh.link/solana-faucet`.)
 
 ## Branch hygiene
 `main` is the integration branch. **Dev B:** start from updated `main`
