@@ -21,6 +21,18 @@ test('wrong genesis prevents all subsequent account checks', async () => {
   finally { connection.getGenesisHash = original; }
 });
 
+test('an unsigned or stale real-looking receipt cannot count as a lifecycle mutation', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'hunch-journal-'));
+  try {
+    const path = join(directory, 'run.json');
+    const journal = new Journal(path, {});
+    await assert.rejects(journal.mutation('create', async () => ({ mode: 'anchor', signature: '1'.repeat(88), status: 'confirmed' })), /Stop; inspect/);
+    const stage = JSON.parse(readFileSync(path)).stages[0];
+    assert.equal(stage.state, 'reconcile-required');
+    assert.equal(stage.signatures.length, 0);
+  } finally { rmSync(directory, { recursive: true }); }
+});
+
 test('signature is flushed before SDK can broadcast; uncertain mutation never retries', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'hunch-journal-'));
   try {

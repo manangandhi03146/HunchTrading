@@ -103,7 +103,7 @@ export class Journal {
     try {
       const receipt = await fn();
       const signature = requireReceipt(receipt);
-      if (!stage.signatures.includes(signature)) stage.signatures.push(signature);
+      assert(stage.signatures.includes(signature), 'Receipt was not signed in this journal stage; stale or substituted receipts are forbidden');
       this.save();
       stage.confirmation = await confirmedTransaction(signature);
       stage.state = 'confirmed'; this.save(); return receipt;

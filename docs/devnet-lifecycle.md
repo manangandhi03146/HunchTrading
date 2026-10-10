@@ -9,7 +9,7 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does n
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
 | Deadline fix | Added locally using existing `MarketStillOpen`; Rust execution pending working Linux toolchain/CI |
 | Original three LiteSVM suites and failing regression | Passed baseline; regression failed for intended early-resolution success in CI run 38093591181, with unpinned dependencies. Pinned rerun and patched suites pending |
-| Harness safeguards | Four Node tests pass: mock rejection, cluster guard, write-before-broadcast/uncertain transaction handling, and actual program invocation |
+| Harness safeguards | Five Node tests pass: mock rejection, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Real create → stake → signed event → resolve → claim | Pending live SDK merge, team key provisioning, funding and working WSL |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
 
