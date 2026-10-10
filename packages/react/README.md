@@ -1,4 +1,6 @@
-# MarketKit frontend — Developer C
+# hunch frontend — Developer C
+
+The product is **hunch**, at **https://hunchtrading.tech**. Existing `@marketkit/*` workspace names, SDK exports, and environment variables are retained for compatibility with Developer A/B's current integration contract.
 
 Reusable React widget, Velocity Racing demo, Nexus esports demo, and the developer console. All demo credits are nonredeemable; live signing is restricted to Solana Devnet. Changes are confined to frontend-owned code. The Anchor program, SDK, and resolver sources are untouched.
 

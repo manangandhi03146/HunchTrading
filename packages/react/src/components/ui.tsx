@@ -24,7 +24,10 @@ export function Logo({ small = false }: { small?: boolean }) {
       <span className="mk-logomark" aria-hidden="true">
         <Layers3 size={small ? 17 : 21} strokeWidth={2.2} />
       </span>
-      MarketKit<span className="mk-logo-dot">.</span>
+      hunch
+      <span className="mk-logo-dot" aria-hidden="true">
+        .
+      </span>
     </span>
   );
 }

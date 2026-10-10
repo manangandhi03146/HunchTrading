@@ -1,7 +1,7 @@
 {
   "name": "@marketkit/react",
   "version": "0.1.0",
-  "description": "MarketKit embeddable React prediction widget.",
+  "description": "hunch embeddable React prediction widget.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

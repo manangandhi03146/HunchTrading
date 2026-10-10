@@ -213,13 +213,13 @@ export default function App() {
                 </span>
                 <h3>Predictions that belong in the action.</h3>
                 <p>
-                  This tournament embeds the same MarketKit component as the
-                  racing league. One integration powers both experiences.
+                  This tournament embeds the same hunch component as the racing
+                  league. One integration powers both experiences.
                 </p>
               </div>
               <a
                 href={appUrl("dashboard", "/integration")}
-                aria-label="Open MarketKit integration documentation"
+                aria-label="Open hunch integration documentation"
               >
                 <ArrowUpRight size={23} />
               </a>
@@ -228,7 +228,7 @@ export default function App() {
           <aside>
             <div className="section-heading">
               <h2>Your prediction</h2>
-              <span>BY MARKETKIT</span>
+              <span>BY HUNCH</span>
             </div>
             <PredictionMarket key={selected} marketId={selected} />
             <div className="tournament-disclaimer">
@@ -245,7 +245,7 @@ export default function App() {
           </aside>
         </div>
         <footer className="app-footer">
-          <span>Nexus Invitational · A MarketKit integration demo</span>
+          <span>Nexus Invitational · A hunch integration demo</span>
           <span>Competition, connected.</span>
         </footer>
       </main>

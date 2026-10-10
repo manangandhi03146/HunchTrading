@@ -194,7 +194,7 @@ export default function App() {
                   ? "Interactive simulation · TEST credits have no value. Race results and settlement are fixtures."
                   : "Solana Devnet · game-server results are authoritative. TEST tokens have no value."}
               </span>
-              <span>POWERED BY MARKETKIT</span>
+              <span>POWERED BY HUNCH</span>
             </div>
             <section className="race-stage" aria-label="Racing circuit">
               <div className="race-stage-head">
@@ -399,7 +399,7 @@ export default function App() {
           </aside>
         </div>
         <footer className="app-footer">
-          <span>Velocity Racing · A MarketKit integration demo</span>
+          <span>Velocity Racing · A hunch integration demo</span>
           <span>
             Solana Devnet infrastructure · nonredeemable test tokens only
           </span>

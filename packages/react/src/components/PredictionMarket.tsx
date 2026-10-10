@@ -258,7 +258,7 @@ function PredictionMarketContent({
               {mode === "mock"
                 ? "Nonredeemable demo credits"
                 : "Solana Devnet · nonredeemable test tokens"}
-              <span>Powered by MarketKit</span>
+              <span>Powered by hunch</span>
             </footer>
             <Dialog.Root open={review} onOpenChange={setReview}>
               <Dialog.Portal>

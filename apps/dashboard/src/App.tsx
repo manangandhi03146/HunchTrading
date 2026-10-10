@@ -622,8 +622,8 @@ function CreateMarket() {
           </span>
           <h3>A few good defaults.</h3>
           <p>
-            MarketKit uses binary pooled predictions with integer TEST tokens.
-            No order books or fixed payout odds.
+            hunch uses binary pooled predictions with integer TEST tokens. No
+            order books or fixed payout odds.
           </p>
           <div>
             <Check size={14} />
@@ -1049,7 +1049,14 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <footer className="dashboard-footer">
-            <span>MarketKit · Prediction infrastructure for your product.</span>
+            <span>hunch · Prediction infrastructure for your product.</span>
+            <a
+              href="https://hunchtrading.tech"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              hunchtrading.tech
+            </a>
             <span>Devnet only · Nonredeemable TEST tokens</span>
           </footer>
         </main>

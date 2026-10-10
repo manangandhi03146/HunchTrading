@@ -86,7 +86,7 @@ export class SdkMarketKitClient implements MarketKitClient {
     // Even custom RPCs must prove they are Solana Devnet before signing.
     const genesis = await this.config.connection.getGenesisHash();
     if (genesis !== "EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
-      throw new Error("MarketKit only signs transactions on Solana Devnet.");
+      throw new Error("hunch only signs transactions on Solana Devnet.");
     const wallet = this.config.getWallet();
     if (!wallet.publicKey || !wallet.signTransaction)
       throw new Error("Connect a wallet that supports transaction signing.");
@@ -132,7 +132,7 @@ export class SdkMarketKitClient implements MarketKitClient {
     return accounts.value.reduce((sum, account) => {
       const balance = account.account.data.parsed.info.tokenAmount;
       if (balance.decimals !== 0)
-        throw new Error("MarketKit requires a zero-decimal TEST mint.");
+        throw new Error("hunch requires a zero-decimal TEST mint.");
       return sum + BigInt(balance.amount);
     }, 0n);
   }

@@ -14,7 +14,7 @@ if ((mode !== "mock" && mode !== "sdk") || cluster !== "devnet") {
       <h1>Check your frontend configuration</h1>
       <p>
         Use VITE_MARKETKIT_MODE=mock or sdk and VITE_SOLANA_CLUSTER=devnet.
-        MarketKit only supports Devnet test tokens.
+        hunch only supports Devnet test tokens.
       </p>
     </main>,
   );
