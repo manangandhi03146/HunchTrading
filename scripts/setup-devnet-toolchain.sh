@@ -2,7 +2,7 @@
 set -euo pipefail
 test "$(uname -s)" = Linux || { echo 'Run inside WSL2 Ubuntu/Linux'; exit 1; }
 sudo apt-get update
-sudo apt-get install -y build-essential pkg-config libssl-dev libudev-dev curl ca-certificates git clang cmake protobuf-compiler ripgrep
+sudo apt-get install -y build-essential pkg-config libssl-dev libudev-dev curl ca-certificates git clang cmake protobuf-compiler ripgrep bzip2 xz-utils
 if ! command -v rustup >/dev/null; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.89.0 --profile minimal
 fi

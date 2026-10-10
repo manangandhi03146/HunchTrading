@@ -8,7 +8,7 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does n
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
 | Deadline fix | Added locally using existing `MarketStillOpen`; Rust execution pending working Linux toolchain/CI |
-| Original three LiteSVM suites and failing regression | Passed baseline; regression failed for intended early-resolution success in CI run 38093591181, with unpinned dependencies. Pinned rerun and patched suites pending |
+| Original three LiteSVM suites and failing regression | Passed with exact pins in CI run 38094366570; regression failed for intended early-resolution success. Patched rerun pending the build-key check correction |
 | Harness safeguards | Five Node tests pass: mock rejection, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Real create → stake → signed event → resolve → claim | Pending live SDK merge, team key provisioning, funding and working WSL |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
@@ -68,7 +68,7 @@ Windows and Linux native Node modules must not share an installation. If `npm ci
 
 ## Contract tests: baseline, red regression, patched green
 
-Ordinary `npm test` does not broadcast Devnet transactions. The dedicated command only runs `anchor build` and `cargo test -p marketkit`:
+Ordinary `npm test` does not broadcast Devnet transactions. The dedicated command only runs `anchor build --ignore-keys` and `cargo test -p marketkit`. The build flag avoids Anchor skipping SBF compilation when a generated local build key differs from the preserved deployed ID. It neither changes IDs nor deploys anything. Never use `anchor keys sync` to remedy this mismatch:
 
 ```sh
 npm run test:contract
@@ -76,7 +76,7 @@ npm run test:contract
 
 The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. The baseline and patched builds share dependency artifacts, and the guard regression checks that the freshly compiled patched program rejects early resolution.
 
-For the equivalent manual baseline on Windows, make a temporary archive of the recorded SHA using host Git, extract it into a separate directory, then run `anchor build` and `cargo test -p marketkit` there using Ubuntu. Copy only `lifecycle_guards.rs` into that baseline tree and run:
+For the equivalent manual baseline on Windows, make a temporary archive of the recorded SHA using host Git, extract it into a separate directory, copy this branch's exact dependency pins from `programs/marketkit/Cargo.toml` (without any behavior change), then run `anchor build --ignore-keys` and `cargo test -p marketkit` there using Ubuntu. Copy only `lifecycle_guards.rs` into that baseline tree and run:
 
 ```sh
 cargo test -p marketkit --test lifecycle_guards early_resolution_regression -- --exact

@@ -19,7 +19,8 @@ assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use Node 24 LTS')
 mkdirSync('.data/devnet-lifecycle', { recursive: true });
 const report = { observedAt: new Date().toISOString(), versions, commands: [], passed: false };
 const path = '.data/devnet-lifecycle/contract-tests.json';
-for (const [command, args] of [['anchor', ['build']], ['cargo', ['test', '-p', 'marketkit', ...process.argv.slice(2)] ]]) {
+// Build-only keys may differ from the deployed ID. Never synchronize IDs or deploy.
+for (const [command, args] of [['anchor', ['build', '--ignore-keys']], ['cargo', ['test', '-p', 'marketkit', ...process.argv.slice(2)] ]]) {
   console.log(`${command} ${args.join(' ')}`);
   const result = spawnSync(command, args, { stdio: 'inherit' });
   report.commands.push({ command, args, exitCode: result.status });
