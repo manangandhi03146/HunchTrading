@@ -25,9 +25,13 @@ jobs:
       - name: Baseline and failing deadline regression
         shell: bash
         run: |
-          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
+          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target"
+          printf 'CARGO_TARGET_DIR=%s\n' "$CARGO_TARGET_DIR" >> "$GITHUB_ENV"
           baseline=$(mktemp -d)
           git archive 49a5e7055d3a490c3c7791d03315ef6107fb28e9 | tar -x -C "$baseline"
+          # Only exact dependency pins differ; baseline program logic/tests are unchanged.
+          cp programs/marketkit/Cargo.toml "$baseline/programs/marketkit/Cargo.toml"
           (cd "$baseline"; anchor build; cargo test -p marketkit)
           cp programs/marketkit/tests/lifecycle_guards.rs "$baseline/programs/marketkit/tests/"
           if (cd "$baseline"; cargo test -p marketkit --test lifecycle_guards early_resolution_regression -- --exact) > baseline-regression.log 2>&1; then
@@ -39,7 +43,7 @@ jobs:
           rg 'operation unexpectedly succeeded' baseline-regression.log
       - name: Build patched program and run all contract suites
         run: |
-          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
           npm run test:contract
       - name: Upload compiler and test evidence
         if: always()

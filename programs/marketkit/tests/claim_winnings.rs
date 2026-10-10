@@ -1,6 +1,6 @@
 use {
     anchor_lang::{
-        prelude::{Pubkey, Clock},
+        prelude::{Clock, Pubkey},
         solana_program::{instruction::Instruction, system_instruction, system_program},
         AccountDeserialize, InstructionData, ToAccountMetas,
     },
@@ -23,13 +23,26 @@ fn send_tx(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&K
     assert!(svm.send_transaction(tx).is_ok(), "tx unexpectedly failed");
 }
 
-fn expect_tx_fails(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Pubkey, signers: &[&Keypair], code: u32) {
+fn expect_tx_fails(
+    svm: &mut LiteSVM,
+    ixs: &[Instruction],
+    payer: &Pubkey,
+    signers: &[&Keypair],
+    code: u32,
+) {
     svm.expire_blockhash();
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(ixs, Some(payer), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), signers).unwrap();
-    let failure = svm.send_transaction(tx).expect_err("tx unexpectedly succeeded");
-    assert_eq!(format!("{:?}", failure.err), format!("InstructionError(0, Custom({code}))"), "{:?}", failure.meta.logs);
+    let failure = svm
+        .send_transaction(tx)
+        .expect_err("tx unexpectedly succeeded");
+    assert_eq!(
+        format!("{:?}", failure.err),
+        format!("InstructionError(0, Custom({code}))"),
+        "{:?}",
+        failure.meta.logs
+    );
 }
 
 /// Reads an SPL token account's `amount` (u64 at byte offset 64).
@@ -149,7 +162,10 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     let mut svm = LiteSVM::new();
     svm.add_program(
         program_id,
-        include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/marketkit.so")),
+        include_bytes!(concat!(
+            env!("CARGO_TARGET_TMPDIR"),
+            "/../deploy/marketkit.so"
+        )),
     )
     .unwrap();
     svm.airdrop(&payer.pubkey(), 100_000_000_000).unwrap();
@@ -201,8 +217,18 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
             .to_account_metas(None),
         )
     };
-    send_tx(&mut svm, &[stake(&user_a.pubkey(), 1, 100, a_ata, pos_a)], &user_a.pubkey(), &[&user_a]);
-    send_tx(&mut svm, &[stake(&user_b.pubkey(), 0, 250, b_ata, pos_b)], &user_b.pubkey(), &[&user_b]);
+    send_tx(
+        &mut svm,
+        &[stake(&user_a.pubkey(), 1, 100, a_ata, pos_a)],
+        &user_a.pubkey(),
+        &[&user_a],
+    );
+    send_tx(
+        &mut svm,
+        &[stake(&user_b.pubkey(), 0, 250, b_ata, pos_b)],
+        &user_b.pubkey(),
+        &[&user_b],
+    );
 
     assert_eq!(token_balance(&svm, &a_ata), 900);
     assert_eq!(token_balance(&svm, &b_ata), 750);
@@ -246,10 +272,21 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     };
 
     // Loser (B) cannot claim — backed the losing outcome.
-    expect_tx_fails(&mut svm, &[claim(&user_b.pubkey(), pos_b, b_ata)], &user_b.pubkey(), &[&user_b], 6008);
+    expect_tx_fails(
+        &mut svm,
+        &[claim(&user_b.pubkey(), pos_b, b_ata)],
+        &user_b.pubkey(),
+        &[&user_b],
+        6008,
+    );
 
     // Winner (A) claims the whole 350 pool (sole winner): 100 * 350 / 100.
-    send_tx(&mut svm, &[claim(&user_a.pubkey(), pos_a, a_ata)], &user_a.pubkey(), &[&user_a]);
+    send_tx(
+        &mut svm,
+        &[claim(&user_a.pubkey(), pos_a, a_ata)],
+        &user_a.pubkey(),
+        &[&user_a],
+    );
     assert_eq!(token_balance(&svm, &a_ata), 1_250);
     assert_eq!(token_balance(&svm, &vault_pda), 0);
 
@@ -260,5 +297,11 @@ fn test_full_lifecycle_create_stake_resolve_claim() {
     assert!(position.claimed);
 
     // Double-claim is rejected.
-    expect_tx_fails(&mut svm, &[claim(&user_a.pubkey(), pos_a, a_ata)], &user_a.pubkey(), &[&user_a], 6007);
+    expect_tx_fails(
+        &mut svm,
+        &[claim(&user_a.pubkey(), pos_a, a_ata)],
+        &user_a.pubkey(),
+        &[&user_a],
+        6007,
+    );
 }

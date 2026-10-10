@@ -8,7 +8,7 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does n
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
 | Deadline fix | Added locally using existing `MarketStillOpen`; Rust execution pending working Linux toolchain/CI |
-| Original three LiteSVM suites, failing regression, patched suites | Commands and CI provided; not yet verified passing |
+| Original three LiteSVM suites and failing regression | Passed baseline; regression failed for intended early-resolution success in CI run 38093591181, with unpinned dependencies. Pinned rerun and patched suites pending |
 | Harness safeguards | Four Node tests pass: mock rejection, cluster guard, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Real create → stake → signed event → resolve → claim | Pending live SDK merge, team key provisioning, funding and working WSL |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
@@ -59,7 +59,7 @@ Keep Git operations on Windows for a Codex-managed Windows worktree. Run Linux t
 ```sh
 cd /mnt/c/Users/Manas/.codex/worktrees/devnet-lifecycle/hackru
 bash scripts/setup-devnet-toolchain.sh
-export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"
+export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
 ```
 
 The script installs Rust **1.89.0**, [Anchor **1.1.2** through AVM](https://github.com/otter-sec/anchor/releases/tag/v1.1.2), [Agave **4.1.2**](https://github.com/anza-xyz/agave/releases/tag/v4.1.2), and Node **24 LTS** from the official Node distribution. AVM's released lockfile requires Rust **1.91.0** for `cargo-platform 0.3.3`, so the script installs that separate bootstrap compiler only to build AVM; the default and host contract compiler remain **1.89.0**. The first CI attempt exposed this dependency requirement before reaching any contract test. It does not configure a global wallet, create keys, or deploy. The contract runner records actual host/AVM bootstrap Rust, Anchor, CLI, Node and SBF/platform versions in `.data/devnet-lifecycle/contract-tests.json`. These records must be retained with the test result; intended version pins are not proof of installation.
@@ -74,7 +74,7 @@ Ordinary `npm test` does not broadcast Devnet transactions. The dedicated comman
 npm run test:contract
 ```
 
-The CI workflow `Contract lifecycle (no deployment)` runs the baseline from the recorded main SHA in a temporary archive (no clone), copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds, then builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record.
+The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. The baseline and patched builds share dependency artifacts, and the guard regression checks that the freshly compiled patched program rejects early resolution.
 
 For the equivalent manual baseline on Windows, make a temporary archive of the recorded SHA using host Git, extract it into a separate directory, then run `anchor build` and `cargo test -p marketkit` there using Ubuntu. Copy only `lifecycle_guards.rs` into that baseline tree and run:
 

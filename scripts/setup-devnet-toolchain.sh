@@ -2,7 +2,7 @@
 set -euo pipefail
 test "$(uname -s)" = Linux || { echo 'Run inside WSL2 Ubuntu/Linux'; exit 1; }
 sudo apt-get update
-sudo apt-get install -y build-essential pkg-config libssl-dev libudev-dev curl ca-certificates git clang cmake protobuf-compiler
+sudo apt-get install -y build-essential pkg-config libssl-dev libudev-dev curl ca-certificates git clang cmake protobuf-compiler ripgrep
 if ! command -v rustup >/dev/null; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.89.0 --profile minimal
 fi
@@ -16,8 +16,15 @@ cargo +1.91.0 install --git https://github.com/otter-sec/anchor --tag v1.1.2 avm
 export PATH="$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"
 avm install 1.1.2
 avm use 1.1.2
-sh -c "$(curl -sSfL https://release.anza.xyz/v4.1.2/install)"
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+test "$(uname -m)" = x86_64 || { echo 'Pinned Agave binary requires x86_64 Linux'; exit 1; }
+agave_temp=$(mktemp -d)
+curl -fsSL https://github.com/anza-xyz/agave/releases/download/v4.1.2/solana-release-x86_64-unknown-linux-gnu.tar.bz2 -o "$agave_temp/agave.tar.bz2"
+printf '5991d027a686eb419a709a479178b33eb83501e8a2bfbf599a81a286bfcbf770  %s\n' "$agave_temp/agave.tar.bz2" | sha256sum -c -
+agave_directory="$HOME/.local/share/hunch/agave-v4.1.2"
+mkdir -p "$agave_directory"
+tar -xjf "$agave_temp/agave.tar.bz2" --strip-components=1 -C "$agave_directory"
+export PATH="$agave_directory/bin:$PATH"
+solana --version | rg 'solana-cli 4\.1\.2'
 
 # Node 24 LTS from the official distribution, checked against its published checksum.
 case "$(uname -m)" in
@@ -36,7 +43,7 @@ mkdir -p "$node_directory"
 tar -xJf "$node_temp/$node_archive" --strip-components=1 -C "$node_directory"
 export PATH="$node_directory/bin:$PATH"
 printf '\nAdd these paths to your shell configuration:\n'
-printf 'export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH"\n'
+printf 'export PATH="$HOME/.local/share/hunch/node24/bin:$HOME/.local/share/hunch/agave-v4.1.2/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"\n'
 rustc --version
 anchor --version
 solana --version

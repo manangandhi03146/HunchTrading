@@ -21,7 +21,10 @@ pub fn handle_resolve_market(ctx: Context<ResolveMarket>, winning_outcome: u8) -
     require!(winning_outcome < 2, MarketError::InvalidOutcome);
 
     let market = &mut ctx.accounts.market;
-    require!(market.status == MarketStatus::Active, MarketError::MarketNotActive);
+    require!(
+        market.status == MarketStatus::Active,
+        MarketError::MarketNotActive
+    );
     require!(
         Clock::get()?.unix_timestamp >= market.deadline,
         MarketError::MarketStillOpen

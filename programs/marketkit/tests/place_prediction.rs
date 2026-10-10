@@ -65,7 +65,10 @@ fn test_place_prediction_escrows_and_accumulates() {
     let mut svm = LiteSVM::new();
     svm.add_program(
         program_id,
-        include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/marketkit.so")),
+        include_bytes!(concat!(
+            env!("CARGO_TARGET_TMPDIR"),
+            "/../deploy/marketkit.so"
+        )),
     )
     .unwrap();
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
@@ -179,6 +182,12 @@ fn test_place_prediction_escrows_and_accumulates() {
     assert_eq!(market.pool, [0, 150]);
     let user_data = svm.get_account(&user_ata.pubkey()).unwrap().data;
     let vault_data = svm.get_account(&vault_pda).unwrap().data;
-    assert_eq!(u64::from_le_bytes(user_data[64..72].try_into().unwrap()), 850);
-    assert_eq!(u64::from_le_bytes(vault_data[64..72].try_into().unwrap()), 150);
+    assert_eq!(
+        u64::from_le_bytes(user_data[64..72].try_into().unwrap()),
+        850
+    );
+    assert_eq!(
+        u64::from_le_bytes(vault_data[64..72].try_into().unwrap()),
+        150
+    );
 }
