@@ -1,12 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { tmpdir, homedir } from "node:os";
+import { join, basename } from "node:path";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import type { AccountInfo } from "@solana/web3.js";
 import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AnchorMarketAdapter, HUNCH_DEVNET_GENESIS_HASH, HUNCH_DEVNET_TOKEN_MINT, HUNCH_PROGRAM_ID } from "@hunch/sdk";
 import { loadResolverSigner, validateRealMode } from "../src/real-mode.js";
+
+vi.mock("node:os", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:os")>();
+  return { ...actual, homedir: vi.fn(actual.homedir) };
+});
 
 // Ephemeral keys in temporary directories outside the repository; never printed.
 let directory: string, keys: Keypair;
@@ -36,10 +41,9 @@ describe("server-side resolver key loading", () => {
   });
 
   it("expands ~/ paths from the home directory", () => {
-    const original = process.env.HOME;
-    process.env.HOME = directory;
-    try { expect(load(`~/${keyFile().split("/").pop()}`).publicKey.equals(keys.publicKey)).toBe(true); }
-    finally { process.env.HOME = original; }
+    vi.mocked(homedir).mockReturnValue(directory);
+    try { expect(load(`~/${basename(keyFile())}`).publicKey.equals(keys.publicKey)).toBe(true); }
+    finally { vi.mocked(homedir).mockReset(); }
   });
 
   it("requires a configured, absolute path", () => {
@@ -55,9 +59,10 @@ describe("server-side resolver key loading", () => {
     const inside = join(repository, "resolver.json");
     writeFileSync(inside, JSON.stringify(Array.from(keys.secretKey))); chmodSync(inside, 0o600);
     expect(() => load(inside, undefined, repository)).toThrow(/outside the repository/);
-    const link = join(directory, "link.json");
-    symlinkSync(inside, link);
-    expect(() => load(link, undefined, repository)).toThrow(/outside the repository/);
+    const link = join(directory, "linked-repository");
+    // Directory junctions do not require Windows symlink privileges.
+    symlinkSync(repository, link, process.platform === "win32" ? "junction" : "dir");
+    expect(() => load(join(link, "resolver.json"), undefined, repository)).toThrow(/outside the repository/);
   });
 
   it.skipIf(process.platform === "win32")("refuses key files readable by group or others", () => {

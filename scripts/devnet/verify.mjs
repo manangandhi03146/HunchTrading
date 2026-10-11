@@ -1,20 +1,21 @@
 import assert from 'node:assert/strict';
 import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes } from 'node:crypto';
 import { getAccount, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { AnchorMarketAdapter } from '@hunch/sdk';
+import { AnchorMarketAdapter, deriveMarketPda } from '@hunch/sdk';
 import { buildServer, ResolverStore, signGameEvent } from '@marketkit/resolver';
 import { requireOptIn, preflight, chainClock, loadProtectedKey, readSafeJSON, wallet, Journal, PROGRAM, MINT, RESOLVER,
   RPC, connection, coder, snapshot, json, sleep } from './core.mjs';
 
 requireOptIn();
+assert.equal(process.platform, 'linux', 'Run lifecycle verification in WSL2 Ubuntu; private keys must stay on Linux');
+assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use the configured Node 24 LTS runtime');
 const chain = await preflight();
 assert.equal(chain.deploymentSlot, '509647737', 'Deployment changed since reviewed audit; coordinate before executing');
 let observedClock = chain.chainClock.unixTimestamp;
-// This deliberately fails on the current CONTRACT_UNAVAILABLE implementation before reading keys.
-// Integrate the reviewed live implementation using its existing public constructor/interface.
-const adapter = new AnchorMarketAdapter({ rpcUrl: RPC, programId: PROGRAM.toBase58() });
+const adapter = new AnchorMarketAdapter({ rpcUrl: RPC, programId: PROGRAM.toBase58(),
+  tokenMint: MINT.toBase58(), resolverAuthority: RESOLVER, clock: () => observedClock });
 assert.equal(adapter.mode, 'anchor', 'Mock adapters are forbidden');
 assert(process.env.HUNCH_VERIFY_MANIFEST, 'HUNCH_VERIFY_MANIFEST must reference the protected WSL manifest');
 const manifest = readSafeJSON(process.env.HUNCH_VERIFY_MANIFEST);
@@ -38,7 +39,9 @@ for (const role of ['A', 'B', 'C']) {
 const runId = `hunch-${randomUUID()}`;
 const appId = `${runId}-game`;
 const eventId = `${runId}-result`;
-let marketId = runId;
+const marketSeed = randomBytes(32);
+const expectedMarketAddress = deriveMarketPda(keys.creator.publicKey, marketSeed, PROGRAM).address.toBase58();
+let marketId = expectedMarketAddress;
 const directory = resolve('.data/devnet-lifecycle');
 mkdirSync(directory, { recursive: true, mode: 0o700 });
 const journalPath = join(directory, `${runId}.json`);
@@ -49,28 +52,32 @@ const participants = {
   B: { publicKey: keys.B.publicKey.toBase58(), outcome: 0 },
   C: { publicKey: keys.C.publicKey.toBase58(), outcome: 1 },
 };
-const journal = new Journal(journalPath, { runId, appId, eventId, requestedMarketId: runId, marketId: null, chain,
+const journal = new Journal(journalPath, { runId, appId, eventId, marketSeedHex: marketSeed.toString('hex'),
+  expectedMarketAddress, marketId: null, chain,
   creator: keys.creator.publicKey.toBase58(), resolver: RESOLVER, participants,
   gamePublicKeyBase64: keys.game.publicKey.toBuffer().toString('base64'),
   snapshots: [], conclusions: { currentDeploymentLifecycle: 'pending', localDeadlineFix: 'separate contract test report', onChainDeadlineEnforcement: 'requires approved upgrade' } });
 const signers = Object.fromEntries(['creator', 'A', 'B', 'C'].map(role => [role, wallet(keys[role], journal)]));
 const store = new ResolverStore(dbPath);
 store.registerApp({ appId, publicKey: keys.game.publicKey.toBuffer().toString('base64'), enabled: true });
-const server = buildServer({ adapter, signer: wallet(resolverKey, journal), store, clock: () => observedClock, logger: false });
+const server = buildServer({ adapter, signer: wallet(resolverKey, journal), store, clock: () => observedClock,
+  tokenMint: MINT.toBase58(), logger: false });
 let resolverUrl;
 try {
   resolverUrl = await server.listen({ host: '127.0.0.1', port: 0 });
   const health = await (await fetch(`${resolverUrl}/health`)).json();
-  assert(health.ok && health.mode === 'anchor' && health.pendingEvents === 0, 'Real resolver health check failed');
+  assert(health.ok && health.mode === 'anchor' && health.network === 'devnet' &&
+    health.resolver === RESOLVER && health.pendingEvents === 0, 'Real resolver health check failed');
   journal.data.resolverHealth = health; journal.save();
   observedClock = (await chainClock()).unixTimestamp;
   const deadline = observedClock + 300;
   journal.data.deadline = deadline; journal.data.deadlineObservedClock = observedClock; journal.save();
   const created = await journal.mutation('create', async () => {
-    const result = await adapter.createMarket({ id: marketId, question: 'Deterministic signed hunch Devnet verification result',
+    const result = await adapter.createMarket({ marketSeed, question: `Deterministic signed hunch result ${runId}`,
       outcomes: ['Outcome 0', 'Outcome 1'], closesAt: deadline, resolverAuthority: RESOLVER }, signers.creator);
     assert(typeof result.market.id === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(result.market.id), 'SDK returned an identifier unsupported by the resolver');
     marketId = result.market.id;
+    assert.equal(marketId, expectedMarketAddress, 'SDK returned a market different from the journaled seed PDA');
     journal.data.marketId = marketId; journal.save();
     return result.transaction;
   });
@@ -90,6 +97,7 @@ try {
   }
   assert.equal(markets.length, 1, 'Cannot uniquely discover the created market');
   const marketAddress = markets[0].toBase58();
+  assert.equal(marketAddress, expectedMarketAddress, 'Confirmed creation does not match the pre-broadcast seed PDA');
   journal.data.marketAddress = marketAddress; journal.save();
   const sdkMarket = await adapter.getMarket(marketId);
   assert(sdkMarket, 'Resolver adapter cannot fetch the created market by its returned ID');

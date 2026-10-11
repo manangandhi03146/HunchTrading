@@ -85,7 +85,7 @@ export class SdkMarketKitClient implements MarketKitClient {
   private async signer(walletAddress?: string) {
     // Even custom RPCs must prove they are Solana Devnet before signing.
     const genesis = await this.config.connection.getGenesisHash();
-    if (genesis !== "EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
+    if (genesis !== "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG")
       throw new Error("hunch only signs transactions on Solana Devnet.");
     const wallet = this.config.getWallet();
     if (!wallet.publicKey || !wallet.signTransaction)

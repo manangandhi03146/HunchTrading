@@ -6,11 +6,18 @@ assert(process.argv[2], 'Usage: npm run devnet:reconcile -- /absolute/path/to/jo
 await preflight();
 const journal = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const report = { runId: journal.runId, readOnly: true, stages: [] };
+report.observedBlockHeight = await connection.getBlockHeight('confirmed');
 for (const stage of journal.stages) {
   const signatures = [...new Set(stage.signatures)];
   const statuses = signatures.length ? await connection.getSignatureStatuses(signatures, { searchTransactionHistory: true }) : null;
   report.stages.push({ name: stage.name, localState: stage.state,
-    signatures: signatures.map((signature, i) => ({ signature, status: statuses.value[i] })) });
+    signatures: signatures.map((signature, i) => {
+      const signed = stage.signedTransactions?.find(tx => tx.signature === signature);
+      return { signature, status: statuses.value[i], blockhash: signed?.blockhash ?? null,
+        lastValidBlockHeight: signed?.lastValidBlockHeight ?? null,
+        validityWindowExpired: Number.isSafeInteger(signed?.lastValidBlockHeight)
+          ? report.observedBlockHeight > signed.lastValidBlockHeight : null };
+    }) });
 }
 if (journal.marketAddress && journal.participants) {
   try { report.onChainState = await snapshot(journal.marketAddress, journal.participants, { allowMissingPositions: true, allowMissingVault: true }); }

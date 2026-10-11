@@ -126,6 +126,10 @@ export class Journal {
     assert(bytes && bytes.some(b => b !== 0), 'Fee-payer signature must be present before broadcast');
     const signature = anchor.utils.bytes.bs58.encode(bytes);
     this.active.signatures.push(signature);
+    this.active.signedTransactions ??= [];
+    this.active.signedTransactions.push({ signature,
+      blockhash: transaction.recentBlockhash ?? transaction.message?.recentBlockhash ?? null,
+      lastValidBlockHeight: Number.isSafeInteger(transaction.lastValidBlockHeight) ? transaction.lastValidBlockHeight : null });
     this.save();
   }
 }

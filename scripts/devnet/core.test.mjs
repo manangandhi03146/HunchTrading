@@ -54,10 +54,14 @@ test('signature is flushed before SDK can broadcast; uncertain mutation never re
     await assert.rejects(journal.mutation('stake', async () => {
       calls++;
       assert.equal(JSON.parse(readFileSync(path)).stages[0].state, 'pending');
-      const tx = new Transaction({ feePayer: key.publicKey, recentBlockhash: Keypair.generate().publicKey.toBase58() });
+      const blockhash = Keypair.generate().publicKey.toBase58();
+      const tx = new Transaction({ feePayer: key.publicKey, blockhash, lastValidBlockHeight: 789 });
       tx.add(SystemProgram.transfer({ fromPubkey: key.publicKey, toPubkey: Keypair.generate().publicKey, lamports: 1 }));
       await signer.signTransaction(tx);
       assert.equal(JSON.parse(readFileSync(path)).stages[0].signatures.length, 1);
+      const signed = JSON.parse(readFileSync(path)).stages[0].signedTransactions[0];
+      assert.equal(signed.blockhash, blockhash);
+      assert.equal(signed.lastValidBlockHeight, 789);
       throw new Error('simulated network loss after signing');
     }), /Stop; inspect/);
     assert.equal(calls, 1);

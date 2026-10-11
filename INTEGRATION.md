@@ -71,7 +71,7 @@ live-mode wiring + one bug fix.
 | # | Task | File(s) | Prio |
 |---|------|---------|------|
 | C1 | Real wallet adapter (Phantom) producing a live `WalletSigner` for SDK mode, replacing the demo wallet. | `packages/react/src/components/WalletButton.tsx`, provider | P0 |
-| C2 | **Fix the Devnet genesis-hash guard** — the constant is truncated and blocks all live signing. Use `EtWTRABZaYq6iMfeYKouRu166VU2xqa1VM7zTVz4yYg`, and allow the local-validator hash when testing locally. | `packages/react/src/adapters/SdkMarketKitClient.ts:88` | P0 |
+| C2 | **Fix the Devnet genesis-hash guard** — use the RPC-confirmed `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`. Live signing remains restricted to Devnet; contract tests use LiteSVM separately. Fixed on `feat/devnet-lifecycle`. | `packages/react/src/adapters/SdkMarketKitClient.ts:88` | P0 |
 | C3 | Plug Dev B's `SdkBindings` into each `apps/*/src/main.tsx` `MarketKitProvider`; set env: `VITE_MARKETKIT_MODE=sdk`, `VITE_SOLANA_CLUSTER=devnet`, `VITE_MARKETKIT_PROGRAM_ID`, `VITE_TEST_TOKEN_MINT`, `VITE_RESOLVER_API_URL`. | `apps/*/.env.local`, `src/main.tsx` | P0 |
 | C4 | Live-test C5/C6: connect wallet → see live market state → predict → claim on Devnet; verify Explorer links render. | apps | P0 |
 | C5 | Coordinate with B on the race-server contract (`getRace`/`startRace`/result signing). | — | P1 |

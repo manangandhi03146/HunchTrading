@@ -112,26 +112,55 @@ describe("adapter contract", () => {
       }),
     ).rejects.toThrow("Simulated transactions");
   });
-  it("rejects a non-Devnet RPC before giving a binding access to the signer", async () => {
+  it.each([
+    "different-network",
+    "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+    "EtWTRABZaYq6iMfeYKouRu166VU2xqa1VM7zTVz4yYg",
+  ])(
+    "rejects an incorrect genesis (%s) before exposing the signer",
+    async (genesis) => {
+      const connection = new Connection("https://api.devnet.solana.com");
+      vi.spyOn(connection, "getGenesisHash").mockResolvedValue(genesis);
+      const predict = vi.fn();
+      const client = new SdkMarketKitClient({
+        connection,
+        getWallet: () => ({ publicKey: PublicKey.default }),
+        bindings: { predict },
+      });
+      await expect(
+        client.predict({
+          marketId: "id",
+          outcome: 0,
+          amount: 1n,
+          walletAddress: PublicKey.default.toBase58(),
+        }),
+      ).rejects.toThrow("only signs");
+      expect(predict).not.toHaveBeenCalled();
+    },
+  );
+  it("allows the RPC-confirmed Devnet genesis through to the signing binding", async () => {
     const connection = new Connection("https://api.devnet.solana.com");
     vi.spyOn(connection, "getGenesisHash").mockResolvedValue(
-      "different-network",
+      "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
     );
-    const predict = vi.fn();
+    const wallet = { publicKey: PublicKey.default, signTransaction: vi.fn() };
+    const predict = vi.fn().mockResolvedValue({ signature: "2".repeat(88) });
     const client = new SdkMarketKitClient({
       connection,
-      getWallet: () => ({ publicKey: PublicKey.default }),
+      getWallet: () => wallet,
       bindings: { predict },
     });
-    await expect(
-      client.predict({
-        marketId: "id",
-        outcome: 0,
-        amount: 1n,
-        walletAddress: PublicKey.default.toBase58(),
-      }),
-    ).rejects.toThrow("only signs");
-    expect(predict).not.toHaveBeenCalled();
+    const result = await client.predict({
+      marketId: "id",
+      outcome: 1,
+      amount: 100n,
+      walletAddress: wallet.publicKey.toBase58(),
+    });
+    expect(predict).toHaveBeenCalledExactlyOnceWith(
+      { marketId: "id", outcome: 1, amount: 100n },
+      wallet,
+    );
+    expect(result).toMatchObject({ simulated: false, status: "submitted" });
   });
   it("racing and esports import the one exported widget", async () => {
     for (const app of ["racing", "esports"]) {

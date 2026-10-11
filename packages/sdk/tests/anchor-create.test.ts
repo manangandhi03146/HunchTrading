@@ -5,6 +5,7 @@ import { Connection, Keypair, PublicKey, SendTransactionError, SystemProgram, Tr
 import type { AccountInfo } from "@solana/web3.js";
 import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { Buffer } from "node:buffer";
 import idl from "../src/idl/marketkit.json";
 import {
@@ -339,7 +340,7 @@ describe("wallet-signed Anchor creation", () => {
   });
 
   it("refuses the opt-in creation script without deliberate authorization", () => {
-    const result = spawnSync(process.execPath, [new URL("../scripts/devnet-create-market.mjs", import.meta.url).pathname], { encoding: "utf8" });
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL("../scripts/devnet-create-market.mjs", import.meta.url))], { encoding: "utf8" });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("--authorize-devnet-create");
     expect(result.stdout).not.toContain("signature");

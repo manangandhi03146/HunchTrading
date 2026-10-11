@@ -1,6 +1,6 @@
 # hunch Devnet lifecycle verification
 
-This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does not change `apps/`, `packages/react/`, SDK interfaces, PDA seeds, instruction arguments, account layouts, program IDs, or public error codes. No upgrade or deployment command is part of this procedure.
+This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. After the user authorized taking over integration and fixing the React guard, it incorporates the existing live SDK/resolver commit `60fd601` from `feat/hunch-devnet-integration` and corrects the React genesis guard with regression coverage. Its existing optional SDK interfaces are used without further API changes. `apps/`, the original frontend checkout, PDA seeds, instruction arguments, account layouts, program IDs, and public contract error codes remain unchanged. No upgrade or deployment command is part of this procedure.
 
 ## Verification status
 
@@ -10,7 +10,9 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. It does n
 | Deadline fix | Added locally using existing `MarketStillOpen`; patched execution pending CI rerun with isolated build outputs |
 | Original three LiteSVM suites and failing regression | Passed with exact pins in CI run 38095226793; regression failed for intended early-resolution success. Patched build reused baseline bytecode; the rerun separates output directories |
 | Harness safeguards | Six Node tests pass: mock rejection, protected JSON error redaction, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
-| Real create → stake → signed event → resolve → claim | Pending live SDK merge, team key provisioning, funding and working WSL |
+| Live SDK/resolver integration | Existing implementation integrated; actual read-only Devnet market/position decoding verified independently against the raw IDL |
+| SDK/resolver/React validation on Windows | SDK build and 376 tests pass; resolver build and 120 tests pass (one POSIX-permission test requires Linux); React typecheck and 56 tests pass |
+| Real create → stake → signed event → resolve → claim | Pending team key provisioning, funding and working WSL; live SDK stub removed on this branch |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
 
 Do not present simulated addresses, game signatures, mock receipts, or expected balances as real transaction evidence. A completed real run writes a distinct public evidence JSON with `complete: true`, seven confirmed transaction stages, and actual Explorer links. Until then there are **no verified lifecycle transaction signatures**.
@@ -31,7 +33,7 @@ Do not present simulated addresses, game signatures, mock receipts, or expected 
 | Observed treasury TEST balance | `999900` |
 | Observed resolver SOL balance | `0` |
 
-Re-query these values before a demo. `INTEGRATION.md:74` in the starting main has an incorrect Devnet genesis string, and `packages/react/src/adapters/SdkMarketKitClient.ts:88` uses a truncated one. Use the RPC-confirmed value above. The frontend owner should reconcile its network guard independently; this branch does not change React files.
+Re-query these values before a demo. This branch fixes the incorrect genesis in `INTEGRATION.md` and the truncated value in `packages/react/src/adapters/SdkMarketKitClient.ts`. Its regression tests permit the actual Devnet hash and reject both previous incorrect values before exposing the wallet to a binding.
 
 ```sh
 npm ci
@@ -88,11 +90,11 @@ Coverage includes create at/past now; stake at D−1, D, D+1; resolve at D−1, 
 
 ## Incorporate the live SDK/resolver
 
-Starting main has a stub `AnchorMarketAdapter` that throws `CONTRACT_UNAVAILABLE`; its resolver executable also lacks real-mode wiring. The harness intentionally fails before reading keys or creating a market while that remains true. Wait for the frontend/SDK owner's reviewed live implementation to merge, fetch and merge that exact main version into this branch using host Git, and record the integration SHA in the final evidence/report.
+Starting main has a stub `AnchorMarketAdapter` that throws `CONTRACT_UNAVAILABLE`; its resolver executable also lacks real-mode wiring. Under the user's later authorization, this branch integrates the completed implementation from `feat/hunch-devnet-integration` (`60fd601`) without waiting for a main merge. SDK reads of an existing developer-created market and position were cross-checked against the raw committed IDL; `docs/evidence/devnet/live-sdk-read-2026-10-10.json` records that read-only result. It is not a market created for this verification and provides no lifecycle transaction signatures. The real SDK is available here; execution now stops at the required Linux/runtime/key preparation boundary rather than the old adapter stub.
 
 The harness uses existing `MarketAdapter` methods, `WalletSigner`, `buildServer`, `ResolverStore`, and `signGameEvent` interfaces. It starts the actual resolver server with the real adapter and signer through its existing public factory, rather than using the currently mock-only executable. It never selects a mock adapter, mock HTTP endpoint, or mock wallet.
 
-Coordinate constructor/configuration, off-chain market ID handling, token account conventions, mint selection, or transaction signing differences with the SDK owner before making any shared interface change. The harness currently assumes the existing constructor accepts `{rpcUrl, programId}`, the real adapter uses the recorded TEST mint and participant ATAs, and calls `WalletSigner.signTransaction` before sending. It uses the SDK's returned market ID for subsequent calls and resolver registration, accommodating either an application ID or canonical PDA identifier. These assumptions must be reviewed against the merged implementation. A mode label alone is not proof of a live implementation: the harness independently confirms transactions and decodes actual accounts using the committed Anchor IDL.
+The integrated constructor accepts RPC/program/mint/resolver configuration and a clock. The harness supplies the observed chain clock, the recorded TEST mint and resolver, and requires participant ATAs. It persists a cryptographically random public 32-byte market seed and its derived PDA before signing, passes `marketSeed` through the existing SDK interface, and requires the returned ID and the independently discovered transaction account to match that PDA. A UUID is only the off-chain run identifier; the live SDK correctly rejects UUIDs supplied as market IDs. The SDK calls `WalletSigner.signTransaction` before broadcasting; the wrapper journals the signature before returning it. A mode label alone is not proof of a live implementation: the harness independently confirms transactions and decodes actual accounts using the committed Anchor IDL. Coordinate before any further shared-interface changes.
 
 ## Secure resolver key and verification wallets
 
@@ -130,7 +132,7 @@ Inspect and confirm each operator transfer before retrying an uncertain request.
 
 ## Execute the real demo
 
-After the SDK merge, WSL/toolchain setup, protected resolver file, and funding:
+After WSL/toolchain setup, protected resolver file, and funding (the live SDK is already integrated on this branch):
 
 ```sh
 npm ci
@@ -159,7 +161,7 @@ Both winning positions must be claimed; B must remain unclaimed; escrow must ret
 
 ## Evidence and recovery
 
-Before each SDK mutation, the harness flushes a pending journal stage. Its wallet wrapper flushes each signed transaction's public signature before returning it to the SDK for broadcast. It does not persist a private key. After submission it fetches the actual transaction, rejects errors, checks an instruction invokes the hunch program, and records confirmation, slot, block time, fee and Explorer URL. Public snapshots record decoded market/position identities, amounts, claim flags, vault and wallet balances.
+Before each SDK mutation, the harness flushes a pending journal stage. Its wallet wrapper flushes each signed transaction's public signature, blockhash and available expiry height before returning it to the SDK for broadcast. It does not persist a private key. After submission it fetches the actual transaction, rejects errors, checks an instruction invokes the hunch program, and records confirmation, slot, block time, fee and Explorer URL. Public snapshots record decoded market/position identities, amounts, claim flags, vault and wallet balances. Reconciliation reports the observed block height and whether each recorded validity window has expired; an expired window alone does not prove the transaction never landed.
 
 On any uncertain mutation or failed assertion, **stop**. No automatic retry is performed. Inspect the ignored journal and resolver database, and use the read-only command:
 
