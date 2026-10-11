@@ -1015,7 +1015,7 @@ function EventRows({
             )}
           </span>
           <div className="event-content">
-            <strong>{event.message}</strong>
+            <strong>{event.message.replace(/\bTEST\b/g, "HUNCH")}</strong>
             <Link
               className="event-market"
               to={`/markets/${encodeURIComponent(event.marketId)}`}
