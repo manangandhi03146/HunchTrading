@@ -1,4 +1,7 @@
 import { Home, MarketPage, Portfolio, Help, NotFound } from "./PublicPages";
+import { DemoProvider, ExhibitionAccountBadge } from "./demos/DemoProvider";
+import { FortniteDemo } from "./demos/FortniteDemo";
+import { FundingDemo } from "./demos/FundingDemo";
 import RacingApp from "../../racing/src/App";
 import EsportsApp from "../../esports/src/App";
 import "../../racing/src/styles.css";
@@ -1172,8 +1175,9 @@ function RadioIcon(props: { size?: number }) {
 export default function App() {
   const { pathname } = useLocation();
   const { mode, client } = useHunch();
+  const exhibition = ["/fortnite", "/funding"].includes(pathname);
   return (
-    <div className="dashboard-app">
+    <DemoProvider><div className="dashboard-app">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -1211,6 +1215,8 @@ export default function App() {
         <span className="sidebar-section-label demos-label">
           EXAMPLE APPLICATIONS
         </span>
+        <NavLink to="/fortnite" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><RadioIcon size={17} />Fortnite VOD market</NavLink>
+        <NavLink to="/funding" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><ArrowDownLeft size={17} />Funding & Solana</NavLink>
         <a
           className="sidebar-nav-link sidebar-demo-link"
           href={appUrl("racing")}
@@ -1260,14 +1266,14 @@ export default function App() {
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={12} />
-            <strong>Prediction markets</strong>
+            <strong>{pathname === "/fortnite" ? "Fortnite exhibition" : pathname === "/funding" ? "Funding & Solana" : "Prediction markets"}</strong>
           </div>
           <div className="topbar-actions">
             <ThemeSwitch />
-            <Badge tone={mode === "mock" ? "warning" : "violet"}>
-              {mode === "mock" ? "Simulated demo" : "Devnet"}
+            <Badge tone={exhibition || mode === "mock" ? "warning" : "violet"}>
+              {exhibition ? "Exhibition" : mode === "mock" ? "Simulated demo" : "Devnet"}
             </Badge>
-            <WalletButton />
+            {exhibition ? <ExhibitionAccountBadge /> : <WalletButton />}
           </div>
         </header>
         <main id="main" className="dashboard-main">
@@ -1277,6 +1283,9 @@ export default function App() {
             <Route path="/overview" element={<Overview />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/fortnite" element={<FortniteDemo />} />
+            <Route path="/funding" element={<FundingDemo />} />
+            <Route path="/solana" element={<Navigate to="/funding" replace />} />
             <Route path="/markets/:marketId" element={<MarketPage />} />
             <Route path="/racing" element={<RacingApp embedded />} />
             <Route path="/esports" element={<EsportsApp embedded />} />
@@ -1296,13 +1305,13 @@ export default function App() {
               hunchtrading.tech
             </a>
             <span>
-              {mode === "mock"
+              {exhibition ? "Browser exhibition · Nonredeemable credits" : mode === "mock"
                 ? client.shared ? "Shared simulation · Nonredeemable demo credits" : "Local simulation · Nonredeemable demo credits"
                 : "Devnet only · Nonredeemable TEST tokens"}
             </span>
           </footer>
         </main>
       </div>
-    </div>
+    </div></DemoProvider>
   );
 }
