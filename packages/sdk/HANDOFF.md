@@ -342,3 +342,51 @@ resolving. These Rust tests have **not been run** (no Rust/Solana toolchain on t
 implementing machine): run `anchor build && cargo test` (Anchor 1.1.2, Rust 1.89).
 Deploying requires the program's upgrade authority and explicit approval; nothing
 was deployed or upgraded.
+
+### Live Devnet record (first real stake)
+
+Market `G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF` (creator
+`4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S`, seed
+`512fa066e6e1fe513b84a680d837c27895e71e79c8e45a158889267ae93e3e3c`), closes
+2026-10-11T00:37:38Z, TEST mint, resolver `6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt`.
+
+- Creation: `rPXD8eKSZCU9gvGMvBhpiNoBtpSGcEjwcWjpjRM7DnyBvCG81nWYArLgTBS5WTjKesVrM1joC2ZAedAx61NL81C`
+- Stake, 10 TEST on outcome 1: `pXxkvGrQrAggCUaz6S1PHihQvp1mthhuCzPsDNDysLfCxMjXnN9CLxEc8nBG1zHe8EBT614ynkjcg8yAy3AFZ5V`
+  (slot 509693502). Wallet ATA `EcZwQE…6MaT` 100 → 90, vault `DWghCcCF1mvGQVVcnFszTenHJr6AZcKUqSkWcwNKAv39`
+  0 → 10 (transaction token deltas −10/+10), Position `CcEMuDNyaswW8di5iZDhg9vSw7QeLpxEWqGKEviFrser`
+  outcome 1 amount 10, pools [0, 10].
+
+Coordinate before staking on or resolving this market; other lifecycle tests should
+create their own market.
+
+### First full settlement runbook (market G5NT43KJ…)
+
+Every authorized step submits exactly one transaction and is never retried; run the
+preview (same command without `--authorize-*`/`--keypair`) first. Paths below keep
+keys outside the repository.
+
+1. **Second player (before 2026-10-11T00:37:38Z).** Generate a key outside the repo
+   (prints only the public key):
+   `node -e 'const {Keypair}=require("@solana/web3.js"),fs=require("fs"),k=Keypair.generate();fs.writeFileSync(process.env.HOME+"/.config/solana/hunch-devnet-player2.json",JSON.stringify(Array.from(k.secretKey)),{mode:0o600,flag:"wx"});console.log(k.publicKey.toBase58())'`
+   Fund it with SOL and TEST from the creator wallet:
+   `npm run fund:devnet --workspace @hunch/sdk -- --from 4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S --to PLAYER2 --amount 40 --lamports 20000000`
+   then stake the opposite outcome:
+   `npm run stake:devnet --workspace @hunch/sdk -- --wallet PLAYER2 --market G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF --outcome 0 --amount 40`
+2. **Resolver.** Developer A places the `6S713Z…MHUt` keypair at
+   `~/.config/solana/marketkit-resolver.json` (mode 600) on the resolver host. Fund fees:
+   `npm run fund:devnet --workspace @hunch/sdk -- --from 4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S --to 6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt --lamports 10000000`
+3. **App signing key and registration** (`DB=$PWD/.data/resolver-devnet.sqlite`, from the repo root):
+   `node -e 'const {Keypair}=require("@solana/web3.js"),fs=require("fs"),k=Keypair.generate();fs.mkdirSync(process.env.HOME+"/.config/hunch",{recursive:true});fs.writeFileSync(process.env.HOME+"/.config/hunch/hunch-devnet-app.json",JSON.stringify(Array.from(k.secretKey)),{mode:0o600,flag:"wx"});console.log(Buffer.from(k.publicKey.toBytes()).toString("base64"))'`
+   `RESOLVER_DB_PATH=$DB npm run register --workspace @marketkit/resolver -- --app-id hunch-devnet --public-key 'BASE64_FROM_ABOVE'`
+   `RESOLVER_DB_PATH=$DB npm run register --workspace @marketkit/resolver -- --app-id hunch-devnet --market-id G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF --event-id g5nt-first-settlement --authority 4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S --resolver-authority 6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt`
+4. **Start the real resolver** (fails closed on any key/network mismatch; check `/health`):
+   `RESOLVER_MODE=anchor MOCK_HTTP_ENABLED=false RESOLVER_KEYPAIR_PATH=$HOME/.config/solana/marketkit-resolver.json RESOLVER_DB_PATH=$DB npm run resolver`
+5. **After the deadline**, preview `npm run resolve:devnet --workspace @hunch/sdk -- --market G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF --outcome N`
+   (must show `eligible: true`), then sign and submit within 300 seconds:
+   `npm run --silent sign-event --workspace @marketkit/resolver -- --keypair-path $HOME/.config/hunch/hunch-devnet-app.json --app-id hunch-devnet --event-id g5nt-first-settlement --market-id G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF --outcome N > .data/g5nt-event.json`
+   `npm run submit-event --workspace @marketkit/resolver -- --event-file $PWD/.data/g5nt-event.json --url http://127.0.0.1:8787`
+   Expect `status: confirmed` with a real `transaction.signature` and `settlement`. A `202 submitted`
+   means run `RESOLVER_MODE=anchor RESOLVER_DB_PATH=$DB npm run reconcile --workspace @marketkit/resolver -- --event-id g5nt-first-settlement` — never resubmit.
+6. **Claim**: `npm run claim:devnet --workspace @hunch/sdk -- --wallet WINNER --market G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF`,
+   then the printed authorization command. The result checks the position is claimed and the
+   vault/recipient deltas equal the payout (with 10 vs 40: outcome 1 pays 50, outcome 0 pays 50).

@@ -602,3 +602,11 @@ npm run resolve:devnet --workspace @hunch/sdk -- --authorize-devnet-resolution \
 The key is read only when the preview shows an eligible market (closed on the cluster
 clock, unresolved, approved mint/resolver, funded resolver). The file must be outside
 the repository with mode 600, and its public key must be the market's resolver.
+
+### Opt-in test-wallet funding
+
+`npm run fund:devnet` moves Devnet SOL (`--lamports`, at most 1 SOL) and/or TEST
+(`--amount`) from a wallet you control to another test wallet, creating the
+recipient's ATA idempotently in the same transaction. Preview first; the source key
+is read only with `--authorize-devnet-transfer --keypair PATH` and must match
+`--from`. It never mints or airdrops and never retries.

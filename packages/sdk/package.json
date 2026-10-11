@@ -24,7 +24,8 @@
     "create:devnet": "npm run build && node scripts/devnet-create-market.mjs",
     "stake:devnet": "npm run build && node scripts/devnet-stake.mjs",
     "claim:devnet": "npm run build && node scripts/devnet-claim.mjs",
-    "resolve:devnet": "npm run build && node scripts/devnet-resolve.mjs"
+    "resolve:devnet": "npm run build && node scripts/devnet-resolve.mjs",
+    "fund:devnet": "npm run build && node scripts/devnet-fund-wallet.mjs"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.32.1",
