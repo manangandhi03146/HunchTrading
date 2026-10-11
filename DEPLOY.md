@@ -1,7 +1,8 @@
 # Deploying hunch
 
 The **dashboard app is the whole product** — `/`, `/markets`, `/markets/:id`,
-`/portfolio`, `/racing`, `/esports`, and `/events` are client-side routes inside
+`/portfolio`, `/creators/:creatorId`, `/fortnite`, `/funding`, `/wallet`,
+`/racing`, `/esports`, and `/events` are client-side routes inside
 `apps/dashboard`. A deployment needs only the dashboard frontend. The resolver is
 a separate backend (below).
 
@@ -26,6 +27,14 @@ runs `npm run build`, serves `apps/dashboard/dist`, and rewrites deep links to
 
 3. Deploy. **Mock mode works standalone** (no backend) — ideal for a first live
    URL. Switch to `sdk` once the resolver is hosted.
+
+Production follows `main`. Pushing a frontend feature branch does not update
+the production site: merge its reviewed changes into `main`, then check that
+Vercel's production deployment references the resulting merge commit.
+Verify `/markets` contains the creator directory and that `/fortnite`,
+`/funding`, and `/wallet` load directly after deployment. Without a configured
+shared API, ordinary mock markets remain local to each browser; a public URL
+alone does not make those markets shared across devices.
 
 > Vercel installs all workspaces, which compiles the resolver's native
 > `better-sqlite3`. If that slows the build, it's harmless — the dashboard bundle

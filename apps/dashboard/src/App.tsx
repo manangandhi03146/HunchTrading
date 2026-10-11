@@ -1,4 +1,12 @@
 import { Home, MarketPage, Portfolio, Help, NotFound } from "./PublicPages";
+import { DemoProvider, ExhibitionAccountBadge } from "./demos/DemoProvider";
+import { CreatorDirectory, CreatorPage } from "./demos/CreatorPages";
+import { getCreator, creatorDescription } from "./demos/creators";
+import { FortniteDemo } from "./demos/FortniteDemo";
+import { FundingDemo } from "./demos/FundingDemo";
+import { FundsProvider } from "./wallet/FundsProvider";
+import { SidebarFunds, WalletFundsPage } from "./wallet/WalletFunds";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import RacingApp from "../../racing/src/App";
 import EsportsApp from "../../esports/src/App";
 import "../../racing/src/styles.css";
@@ -163,7 +171,7 @@ function MarketTable({
                 <strong className="tabular">
                   {formatTokens(market.totalPool)}
                 </strong>
-                <small> TEST</small>
+                <small> HUNCH</small>
               </td>
               {!compact && (
                 <td className="table-date" role="cell" data-label="Closes">
@@ -254,7 +262,7 @@ function Overview() {
     {
       label: "Total test-token pool",
       value: formatTokens(pool),
-      detail: "TEST · zero-decimal tokens",
+      detail: "HUNCH · zero-decimal tokens",
       icon: ArrowDownLeft,
     },
   ];
@@ -311,7 +319,7 @@ function Overview() {
                   <div>
                     <span>{application.name}</span>
                     <strong className="tabular">
-                      {formatTokens(application.totalPool)} <small>TEST</small>
+                      {formatTokens(application.totalPool)} <small>HUNCH</small>
                     </strong>
                   </div>
                   <span className={`pool-row-track pool-color-${index % 3}`}>
@@ -336,7 +344,7 @@ function Overview() {
             )}
           </div>
           <div className="panel-footnote">
-            Pooled stakes, measured in nonredeemable TEST tokens.
+            Pooled stakes, measured in nonredeemable HUNCH tokens.
           </div>
         </Card>
         <Card className="quickstart-card">
@@ -438,6 +446,7 @@ function Markets() {
         }
       />
       <ModeNotice />
+      <CreatorDirectory />
       <Card className="markets-panel">
         <div className="table-toolbar">
           <label className="market-search">
@@ -516,13 +525,15 @@ function CreateMarket() {
   const { client, mode, notify } = useHunch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [question, setQuestion] = useState("");
-  const [outcomeA, setOutcomeA] = useState("");
-  const [outcomeB, setOutcomeB] = useState("");
+  const [searchParams] = useSearchParams();
+  const creator = getCreator(searchParams.get("creator"));
+  const [question, setQuestion] = useState(creator?.question ?? "");
+  const [outcomeA, setOutcomeA] = useState(creator ? "Yes" : "");
+  const [outcomeB, setOutcomeB] = useState(creator ? "No" : "");
   const [closing, setClosing] = useState(() =>
     localDatetime(Date.now() + 3600000),
   );
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(creator ? creatorDescription(creator) : "");
   const [validation, setValidation] = useState<
     Partial<Record<"question" | "outcome-a" | "outcome-b" | "closing", string>>
   >({});
@@ -618,7 +629,7 @@ function CreateMarket() {
                 placeholder="Who wins the championship final?"
               />
               <small id="question-hint">
-                This question appears at the top of your widget.
+                This question appears at the top of your market page.
               </small>
               {validation.question && (
                 <p className="form-field-error" id="question-error">
@@ -751,7 +762,7 @@ function CreateMarket() {
           </span>
           <h3>A few good defaults.</h3>
           <p>
-            hunch uses binary pooled predictions with integer TEST tokens. No
+            hunch uses binary pooled predictions with integer HUNCH tokens. No
             order books or fixed payout odds.
           </p>
           <div>
@@ -1009,7 +1020,7 @@ function EventRows({
             )}
           </span>
           <div className="event-content">
-            <strong>{event.message}</strong>
+            <strong>{event.message.replace(/\bTEST\b/g, "HUNCH")}</strong>
             <Link
               className="event-market"
               to={`/markets/${encodeURIComponent(event.marketId)}`}
@@ -1172,8 +1183,10 @@ function RadioIcon(props: { size?: number }) {
 export default function App() {
   const { pathname } = useLocation();
   const { mode, client } = useHunch();
+  const exhibition = ["/fortnite", "/funding"].includes(pathname) || pathname.startsWith("/creators/");
+  const fundsPage = pathname === "/wallet";
   return (
-    <div className="dashboard-app">
+    <FundsProvider><DemoProvider><div className="dashboard-app">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -1181,6 +1194,7 @@ export default function App() {
         <Link to="/" className="sidebar-logo">
           <Logo />
         </Link>
+        <SidebarFunds />
         <div className="workspace-switch">
           <span className="workspace-avatar">h</span>
           <div>
@@ -1208,9 +1222,11 @@ export default function App() {
             </NavLink>
           ))}
         </nav>
-        <span className="sidebar-section-label demos-label">
+        <div className="sidebar-examples"><span className="sidebar-section-label demos-label">
           EXAMPLE APPLICATIONS
         </span>
+        <NavLink to="/fortnite" className={({ isActive }) => `sidebar-nav-link sidebar-livestream ${isActive ? "active" : ""}`}><RadioIcon size={17} /><span><strong>Livestream demo</strong><small>SypherPK · Fortnite</small></span></NavLink>
+        <NavLink to="/funding" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><ArrowDownLeft size={17} />Funding model</NavLink>
         <a
           className="sidebar-nav-link sidebar-demo-link"
           href={appUrl("racing")}
@@ -1229,12 +1245,13 @@ export default function App() {
           Esports<span className="sidebar-demo-suffix"> demo</span>
           <ArrowUpRight size={13} />
         </a>
+        </div>
         <div className="sidebar-bottom">
           <Card className="sidebar-tip">
             <Sparkles size={17} />
-            <strong>Built to be embedded.</strong>
+            <strong>Made for your community.</strong>
             <p>
-              Your interface. Your community.
+              Share a market with your viewers.
               <br />
               Shared settlement infrastructure.
             </p>
@@ -1260,14 +1277,14 @@ export default function App() {
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={12} />
-            <strong>Prediction markets</strong>
+            <strong>{fundsPage ? "Wallet funds" : (pathname === "/fortnite" || pathname.startsWith("/creators/")) ? "Livestream demo" : pathname === "/funding" ? "Funding model" : "Prediction markets"}</strong>
           </div>
           <div className="topbar-actions">
             <ThemeSwitch />
-            <Badge tone={mode === "mock" ? "warning" : "violet"}>
-              {mode === "mock" ? "Simulated demo" : "Devnet"}
+            <Badge tone={!fundsPage && (exhibition || mode === "mock") ? "warning" : "violet"}>
+              {fundsPage ? "Devnet wallet" : exhibition ? "Exhibition" : mode === "mock" ? "Simulated demo" : "Devnet"}
             </Badge>
-            <WalletButton />
+            {fundsPage ? <WalletMultiButton /> : exhibition ? <ExhibitionAccountBadge /> : <WalletButton />}
           </div>
         </header>
         <main id="main" className="dashboard-main">
@@ -1277,6 +1294,12 @@ export default function App() {
             <Route path="/overview" element={<Overview />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/creators/:creatorId" element={<CreatorPage />} />
+            <Route path="/fortnite" element={<FortniteDemo />} />
+            <Route path="/livestream" element={<Navigate to="/fortnite" replace />} />
+            <Route path="/wallet" element={<WalletFundsPage />} />
+            <Route path="/funding" element={<FundingDemo />} />
+            <Route path="/solana" element={<Navigate to="/funding" replace />} />
             <Route path="/markets/:marketId" element={<MarketPage />} />
             <Route path="/racing" element={<RacingApp embedded />} />
             <Route path="/esports" element={<EsportsApp embedded />} />
@@ -1296,13 +1319,13 @@ export default function App() {
               hunchtrading.tech
             </a>
             <span>
-              {mode === "mock"
+              {fundsPage ? "Devnet wallet · Test funds only" : exhibition ? "Browser exhibition · Nonredeemable credits" : mode === "mock"
                 ? client.shared ? "Shared simulation · Nonredeemable demo credits" : "Local simulation · Nonredeemable demo credits"
-                : "Devnet only · Nonredeemable TEST tokens"}
+                : "Devnet only · Nonredeemable HUNCH tokens"}
             </span>
           </footer>
         </main>
       </div>
-    </div>
+    </div></DemoProvider></FundsProvider>
   );
 }

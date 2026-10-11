@@ -73,7 +73,7 @@ export function ClaimPanel({
               {claimable.isPending
                 ? "…"
                 : claimable.data
-                  ? `${formatTokens(claimable.data.amount)} TEST`
+                  ? `${formatTokens(claimable.data.amount)} HUNCH`
                   : "Unavailable"}
             </strong>
           </div>
@@ -138,7 +138,7 @@ export function ClaimPanel({
             <div className="hunch-claim-history" role="status">
               <strong>
                 {savedReceipt
-                  ? `${savedReceipt.transaction.simulated ? "Simulated" : "Confirmed"} ${market.status === "cancelled" ? "refund" : "payout"}: ${formatTokens(BigInt(savedReceipt.amount))} TEST`
+                  ? `${savedReceipt.transaction.simulated ? "Simulated" : "Confirmed"} ${market.status === "cancelled" ? "refund" : "payout"}: ${formatTokens(BigInt(savedReceipt.amount))} HUNCH`
                   : "Claim completed. No tokens remain to claim."}
               </strong>
               {savedReceipt && (

@@ -151,7 +151,7 @@ export class SdkHunchClient implements HunchClient {
     return accounts.value.reduce((sum, account) => {
       const balance = account.account.data.parsed.info.tokenAmount;
       if (balance.decimals !== 0)
-        throw new Error("hunch requires a zero-decimal TEST mint.");
+        throw new Error("hunch requires a zero-decimal HUNCH mint.");
       return sum + BigInt(balance.amount);
     }, 0n);
   }
