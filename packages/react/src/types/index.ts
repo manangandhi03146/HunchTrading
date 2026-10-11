@@ -63,11 +63,11 @@ export function formatTokens(value: bigint) {
 }
 export function parseStake(value: string, balance?: bigint): bigint {
   if (!/^\d+$/.test(value.trim()))
-    throw new Error("Enter a positive whole number of TEST tokens.");
+    throw new Error("Enter a positive whole number of HUNCH tokens.");
   const amount = BigInt(value.trim());
-  if (amount <= 0n) throw new Error("Your prediction must be at least 1 TEST.");
+  if (amount <= 0n) throw new Error("Your prediction must be at least 1 HUNCH.");
   if (balance !== undefined && amount > balance)
-    throw new Error("This amount exceeds your available TEST balance.");
+    throw new Error("This amount exceeds your available HUNCH balance.");
   return amount;
 }
 export function poolPercent(pool: bigint, total: bigint) {

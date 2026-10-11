@@ -13,7 +13,7 @@ export function PoolDistribution({
         <span>Pool distribution</span>
         {showPool && (
           <strong>
-            {formatTokens(market.totalPool)} <small>TEST</small>
+            {formatTokens(market.totalPool)} <small>HUNCH</small>
           </strong>
         )}
       </div>

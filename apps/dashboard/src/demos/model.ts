@@ -199,7 +199,7 @@ export function demoReducer(state: DemoState, action: Action): DemoState {
             grantUsed: true,
             tokens: state.tokens + 1_000,
             sol: state.sol - FEE,
-            receipts: receipt(state, "Demo TEST grant", 1_000),
+            receipts: receipt(state, "Demo HUNCH grant", 1_000),
           };
     case "stake": {
       if (
@@ -307,7 +307,7 @@ export function demoReducer(state: DemoState, action: Action): DemoState {
         exchangeTokens: state.exchangeTokens - output,
         receipts: receipt(
           state,
-          "Modeled SOL → TEST swap",
+          "Modeled SOL → HUNCH swap",
           output,
           -action.input - FEE,
         ),

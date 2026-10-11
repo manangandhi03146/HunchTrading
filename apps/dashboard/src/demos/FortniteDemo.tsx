@@ -29,9 +29,9 @@ export function FortniteDemo() {
   const { state, dispatch } = useDemo();
   const [playing, setPlaying] = useState(false);
   const [second, setSecond] = useState(() => Math.min(state.tick * 4, 220));
-  const [clock, setClock] = useState<"presentation" | "vod">("presentation");
+  const [clock, setClock] = useState<"presentation" | "vod">("vod");
   const [ready, setReady] = useState(false);
-  const [seekTo, setSeekTo] = useState<number | null>(null);
+  const [seekTo, setSeekTo] = useState<number | null>(() => VOD.start + Math.min(state.tick * 4, 220));
   const [side, setSide] = useState<Side>(0);
   const [amount, setAmount] = useState("100");
   const [review, setReview] = useState(false);
@@ -42,6 +42,7 @@ export function FortniteDemo() {
   const cue = cueAt(second);
   const yes = share(state.pool);
   const total = state.pool[0] + state.pool[1];
+  const change = yes - (state.history.at(-2)?.share ?? yes);
   const stake = Number(amount);
   const estimated =
     Number.isSafeInteger(stake) && stake > 0
@@ -75,7 +76,7 @@ export function FortniteDemo() {
   useEffect(() => {
     if (state.claimed && !wasClaimed.current)
       setMessage(
-        `Claim complete. ${number(eligible)} demo TEST returned to your exhibition balance.`,
+        `Claim complete. ${number(eligible)} demo HUNCH returned to your exhibition balance.`,
       );
     wasClaimed.current = state.claimed;
   }, [state.claimed, eligible]);
@@ -85,7 +86,7 @@ export function FortniteDemo() {
     if (state.placement !== null || second >= 220)
       return "This exhibition market has closed.";
     if (!Number.isSafeInteger(stake) || stake < 1)
-      return "Enter a positive whole number of TEST tokens.";
+      return "Enter a positive whole number of HUNCH tokens.";
     if (stake > state.tokens)
       return "Your exhibition balance is too low for this stake.";
     if (state.sol < 5_000)
@@ -108,7 +109,7 @@ export function FortniteDemo() {
     dispatch({ type: "stake", side, amount: stake });
     setReview(false);
     setMessage(
-      `${number(stake)} demo TEST staked on ${side === 0 ? "Yes" : "No"}.`,
+      `${number(stake)} demo HUNCH staked on ${side === 0 ? "Yes" : "No"}.`,
     );
   }
   function jump() {
@@ -140,9 +141,9 @@ export function FortniteDemo() {
     <div className="exhibition">
       <div className="demo-page-heading">
         <div>
-          <span className="demo-eyebrow">LIVESTREAM DEMO · VOD REPLAY</span>
+          <span className="demo-eyebrow">LIVESTREAM DEMO</span>
           <h1>A hunch, in the middle of the action.</h1>
-          <p>Watch SypherPK’s Fortnite VOD. Back a finish. Follow the crowd.</p>
+          <p>Watch SypherPK play Fortnite. Back a finish. Follow the crowd.</p>
         </div>
         <Link to="/funding" className="hunch-button hunch-button-secondary">
           <Wallet size={16} /> Fund demo account
@@ -151,7 +152,7 @@ export function FortniteDemo() {
       <div className="demo-disclosure">
         <Radio size={16} />
         <span>
-          <strong>Exhibition</strong> · Real VOD, scripted match cues, simulated
+          <strong>Exhibition</strong> · Recorded gameplay, scripted match cues, simulated
           participants and tokens. This page does not submit Solana
           transactions.
         </span>
@@ -172,17 +173,30 @@ export function FortniteDemo() {
                 </a>
                 <p>Fortnite · Twitch Verified Partner</p>
               </div>
-              <span className="demo-replay-label">VOD REPLAY</span>
+              <span className="demo-replay-label">DEMO BROADCAST</span>
             </div>
             <TwitchVod
               playing={playing}
               seekTo={seekTo}
               onReady={setReady}
               onTime={(time, paused) => {
-                if (clock === "vod" && ready && playing && !paused)
-                  setSecond(Math.max(0, Math.min(220, time - VOD.start)));
+                if (clock !== "vod" || !ready || state.placement !== null || !Number.isFinite(time)) return;
+                setPlaying(!paused);
+                if (!paused) setSecond(Math.max(0, Math.min(220, time - VOD.start)));
               }}
             />
+            <div className="broadcast-quotes" aria-label="Changing demo outcome quotes">
+              {([0, 1] as Side[]).map((outcome) => {
+                const value = outcome === 0 ? yes : 100 - yes;
+                const delta = outcome === 0 ? change : -change;
+                return <div key={outcome} className={outcome === 0 ? "quote-yes" : "quote-no"}>
+                  <span>{outcome === 0 ? "Yes" : "No"} · indicative quote</span>
+                  <strong>{(value / 100).toFixed(4)} <small>HUNCH</small></strong>
+                  <span>{delta >= 0 ? "+" : ""}{(delta / 100).toFixed(4)} since last update</span>
+                </div>;
+              })}
+              <p>Updates every 4 seconds of playback from modeled crowd stakes. Quotes represent pool share; this staking prototype does not execute share-price orders.</p>
+            </div>
             <div className="vod-controls">
               <button
                 className="hunch-button hunch-button-primary"
@@ -211,7 +225,7 @@ export function FortniteDemo() {
                   }}
                 >
                   <option value="presentation">Presentation clock</option>
-                  <option value="vod">Sync to VOD playback</option>
+                  <option value="vod">Sync to broadcast playback</option>
                 </select>
               </label>
               <span>
@@ -220,7 +234,7 @@ export function FortniteDemo() {
             </div>
             <p className="demo-caption">
               Scripted cues illustrate a match and are not detected from this
-              recording. VOD sync follows the player timestamp; the presentation
+              gameplay. Broadcast sync follows the player timestamp; the presentation
               clock works through ads or playback interruptions.
             </p>
           </section>
@@ -400,7 +414,7 @@ export function FortniteDemo() {
                     {(s === 0 ? yes : 100 - yes).toFixed(1)}
                     <small>%</small>
                   </strong>
-                  <span>{number(state.pool[s])} TEST</span>
+                  <span>{number(state.pool[s])} HUNCH</span>
                 </button>
               ))}
             </div>
@@ -412,16 +426,16 @@ export function FortniteDemo() {
             </div>
             <div className="ticket-meta">
               <span>Total pool</span>
-              <strong>{number(total)} TEST</strong>
+              <strong>{number(total)} HUNCH</strong>
             </div>
             <div className="ticket-meta">
               <span>Your available balance</span>
-              <strong>{number(state.tokens)} TEST</strong>
+              <strong>{number(state.tokens)} HUNCH</strong>
             </div>
             {state.placement === null ? (
               <form onSubmit={submit}>
                 <label className="stake-label">
-                  Your stake <span>Whole demo TEST tokens</span>
+                  Your stake <span>Whole demo HUNCH tokens</span>
                   <input
                     type="number"
                     inputMode="numeric"
@@ -453,7 +467,7 @@ export function FortniteDemo() {
                   <span>
                     Estimated total return if {side === 0 ? "Yes" : "No"} wins
                   </span>
-                  <strong>{number(estimated)} TEST</strong>
+                  <strong>{number(estimated)} HUNCH</strong>
                   <small>
                     Includes your existing stake on this outcome. Changes with
                     the final pool.
@@ -462,7 +476,7 @@ export function FortniteDemo() {
                 {review ? (
                   <div className="stake-review">
                     <p>
-                      Confirm {number(stake)} demo TEST on{" "}
+                      Confirm {number(stake)} demo HUNCH on{" "}
                       <strong>{side === 0 ? "Yes" : "No"}</strong>. A modeled
                       0.000005 SOL fee applies. Stakes stay locked until
                       settlement.
@@ -507,7 +521,7 @@ export function FortniteDemo() {
                   {state.claimed
                     ? "Your payout has been claimed."
                     : eligible > 0
-                      ? `${number(eligible)} demo TEST available to claim.`
+                      ? `${number(eligible)} demo HUNCH available to claim.`
                       : "No winning position in this account."}
                 </p>
                 {eligible > 0 && (
@@ -531,7 +545,7 @@ export function FortniteDemo() {
               <span>Your positions</span>
               <strong>
                 Yes {number(state.position[0])} · No {number(state.position[1])}{" "}
-                TEST
+                HUNCH
               </strong>
             </div>
           </section>
@@ -555,7 +569,7 @@ export function FortniteDemo() {
                       className={a.side === 0 ? "activity-yes" : "activity-no"}
                     >
                       {a.side === 0 ? "Yes" : "No"}
-                      <strong>{a.amount} TEST</strong>
+                      <strong>{a.amount} HUNCH</strong>
                     </span>
                   </li>
                 ))}

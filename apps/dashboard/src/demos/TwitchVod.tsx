@@ -104,7 +104,7 @@ export function TwitchVod({
         };
         instance.addEventListener(api.Player.READY, markReady);
         instance.addEventListener(api.Player.PLAYBACK_BLOCKED, () => {
-          if (!disposed) setError("Click Play inside the Twitch player to start the recording. The presentation clock can continue separately.");
+          if (!disposed) setError("Click Play inside the Twitch player to start the broadcast. The presentation clock can continue separately.");
         });
         instance.addEventListener(api.Player.PLAYING, () => {
           if (!disposed) setError("");
@@ -155,7 +155,7 @@ export function TwitchVod({
   }, [seekTo, ready]);
   return (
     <>
-      <div className="vod-player" aria-label="SypherPK Fortnite Twitch VOD">
+      <div className="vod-player" aria-label="SypherPK Fortnite demo broadcast">
         <div ref={host} className="vod-mount" />
       </div>
       {error && (

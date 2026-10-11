@@ -35,15 +35,15 @@ describe("confirmed claim history", () => {
     await waitFor(() => expect(button).toBeEnabled());
     await userEvent.setup().click(button);
     expect(
-      await screen.findByText("Simulated payout: 25 TEST"),
+      await screen.findByText("Simulated payout: 25 HUNCH"),
     ).toBeInTheDocument();
     view.unmount();
     render(ui);
     expect(
-      await screen.findByText("Simulated payout: 25 TEST"),
+      await screen.findByText("Simulated payout: 25 HUNCH"),
     ).toBeInTheDocument();
     expect(screen.getByText("Remaining to claim")).toBeInTheDocument();
-    expect(screen.getByText("0 TEST")).toBeInTheDocument();
+    expect(screen.getByText("0 HUNCH")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Already claimed/ }),
     ).toBeDisabled();

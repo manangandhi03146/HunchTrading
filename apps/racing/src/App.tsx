@@ -206,8 +206,8 @@ export default function App({ embedded = false }: { embedded?: boolean }) {
         <div className="mode-notice">
           <span>
             {mode === "mock"
-              ? "Interactive simulation · TEST credits have no value. Race results and settlement are fixtures."
-              : "Solana Devnet · game-server results are authoritative. TEST tokens have no value."}
+              ? "Interactive simulation · HUNCH credits have no value. Race results and settlement are fixtures."
+              : "Solana Devnet · game-server results are authoritative. HUNCH tokens have no value."}
           </span>
           <span>POWERED BY HUNCH</span>
         </div>

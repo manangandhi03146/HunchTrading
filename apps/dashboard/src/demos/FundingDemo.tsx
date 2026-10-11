@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react";
+import { useFunds } from "../wallet/FundsProvider";
 import { useDemo } from "./DemoProvider";
 import { FEE, LAMPORTS, payout, quoteSwap } from "./model";
 import "./demos.css";
@@ -20,6 +21,7 @@ function sol(n: number) {
 }
 export function FundingDemo() {
   const { state, dispatch } = useDemo();
+  const funds = useFunds();
   const [input, setInput] = useState("0.01");
   const [review, setReview] = useState(false);
   const [message, setMessage] = useState("");
@@ -45,7 +47,7 @@ export function FundingDemo() {
   function validate() {
     if (!state.connected) return "Connect your exhibition account first.";
     if (!valid || quote < 1)
-      return "Enter 0.000000001–1 SOL with at most nine decimal places and a quote of at least 1 TEST.";
+      return "Enter 0.000000001–1 SOL with at most nine decimal places and a quote of at least 1 HUNCH.";
     if (state.sol < lamports + FEE)
       return "Insufficient demo SOL, including the modeled transaction fee.";
     return "";
@@ -66,7 +68,7 @@ export function FundingDemo() {
     dispatch({ type: "swap", input: lamports });
     setReview(false);
     setMessage(
-      `Modeled exchange complete. ${number(quote)} demo TEST received.`,
+      `Modeled exchange complete. ${number(quote)} demo HUNCH received.`,
     );
   }
   return (
@@ -74,7 +76,7 @@ export function FundingDemo() {
       <div className="demo-page-heading">
         <div>
           <span className="demo-eyebrow">FUNDING & SOLANA</span>
-          <h1>Follow the tokens.</h1>
+          <h1>SOL in. Hunch Credits out.</h1>
           <p>
             From a funded account to a market vault and back to a winning
             wallet.
@@ -92,6 +94,19 @@ export function FundingDemo() {
           funds move on Solana.
         </span>
       </div>
+      <section className="demo-panel conversion-journey">
+        <div className="demo-section-heading"><h2>Your funding journey</h2><span>SOL → HUNCH → PREDICTION</span></div>
+        <div className="conversion-stages">
+          <div><span className="demo-eyebrow">01 · DEVNET WALLET</span><h3>Start with SOL</h3>
+            <strong>{funds.owner ? funds.balance.isError ? "Balance unavailable" : funds.balance.data === undefined ? "Loading balance…" : `${sol(funds.balance.data)} SOL` : "Connect your wallet"}</strong>
+            <p>Real network balance. SOL covers transfers and transaction fees.</p><Link to="/wallet" className="panel-link">Add or remove Devnet SOL <ArrowRight size={14} /></Link></div>
+          <ArrowRight className="ledger-arrow" size={22} />
+          <div><span className="demo-eyebrow">02 · CONVERSION PREVIEW</span><h3>SOL → Hunch Credits</h3><strong>{valid ? sol(lamports) : "—"} SOL → {number(quote)} HUNCH</strong><p>The exchange below models a liquidity pool, price impact, whole credits and network fees.</p><a href="#conversion" className="panel-link">Preview conversion <ArrowDown size={14} /></a></div>
+          <ArrowRight className="ledger-arrow" size={22} />
+          <div><span className="demo-eyebrow">03 · READY TO PREDICT</span><h3>Your Hunch balance</h3><strong>{number(state.tokens)} HUNCH</strong><p>Complete the modeled conversion below, then stake your credits on Yes or No.</p><Link to="/fortnite" className="panel-link">Trade the livestream demo <ArrowRight size={14} /></Link></div>
+        </div>
+        <p className="demo-caption">The wallet balance is read from Devnet. Conversion uses the separate exhibition SOL balance; it never debits your connected wallet. A real SOL/HUNCH exchange is not deployed.</p>
+      </section>
       <section className="funding-balance-banner">
         <div>
           <span className="demo-eyebrow">EXHIBITION ACCOUNT</span>
@@ -113,7 +128,7 @@ export function FundingDemo() {
         <div>
           <span>Available to predict</span>
           <strong>
-            {number(state.tokens)} <small>TEST</small>
+            {number(state.tokens)} <small>HUNCH</small>
           </strong>
         </div>
       </section>
@@ -172,10 +187,10 @@ export function FundingDemo() {
                 {state.grantUsed ? <Check size={18} /> : "3"}
               </span>
               <div>
-                <h3>Receive the market’s TEST token</h3>
+                <h3>Receive Hunch Credits</h3>
                 <p>
                   The token mint identifies which asset the vault accepts. Our
-                  real Devnet TEST treasury requires an authorized operator.
+                  real Devnet HUNCH treasury requires an authorized operator.
                 </p>
                 <button
                   className="hunch-button hunch-button-primary"
@@ -185,8 +200,8 @@ export function FundingDemo() {
                   onClick={() => dispatch({ type: "grant" })}
                 >
                   {state.grantUsed
-                    ? "1,000 demo TEST received"
-                    : "Receive 1,000 demo TEST"}
+                    ? "1,000 demo HUNCH received"
+                    : "Receive 1,000 demo HUNCH"}
                 </button>
               </div>
             </li>
@@ -200,13 +215,13 @@ export function FundingDemo() {
             Use your balance in the Fortnite market <ArrowRight size={14} />
           </Link>
         </section>
-        <section className="demo-panel exchange-panel">
+        <section id="conversion" className="demo-panel exchange-panel">
           <div className="demo-section-heading">
-            <h2>Solana exchange model</h2>
+            <h2>Convert SOL to Hunch Credits</h2>
             <span>SIMULATED AMM</span>
           </div>
           <p>
-            See how a SOL → TEST swap changes balances. This illustrative
+            See how a SOL → HUNCH swap changes balances. This illustrative
             exchange is separate from Hunch’s prediction contract.
           </p>
           <form onSubmit={submit}>
@@ -231,7 +246,7 @@ export function FundingDemo() {
             </div>
             <div className="swap-field swap-output">
               <span>
-                You receive <strong>TEST</strong>
+                You receive <strong>HUNCH</strong>
               </span>
               <strong>{number(quote)}</strong>
               <small>Whole demo tokens, rounded down</small>
@@ -258,7 +273,7 @@ export function FundingDemo() {
               <div className="stake-review">
                 <p>
                   Exchange {sol(lamports)} demo SOL for {number(quote)} demo
-                  TEST, plus 0.000005 demo SOL for the modeled fee.
+                  HUNCH, plus 0.000005 demo SOL for the modeled fee.
                 </p>
                 <button
                   className="hunch-button hunch-button-primary"
@@ -288,7 +303,7 @@ export function FundingDemo() {
             </p>
           </form>
           <p className="demo-caption">
-            No deployed TEST/SOL exchange or redeemability is implied. TEST has
+            No deployed HUNCH/SOL exchange or redeemability is implied. HUNCH has
             no cash value. Other market participants cannot trade against this
             model.
           </p>
@@ -305,7 +320,7 @@ export function FundingDemo() {
               <Wallet size={23} />
             </span>
             <h3>Your account</h3>
-            <strong>{number(state.tokens)} TEST</strong>
+            <strong>{number(state.tokens)} HUNCH</strong>
             <p>Available balance after funding, stakes, swaps, and claims.</p>
           </div>
           <ArrowRight size={22} className="ledger-arrow" />
@@ -315,11 +330,11 @@ export function FundingDemo() {
             </span>
             <h3>Market vault</h3>
             <strong>
-              {number(state.pool[0] + state.pool[1] - winnerClaim)} TEST
+              {number(state.pool[0] + state.pool[1] - winnerClaim)} HUNCH
             </strong>
             <p>
               Includes seeded simulated crowd stakes. Your locked stake:{" "}
-              {number(state.position[0] + state.position[1])} TEST.
+              {number(state.position[0] + state.position[1])} HUNCH.
             </p>
           </div>
           <ArrowRight size={22} className="ledger-arrow" />
@@ -331,7 +346,7 @@ export function FundingDemo() {
             <strong>
               {state.placement === null
                 ? "Awaiting result"
-                : `${number(payout(state))} TEST`}
+                : `${number(payout(state))} HUNCH`}
             </strong>
             <p>
               {state.claimed
@@ -358,7 +373,7 @@ export function FundingDemo() {
               <thead>
                 <tr>
                   <th scope="col">Action</th>
-                  <th scope="col">TEST change</th>
+                  <th scope="col">HUNCH change</th>
                   <th scope="col">SOL change</th>
                   <th scope="col">Demo receipt</th>
                 </tr>
@@ -366,7 +381,7 @@ export function FundingDemo() {
               <tbody>
                 {state.receipts.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.action}</td>
+                    <td>{r.action.replace(/\bTEST\b/g, "HUNCH")}</td>
                     <td className={r.tokens > 0 ? "positive-value" : ""}>
                       {r.tokens > 0 ? "+" : ""}
                       {number(r.tokens)}
@@ -413,7 +428,7 @@ export function FundingDemo() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            TEST mint <ExternalLink size={14} />
+            HUNCH mint <ExternalLink size={14} />
             <code>{MINT}</code>
           </a>
           <a

@@ -154,7 +154,7 @@ export default function App({ embedded = false }: { embedded?: boolean }) {
                       ? `${current.outcomes[current.winningOutcome]} wins`
                       : "The next chapter starts here."}
                   </span>
-                  <span>{formatTokens(current.totalPool)} TEST in pool</span>
+                  <span>{formatTokens(current.totalPool)} HUNCH in pool</span>
                 </div>
               </Card>
             )}
@@ -190,7 +190,7 @@ export default function App({ embedded = false }: { embedded?: boolean }) {
               <p>
                 {mode === "mock"
                   ? "All matches, stakes, and settlement shown here are simulated. No blockchain transactions are submitted."
-                  : "Predictions use nonredeemable Devnet TEST tokens. Results follow the authorized resolver."}
+                  : "Predictions use nonredeemable Devnet HUNCH tokens. Results follow the authorized resolver."}
               </p>
             </div>
           </aside>

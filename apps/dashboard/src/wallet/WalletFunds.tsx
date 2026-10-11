@@ -93,7 +93,7 @@ export function WalletFundsPage() {
       return accounts.value.reduce((total, account) => {
         const token = account.account.data.parsed.info.tokenAmount;
         if (token.decimals !== 0)
-          throw new Error("The configured TEST token must have zero decimals.");
+          throw new Error("The configured HUNCH token must have zero decimals.");
         return total + BigInt(token.amount);
       }, 0n);
     },
@@ -189,9 +189,9 @@ export function WalletFundsPage() {
               <span>Live prediction token</span>
               <strong>
                 {tokens.data === undefined ? "—" : tokens.data.toLocaleString()}{" "}
-                <small>TEST</small>
+                <small>HUNCH</small>
               </strong>
-              <p>TEST comes from the authorized team treasury.</p>
+              <p>Hunch Credits (HUNCH) come from the authorized team treasury.</p>
             </section>
           </div>
           {funds.balance.error && (
@@ -207,7 +207,7 @@ export function WalletFundsPage() {
           )}
           {tokens.error && (
             <p className="funds-error" role="alert">
-              Could not load TEST: {tokens.error.message}
+              Could not load HUNCH: {tokens.error.message}
             </p>
           )}
           <div className="funds-actions-grid">
@@ -246,7 +246,7 @@ export function WalletFundsPage() {
               </a>
               <p className="funds-note">
                 If the RPC faucet is rate limited, copy your address into the
-                official faucet. SOL and TEST have no cash value here.
+                official faucet. SOL and HUNCH have no cash value here.
               </p>
             </section>
             <section className="funds-action" id="send">
@@ -422,10 +422,10 @@ export function WalletFundsPage() {
         <p>
           {mode === "mock"
             ? "The main market workspace currently uses simulated credits. "
-            : "Live market stakes use TEST tokens rather than SOL. "}
+            : "Live market stakes use HUNCH tokens rather than SOL. "}
           The SypherPK livestream exhibition has its own simulated ledger.
           Adding Devnet SOL does not add exhibition credits or swap SOL for
-          TEST.
+          HUNCH.
         </p>
         <div>
           <Link to="/fortnite">

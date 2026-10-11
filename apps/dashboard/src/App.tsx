@@ -169,7 +169,7 @@ function MarketTable({
                 <strong className="tabular">
                   {formatTokens(market.totalPool)}
                 </strong>
-                <small> TEST</small>
+                <small> HUNCH</small>
               </td>
               {!compact && (
                 <td className="table-date" role="cell" data-label="Closes">
@@ -260,7 +260,7 @@ function Overview() {
     {
       label: "Total test-token pool",
       value: formatTokens(pool),
-      detail: "TEST · zero-decimal tokens",
+      detail: "HUNCH · zero-decimal tokens",
       icon: ArrowDownLeft,
     },
   ];
@@ -317,7 +317,7 @@ function Overview() {
                   <div>
                     <span>{application.name}</span>
                     <strong className="tabular">
-                      {formatTokens(application.totalPool)} <small>TEST</small>
+                      {formatTokens(application.totalPool)} <small>HUNCH</small>
                     </strong>
                   </div>
                   <span className={`pool-row-track pool-color-${index % 3}`}>
@@ -342,7 +342,7 @@ function Overview() {
             )}
           </div>
           <div className="panel-footnote">
-            Pooled stakes, measured in nonredeemable TEST tokens.
+            Pooled stakes, measured in nonredeemable HUNCH tokens.
           </div>
         </Card>
         <Card className="quickstart-card">
@@ -757,7 +757,7 @@ function CreateMarket() {
           </span>
           <h3>A few good defaults.</h3>
           <p>
-            hunch uses binary pooled predictions with integer TEST tokens. No
+            hunch uses binary pooled predictions with integer HUNCH tokens. No
             order books or fixed payout odds.
           </p>
           <div>
@@ -1315,7 +1315,7 @@ export default function App() {
             <span>
               {fundsPage ? "Devnet wallet · Test funds only" : exhibition ? "Browser exhibition · Nonredeemable credits" : mode === "mock"
                 ? client.shared ? "Shared simulation · Nonredeemable demo credits" : "Local simulation · Nonredeemable demo credits"
-                : "Devnet only · Nonredeemable TEST tokens"}
+                : "Devnet only · Nonredeemable HUNCH tokens"}
             </span>
           </footer>
         </main>

@@ -40,5 +40,5 @@ export function useDemo() {
 
 export function ExhibitionAccountBadge() {
   const { state } = useDemo();
-  return <Link to="/funding" className="exhibition-account-badge">{state.connected ? `${state.tokens.toLocaleString()} demo TEST` : "Fund exhibition account"}</Link>;
+  return <Link to="/funding" className="exhibition-account-badge">{state.connected ? `${state.tokens.toLocaleString()} demo HUNCH` : "Fund exhibition account"}</Link>;
 }

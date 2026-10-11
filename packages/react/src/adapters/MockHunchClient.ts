@@ -378,7 +378,7 @@ export class MockHunchClient implements HunchClient {
       params.amount <= 0n ||
       params.amount > this.balance(params.walletAddress)
     )
-      throw new Error("Insufficient TEST balance or invalid amount.");
+      throw new Error("Insufficient HUNCH balance or invalid amount.");
     const position = this.state.positions.find(
       (p) =>
         p.marketId === params.marketId &&
@@ -401,7 +401,7 @@ export class MockHunchClient implements HunchClient {
     this.event(
       market.id,
       "prediction",
-      `${params.amount} TEST committed to ${market.outcomes[params.outcome]} (simulated)`,
+      `${params.amount} HUNCH committed to ${market.outcomes[params.outcome]} (simulated)`,
     );
     this.save();
     return this.receipt();
@@ -440,7 +440,7 @@ export class MockHunchClient implements HunchClient {
     this.event(
       market.id,
       "claim",
-      `${eligible.amount} TEST claimed (simulated)`,
+      `${eligible.amount} HUNCH claimed (simulated)`,
     );
     this.save();
     return this.receipt();

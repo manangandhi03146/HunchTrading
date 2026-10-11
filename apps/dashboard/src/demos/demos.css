@@ -1018,3 +1018,18 @@
   }
 }
 .exhibition-account-badge { padding: 10px 13px; border: 1px solid var(--hunch-control-border); border-radius: 7px; color: var(--hunch-ink); background: var(--hunch-white); text-decoration: none; font-size: 12px; font-weight: 650; white-space: nowrap; }
+
+.broadcast-quotes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.broadcast-quotes > div { padding:16px; border:1px solid var(--hunch-line); border-radius:12px; display:grid; gap:8px; }
+.broadcast-quotes strong { font-size:clamp(22px,3vw,32px); font-variant-numeric:tabular-nums; }
+.broadcast-quotes small,.broadcast-quotes span { font-size:12px; }
+.broadcast-quotes p { grid-column:1/-1; font-size:12px; margin:0; }
+.quote-yes strong { color:var(--demo-yes); }
+.quote-no strong { color:var(--demo-no); }
+.conversion-journey { margin:20px 0; }
+.conversion-stages { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:20px; }
+.conversion-stages > div { min-width:0; }
+.conversion-stages strong { font-size:20px; overflow-wrap:anywhere; }
+.conversion-stages p { font-size:13px; line-height:1.6; }
+#conversion { scroll-margin-top:100px; }
+@media(max-width:700px) { .conversion-stages { grid-template-columns:1fr; } .conversion-stages > svg { transform:rotate(90deg); justify-self:center; } }
