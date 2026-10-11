@@ -1039,3 +1039,25 @@
 .odds-legend span:first-child { color:var(--demo-yes); }
 .odds-legend span:last-child { color:var(--demo-no); }
 @media(max-width:700px) { .conversion-stages { grid-template-columns:1fr; } .conversion-stages > svg { transform:rotate(90deg); justify-self:center; } }
+
+.creator-directory { margin:28px 0; }
+.creator-directory .panel-heading p { color:var(--hunch-muted); font-size:14px; }
+.creator-directory select { margin-left:8px; padding:9px; border:1px solid var(--hunch-line); border-radius:8px; background:var(--hunch-paper); color:var(--hunch-ink); }
+.creator-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.creator-card { display:flex; flex-direction:column; gap:12px; padding:24px; border:1px solid var(--hunch-line); border-radius:16px; background:var(--hunch-white); color:var(--hunch-ink); text-decoration:none; }
+.creator-card:hover { border-color:var(--hunch-success); }
+.creator-card h3 { display:flex; align-items:center; gap:8px; margin:0; font-size:24px; }
+.creator-card h3 svg { color:var(--hunch-success); }
+.creator-card p { margin:0; color:var(--hunch-muted); font-size:14px; }
+.creator-card > strong { line-height:1.5; flex:1; }
+.creator-game,.creator-verification { font-size:12px; color:var(--hunch-muted); }
+.creator-avatar { width:48px; height:48px; border-radius:14px; background:var(--hunch-success); color:var(--hunch-white); display:grid; place-items:center; font-size:28px; }
+.creator-market-actions { display:flex; gap:24px; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.creator-market-actions h2 { margin:0; }
+.creator-market-actions p { color:var(--hunch-muted); line-height:1.6; font-size:14px; }
+.creator-market-actions a { flex-shrink:0; }
+.linked-market-broadcast { margin-bottom:24px; max-width:900px; }
+@media(max-width:900px) { .creator-grid { grid-template-columns:1fr; } .creator-market-actions { flex-direction:column; align-items:flex-start; } }
+
+.creator-directory .panel-heading { flex-wrap:wrap; gap:16px; }
+.creator-directory .panel-heading label { white-space:nowrap; }

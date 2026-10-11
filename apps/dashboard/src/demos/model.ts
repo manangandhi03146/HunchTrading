@@ -53,6 +53,7 @@ export function initialDemo(): DemoState {
     exchangeTokens: 1_000_000,
   };
 }
+export type MatchCue = { second: number; label: string; detail: string; bias: number };
 export const CUES = [
   {
     second: 0,
@@ -97,8 +98,8 @@ export const CUES = [
     bias: 100,
   },
 ] as const;
-export function cueAt(second: number) {
-  return [...CUES].reverse().find((c) => c.second <= second) ?? CUES[0];
+export function cueAt(second: number, cues: readonly MatchCue[] = CUES) {
+  return [...cues].reverse().find((c) => c.second <= second) ?? cues[0];
 }
 export function share(pool: [number, number]) {
   return (pool[0] / (pool[0] + pool[1])) * 100;
@@ -121,7 +122,7 @@ export function quoteSwap(state: DemoState, input: number) {
 export type Action =
   | { type: "connect" | "faucet" | "grant" | "claim" | "reset" | "restartMarket" }
   | { type: "stake"; side: Side; amount: number }
-  | { type: "tick"; tick: number; second: number }
+  | { type: "tick"; tick: number; second: number; cues?: readonly MatchCue[] }
   | { type: "cue"; cue: string; bias: number }
   | { type: "resolve"; placement: number }
   | { type: "swap"; input: number };
@@ -270,7 +271,7 @@ export function demoReducer(state: DemoState, action: Action): DemoState {
         return state;
       let next = state;
       for (let tick = state.tick + 1; tick <= action.tick; tick++) {
-        const cue = cueAt(Math.min(action.second, tick * 4));
+        const cue = cueAt(Math.min(action.second, tick * 4), action.cues);
         next = crowd(next, cue.bias, cue.label, tick);
       }
       return next;

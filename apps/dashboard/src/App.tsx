@@ -1,5 +1,7 @@
 import { Home, MarketPage, Portfolio, Help, NotFound } from "./PublicPages";
 import { DemoProvider, ExhibitionAccountBadge } from "./demos/DemoProvider";
+import { CreatorDirectory, CreatorPage } from "./demos/CreatorPages";
+import { getCreator, creatorDescription } from "./demos/creators";
 import { FortniteDemo } from "./demos/FortniteDemo";
 import { FundingDemo } from "./demos/FundingDemo";
 import { FundsProvider } from "./wallet/FundsProvider";
@@ -444,6 +446,7 @@ function Markets() {
         }
       />
       <ModeNotice />
+      <CreatorDirectory />
       <Card className="markets-panel">
         <div className="table-toolbar">
           <label className="market-search">
@@ -522,13 +525,15 @@ function CreateMarket() {
   const { client, mode, notify } = useHunch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [question, setQuestion] = useState("");
-  const [outcomeA, setOutcomeA] = useState("");
-  const [outcomeB, setOutcomeB] = useState("");
+  const [searchParams] = useSearchParams();
+  const creator = getCreator(searchParams.get("creator"));
+  const [question, setQuestion] = useState(creator?.question ?? "");
+  const [outcomeA, setOutcomeA] = useState(creator ? "Yes" : "");
+  const [outcomeB, setOutcomeB] = useState(creator ? "No" : "");
   const [closing, setClosing] = useState(() =>
     localDatetime(Date.now() + 3600000),
   );
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(creator ? creatorDescription(creator) : "");
   const [validation, setValidation] = useState<
     Partial<Record<"question" | "outcome-a" | "outcome-b" | "closing", string>>
   >({});
@@ -624,7 +629,7 @@ function CreateMarket() {
                 placeholder="Who wins the championship final?"
               />
               <small id="question-hint">
-                This question appears at the top of your widget.
+                This question appears at the top of your market page.
               </small>
               {validation.question && (
                 <p className="form-field-error" id="question-error">
@@ -1178,7 +1183,7 @@ function RadioIcon(props: { size?: number }) {
 export default function App() {
   const { pathname } = useLocation();
   const { mode, client } = useHunch();
-  const exhibition = ["/fortnite", "/funding"].includes(pathname);
+  const exhibition = ["/fortnite", "/funding"].includes(pathname) || pathname.startsWith("/creators/");
   const fundsPage = pathname === "/wallet";
   return (
     <FundsProvider><DemoProvider><div className="dashboard-app">
@@ -1272,7 +1277,7 @@ export default function App() {
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={12} />
-            <strong>{fundsPage ? "Wallet funds" : pathname === "/fortnite" ? "Livestream demo" : pathname === "/funding" ? "Funding model" : "Prediction markets"}</strong>
+            <strong>{fundsPage ? "Wallet funds" : (pathname === "/fortnite" || pathname.startsWith("/creators/")) ? "Livestream demo" : pathname === "/funding" ? "Funding model" : "Prediction markets"}</strong>
           </div>
           <div className="topbar-actions">
             <ThemeSwitch />
@@ -1289,6 +1294,7 @@ export default function App() {
             <Route path="/overview" element={<Overview />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/creators/:creatorId" element={<CreatorPage />} />
             <Route path="/fortnite" element={<FortniteDemo />} />
             <Route path="/livestream" element={<Navigate to="/fortnite" replace />} />
             <Route path="/wallet" element={<WalletFundsPage />} />

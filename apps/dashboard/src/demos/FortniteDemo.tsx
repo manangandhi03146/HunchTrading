@@ -13,8 +13,9 @@ import {
   Wallet,
 } from "lucide-react";
 import { useDemo } from "./DemoProvider";
-import { CUES, cueAt, payout, share, type Side } from "./model";
-import { TwitchVod, VOD } from "./TwitchVod";
+import { cueAt, payout, share, type Side } from "./model";
+import { TwitchVod } from "./TwitchVod";
+import { CREATORS, type Creator } from "./creators";
 import "./demos.css";
 const number = (n: number) => n.toLocaleString();
 function Clock({ second }: { second: number }) {
@@ -25,13 +26,15 @@ function Clock({ second }: { second: number }) {
     </>
   );
 }
-export function FortniteDemo() {
+export function FortniteDemo({ creator = CREATORS[0] }: { creator?: Creator }) {
+  const source = creator.source;
+  const cues = creator.cues;
   const { state, dispatch } = useDemo();
   const [playing, setPlaying] = useState(false);
   const [second, setSecond] = useState(0);
   const [clock, setClock] = useState<"presentation" | "vod">("vod");
   const [ready, setReady] = useState(false);
-  const [seekTo, setSeekTo] = useState<number | null>(VOD.start);
+  const [seekTo, setSeekTo] = useState<number | null>(source.start);
   const [side, setSide] = useState<Side>(0);
   const [amount, setAmount] = useState("100");
   const [review, setReview] = useState(false);
@@ -39,7 +42,7 @@ export function FortniteDemo() {
   const [placement, setPlacement] = useState("9");
   const [resetConfirm, setResetConfirm] = useState(false);
   const wasClaimed = useRef(state.claimed);
-  const cue = cueAt(second);
+  const cue = cueAt(second, cues);
   const yes = share(state.pool);
   const total = state.pool[0] + state.pool[1];
   const change = yes - (state.history.at(-2)?.share ?? yes);
@@ -69,13 +72,13 @@ export function FortniteDemo() {
   useEffect(() => {
     if (!playing || state.placement !== null) return;
     const tick = Math.floor(second / 4);
-    if (tick > state.tick) dispatch({ type: "tick", tick, second });
+    if (tick > state.tick) dispatch({ type: "tick", tick, second, cues });
     if (second >= 220) {
       dispatch({ type: "resolve", placement: 9 });
       setPlaying(false);
       setReview(false);
     }
-  }, [second, playing, state.tick, state.placement, dispatch]);
+  }, [second, playing, state.tick, state.placement, dispatch, cues]);
   useEffect(() => {
     if (state.claimed && !wasClaimed.current)
       setMessage(
@@ -116,10 +119,10 @@ export function FortniteDemo() {
     );
   }
   function jump() {
-    const next = CUES.find((c) => c.second > second);
+    const next = cues.find((c) => c.second > second);
     if (next) {
       setSecond(next.second);
-      if (clock === "vod") setSeekTo(VOD.start + next.second);
+      if (clock === "vod") setSeekTo(source.start + next.second);
       setPlaying(true);
     }
   }
@@ -127,7 +130,7 @@ export function FortniteDemo() {
     dispatch({ type: "reset" });
     setSecond(0);
     setPlaying(false);
-    setSeekTo(VOD.start);
+    setSeekTo(source.start);
     setReview(false);
     setMessage(
       "Exhibition reset. Fund a new demo account to participate again.",
@@ -144,12 +147,18 @@ export function FortniteDemo() {
         <div>
           <span className="demo-eyebrow">LIVESTREAM DEMO</span>
           <h1>A hunch, in the middle of the action.</h1>
-          <p>Watch SypherPK play Fortnite. Back a finish. Follow the crowd.</p>
+          <p>{creator.name} · {creator.game}. Back an outcome. Follow the crowd.</p>
+          <p>{creator.about}</p>
+          <Link to="/markets" className="panel-link">← All creators & markets</Link>
         </div>
         <Link to="/funding" className="hunch-button hunch-button-secondary">
           <Wallet size={16} /> Fund demo account
         </Link>
       </div>
+      <section className="demo-panel creator-market-actions">
+        <div><h2>Make a market for this match</h2><p>Use this creator, source and Yes / No question as a starting point. Review the rules and deadline before creating a shareable market.</p></div>
+        <Link className="hunch-button hunch-button-primary" to={`/markets/new?creator=${creator.slug}`}>Create match market <ArrowRight size={16} /></Link>
+      </section>
       <div className="demo-disclosure">
         <Radio size={16} />
         <span>
@@ -162,28 +171,29 @@ export function FortniteDemo() {
         <div className="vod-column">
           <section className="demo-panel video-panel">
             <div className="streamer-heading">
-              <div className="streamer-avatar">S</div>
+              <div className="streamer-avatar">{creator.name.slice(0, 1)}</div>
               <div>
                 <a
-                  href="https://www.twitch.tv/sypherpk"
+                  href={`https://www.twitch.tv/${source.channel.toLowerCase()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  SypherPK{" "}
+                  {creator.name}{" "}
                   <ShieldCheck size={16} aria-label="Twitch Verified Partner" />
                 </a>
-                <p>Fortnite · Twitch Verified Partner</p>
+                <p>{creator.game} · Twitch Verified Partner</p>
               </div>
               <span className="demo-replay-label">DEMO BROADCAST</span>
             </div>
             <TwitchVod
+              source={source}
               playing={playing}
               seekTo={seekTo}
               onReady={setReady}
               onTime={(time, paused) => {
                 if (clock !== "vod" || !ready || state.placement !== null || !Number.isFinite(time)) return;
                 setPlaying(!paused);
-                if (!paused) setSecond(Math.max(0, Math.min(220, time - VOD.start)));
+                if (!paused) setSecond(Math.max(0, Math.min(220, time - source.start)));
               }}
             />
             <div className="broadcast-quotes" aria-label="Changing demo outcome quotes">
@@ -254,14 +264,14 @@ export function FortniteDemo() {
               </div>
             </div>
             <div className="cue-timeline">
-              {CUES.map((c) => (
+              {cues.map((c) => (
                 <button
                   key={c.second}
                   disabled={state.placement !== null}
                   className={c.second <= second ? "cue-passed" : ""}
                   onClick={() => {
                     setSecond(c.second);
-                    if (clock === "vod") setSeekTo(VOD.start + c.second);
+                    if (clock === "vod") setSeekTo(source.start + c.second);
                     setPlaying(true);
                   }}
                 >
@@ -290,37 +300,37 @@ export function FortniteDemo() {
                   onClick={() =>
                     dispatch({
                       type: "cue",
-                      cue: "Presenter: elimination observed",
+                      cue: `Presenter: ${cues[1].label}`,
                       bias: 95,
                     })
                   }
                   disabled={state.placement !== null}
                 >
-                  Elimination · Yes reaction
+                  {cues[1].label} · Yes reaction
                 </button>
                 <button
                   onClick={() =>
                     dispatch({
                       type: "cue",
-                      cue: "Presenter: storm pressure observed",
+                      cue: `Presenter: ${cues[2].label}`,
                       bias: 5,
                     })
                   }
                   disabled={state.placement !== null}
                 >
-                  Storm pressure · No reaction
+                  {cues[2].label} · No reaction
                 </button>
               </div>
               <label>
-                Modeled final placement{" "}
-                <input
+                {creator.ranked ? "Modeled final placement" : "Modeled map result"}{" "}
+                {creator.ranked ? <input
                   type="number"
                   min="1"
                   max="100"
                   step="1"
                   value={placement}
                   onChange={(e) => setPlacement(e.target.value)}
-                />
+                /> : <select value={placement} onChange={(e) => setPlacement(e.target.value)}><option value="9">Yes · featured team wins</option><option value="10">No · opposing team wins</option></select>}
               </label>
               <button
                 className="hunch-button hunch-button-secondary"
@@ -399,10 +409,9 @@ export function FortniteDemo() {
               </span>
               <span>YES / NO</span>
             </div>
-            <h2>Will SypherPK finish higher than 10th?</h2>
+            <h2>{creator.question}</h2>
             <p className="market-rule">
-              Yes = 1st–9th. No = 10th or lower. The scripted exhibition
-              finishes 9th.
+              {creator.rule}
             </p>
             <div className="demo-pool-options">
               {([0, 1] as Side[]).map((s) => (
@@ -606,7 +615,7 @@ export function FortniteDemo() {
       <div className="demo-bottom-note">
         <span>
           Twitch partner status identifies the source channel. Hunch has no
-          affiliation with SypherPK, Twitch, or Epic Games.
+          affiliation with {creator.name}, Twitch, or the game publisher.
         </span>
         {resetConfirm ? (
           <span>

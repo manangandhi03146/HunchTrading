@@ -1,3 +1,5 @@
+import { MarketBroadcast } from "./demos/CreatorPages";
+import { creatorFromDescription } from "./demos/creators";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CheckCircle2, Layers3, Share2 } from "lucide-react";
@@ -22,6 +24,7 @@ export function MarketPage() {
   const { marketId = "" } = useParams();
   const query = useMarket(marketId);
   const { mode, client } = useHunch();
+  const creator = creatorFromDescription(query.data?.description);
   const { theme } = useTheme();
   const [copyStatus, setCopyStatus] = useState("");
   async function share() {
@@ -29,7 +32,8 @@ export function MarketPage() {
     catch { setCopyStatus(`Copy this link: ${window.location.href}`); }
   }
   return <><Link className="panel-link" to="/markets">← All markets</Link>{query.isPending ? <Skeleton /> : query.error ? <ErrorState error={query.error} retry={() => { void query.refetch(); }} /> : query.data && <>
-    <div className="page-title"><div><h1>{query.data.question}</h1><p>{query.data.description ?? "Pick an outcome and follow the shared pool."}</p></div><Button variant="secondary" onClick={() => { void share(); }}><Share2 size={16} /> Share market</Button></div><p role="status" className="share-status">{copyStatus}</p>
+    <div className="page-title"><div><h1>{query.data.question}</h1><p>{(creator ? query.data.description?.split("\n").slice(2).join("\n") : query.data.description) ?? "Pick an outcome and follow the shared pool."}</p></div><Button variant="secondary" onClick={() => { void share(); }}><Share2 size={16} /> Share market</Button></div><p role="status" className="share-status">{copyStatus}</p>
+    {creator && <MarketBroadcast key={creator.slug} creator={creator} />}
     <div className="market-detail-layout"><PredictionMarket marketId={marketId} theme={theme} /><Card className="market-facts"><h2>About this market</h2><dl><dt>Predictions close</dt><dd>{new Date(query.data.closesAt * 1000).toLocaleString()}</dd><dt>Total pool</dt><dd>{formatTokens(query.data.totalPool)} HUNCH</dd><dt>Settlement</dt><dd>{query.data.status === "resolved" ? `Winner: ${query.data.outcomes[query.data.winningOutcome ?? 0]}` : "Waiting for an authorized result after the deadline."}</dd><dt>Market ID</dt><dd className="break-id">{marketId}</dd></dl><p>{mode === "mock" ? client.shared ? "Shared simulated credits. Anyone using this backend can open this market link. The development ledger resets when the backend restarts." : "Simulated credits. This local-only demo stays on this device." : "Solana Devnet test tokens. No cash value."}</p><Link to={`/integration?market=${encodeURIComponent(marketId)}`}>Embed this market <ArrowRight size={14} /></Link></Card></div>
   </>}</>;
 }

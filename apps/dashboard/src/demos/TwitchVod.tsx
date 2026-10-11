@@ -6,6 +6,7 @@ export const VOD = {
   url: "https://www.twitch.tv/videos/2895387839",
   title: "THE BEST 30 YEAR OLD FORTNITE PLAYER IN THE WORLD",
 };
+export type BroadcastSource = { id: string; channel: string; start: number; url: string; title: string };
 type Player = {
   getCurrentTime(): number;
   isPaused(): boolean;
@@ -64,7 +65,9 @@ export function TwitchVod({
   onReady,
   playing,
   seekTo,
+  source = VOD,
 }: {
+  source?: BroadcastSource;
   onTime: (second: number, paused: boolean) => void;
   onReady: (ready: boolean) => void;
   playing: boolean;
@@ -88,13 +91,13 @@ export function TwitchVod({
       .then((api) => {
         if (disposed || !host.current) return;
         instance = new api.Player(host.current, {
-          video: `v${VOD.id}`,
+          video: `v${source.id}`,
           parent: [location.hostname],
           width: "100%",
           height: "100%",
           autoplay: false,
           muted: true,
-          time: "0h30m0s",
+          time: `${Math.floor(source.start / 3600)}h${Math.floor(source.start / 60) % 60}m${source.start % 60}s`,
         });
         player.current = instance;
         const markReady = () => {
@@ -136,7 +139,7 @@ export function TwitchVod({
       player.current = null;
       host.current?.replaceChildren();
     };
-  }, [attempt]);
+  }, [attempt, source.id, source.start]);
   useEffect(() => {
     if (!ready || !player.current) return;
     try {
@@ -155,7 +158,7 @@ export function TwitchVod({
   }, [seekTo, ready]);
   return (
     <>
-      <div className="vod-player" aria-label="SypherPK Fortnite demo broadcast">
+      <div className="vod-player" aria-label={`${source.channel} demo broadcast`}>
         <div ref={host} className="vod-mount" />
       </div>
       {error && (
@@ -170,7 +173,7 @@ export function TwitchVod({
         </div>
       )}
       <div className="vod-attribution">
-        <a href={VOD.url} target="_blank" rel="noopener noreferrer">
+        <a href={source.url} target="_blank" rel="noopener noreferrer">
           Watch original on Twitch ↗
         </a>
         <span>Recorded gameplay. No streamer endorsement.</span>
