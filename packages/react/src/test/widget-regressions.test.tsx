@@ -112,7 +112,7 @@ describe("widget integration regressions", () => {
         <PredictionMarket marketId="race-42" />
       </HunchProvider>,
     );
-    expect(await screen.findByText("1,000 TEST available")).toBeInTheDocument();
+    expect(await screen.findByText("1,000 HUNCH available")).toBeInTheDocument();
     await userEvent
       .setup()
       .click(screen.getByRole("radio", { name: /Player A/ }));
@@ -124,11 +124,11 @@ describe("widget integration regressions", () => {
     expect(
       screen.queryByText("Who takes the checkered flag?"),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText("1,000 TEST available")).not.toBeInTheDocument();
+    expect(screen.queryByText("1,000 HUNCH available")).not.toBeInTheDocument();
     await waitFor(() => expect(second.getMarket).toHaveBeenCalled());
     await act(async () => release(nextMarket));
     expect(await screen.findByText("Replacement market")).toBeInTheDocument();
-    expect(await screen.findByText("12 TEST available")).toBeInTheDocument();
+    expect(await screen.findByText("12 HUNCH available")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /Player A/ })).not.toBeChecked();
   });
   it("shows refreshed-balance validation inside the themed review modal", async () => {
@@ -154,12 +154,12 @@ describe("widget integration regressions", () => {
         walletAddress: DEMO_WALLET,
       });
     });
-    await screen.findByText("5 TEST available");
+    await screen.findByText("5 HUNCH available");
     await user.click(
       within(dialog).getByRole("button", { name: "Confirm prediction" }),
     );
     expect(within(dialog).getByRole("alert")).toHaveTextContent(
-      "exceeds your available TEST balance",
+      "exceeds your available HUNCH balance",
     );
     expect(predict).toHaveBeenCalledTimes(1);
   });

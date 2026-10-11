@@ -7,14 +7,15 @@ export default defineConfig({
   server: { proxy: { "/v1": { target: "http://127.0.0.1:8787", changeOrigin: true }, "/health": { target: "http://127.0.0.1:8787", changeOrigin: true } } },
   plugins: [themeBootstrap(), react(), tailwindcss()],
   resolve: {
-    alias: {
-      "@hunch/react": fileURLToPath(
+    alias: [
+      {find: /^buffer$/, replacement: "buffer/index.js"},
+      {find: "@hunch/react", replacement: fileURLToPath(
         new URL("../../packages/react/src/index.ts", import.meta.url),
-      ),
-      "@hunch/sdk": fileURLToPath(
+      )},
+      {find: "@hunch/sdk", replacement: fileURLToPath(
         new URL("../../packages/sdk/src/index.ts", import.meta.url),
-      ),
-    },
+      )},
+    ],
   },
   build: {
     target: "es2020",

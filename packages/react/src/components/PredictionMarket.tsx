@@ -84,9 +84,9 @@ function PredictionMarketContent({
       if (outcome === null)
         throw new Error("Choose an outcome before continuing.");
       if (balance.isError)
-        throw new Error("Refresh your TEST balance before confirming.");
+        throw new Error("Refresh your HUNCH balance before confirming.");
       if (balance.data === undefined)
-        throw new Error("Wait until your TEST balance is available.");
+        throw new Error("Wait until your HUNCH balance is available.");
       const stake = parseStake(amount, balance.data);
       setFieldError("");
       return stake;
@@ -203,7 +203,7 @@ function PredictionMarketContent({
                     <p>
                       {mode === "mock"
                         ? "Try the complete flow with a simulated account."
-                        : "Connect a Solana wallet to predict with Devnet TEST."}
+                        : "Connect a Solana wallet to predict with Devnet HUNCH."}
                     </p>
                     {showWalletButton && <WalletButton />}
                   </div>
@@ -234,7 +234,7 @@ function PredictionMarketContent({
                       <WalletAddress />
                       <span>
                         {positions.data?.reduce((sum, p) => sum + p.amount, 0n)
-                          ? `${formatTokens(positions.data.reduce((sum, p) => sum + p.amount, 0n))} TEST committed`
+                          ? `${formatTokens(positions.data.reduce((sum, p) => sum + p.amount, 0n))} HUNCH committed`
                           : "No position yet"}
                       </span>
                       {showWalletButton && <WalletButton />}
@@ -279,7 +279,7 @@ function PredictionMarketContent({
                 >
                   <Dialog.Title>Review your prediction</Dialog.Title>
                   <Dialog.Description>
-                    Commit {amount} TEST to{" "}
+                    Commit {amount} HUNCH to{" "}
                     {outcome === null
                       ? "your selected outcome"
                       : market.outcomes[outcome]}

@@ -426,14 +426,14 @@ export class AnchorMarketAdapter implements MarketAdapter {
       tokenAccount = explicitToken ?? ata;
       if (userAccount) {
         const token = this.decodeToken(tokenAccount, userAccount, user, this.mint);
-        if (token.amount < amount) throw new HunchError("INSUFFICIENT_FUNDS", "Wallet token account has insufficient TEST base units", { ...details, tokenAccount: tokenAccount.toBase58(), available: token.amount.toString() });
+        if (token.amount < amount) throw new HunchError("INSUFFICIENT_FUNDS", "Wallet token account has insufficient HUNCH base units", { ...details, tokenAccount: tokenAccount.toBase58(), available: token.amount.toString() });
       } else {
         if (explicitToken) throw new HunchError("INVALID_INPUT", "Explicit token account does not exist", details);
         // A new ATA has no tokens. Select a funded wallet-owned source, never mint.
         const owned = await this.connection.getTokenAccountsByOwner(user, { mint: this.mint }, "confirmed");
         const candidates = owned.value.map(({ pubkey, account }) => ({ pubkey, token: this.decodeToken(pubkey, account, user, this.mint, true) }))
           .filter(({ token }) => !token.isFrozen && token.amount >= amount).sort((a, b) => a.pubkey.toBase58().localeCompare(b.pubkey.toBase58()));
-        if (!candidates.length) throw new HunchError("INSUFFICIENT_FUNDS", "No wallet-owned TEST account has enough tokens; obtain TEST from its mint authority or a funded holder", details);
+        if (!candidates.length) throw new HunchError("INSUFFICIENT_FUNDS", "No wallet-owned HUNCH account has enough tokens; obtain HUNCH from its mint authority or a funded holder", details);
         if (createAssociatedTokenAccount) { ataMissing = true; source = candidates[0].pubkey; }
         else tokenAccount = candidates[0].pubkey;
       }

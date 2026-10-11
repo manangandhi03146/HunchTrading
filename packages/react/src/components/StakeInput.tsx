@@ -29,7 +29,7 @@ export function StakeInput({
               ? "Loading balance…"
               : balance === undefined
                 ? "Balance unavailable"
-                : `${formatTokens(balance)} TEST available`}
+                : `${formatTokens(balance)} HUNCH available`}
         </span>
       </div>
       <div className="hunch-input-wrap">
@@ -45,7 +45,7 @@ export function StakeInput({
           disabled={disabled}
           placeholder="Enter whole tokens"
         />
-        <span>TEST</span>
+        <span>HUNCH</span>
       </div>
       {error && (
         <p className="hunch-field-error" id={`${id}-error`} role="alert">
