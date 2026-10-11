@@ -26,7 +26,7 @@ export function WalletButton() {
       onClick={walletAddress ? disconnect : demoConnect}
     >
       <Wallet size={15} />
-      {walletAddress ? "Demo account connected" : "Connect demo account"}
+      {walletAddress ? "Disconnect demo account" : "Connect demo account"}
       {walletAddress && <LogOut size={14} />}
     </Button>
   );

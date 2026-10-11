@@ -13,15 +13,12 @@
 
 .hunch-widget {
   container-type: inline-size;
-  padding: 24px;
   border: 1px solid var(--hunch-widget-border);
-  border-radius: 18px;
   background: var(--hunch-widget-surface);
   min-width: 0;
 }
 .hunch-widget h2 {
   margin: 0;
-  font-size: 22px;
   font-weight: 600;
   line-height: 1.3;
   text-wrap: balance;
@@ -38,9 +35,7 @@
 .hunch-logo {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  font-size: 21px;
-  font-weight: 650;
+  font-size: 20px;
   color: var(--hunch-widget-text);
   white-space: nowrap;
 }
@@ -53,9 +48,6 @@
   place-items: center;
   height: 32px;
   width: 32px;
-  background: var(--hunch-widget-primary);
-  color: white;
-  border-radius: 9px;
 }
 .hunch-logo-small .hunch-logomark {
   width: 26px;
@@ -72,10 +64,7 @@
   gap: 6px;
   padding: 4px 9px;
   border: 1px solid var(--hunch-widget-border);
-  border-radius: 6px;
   color: var(--hunch-widget-muted);
-  font-size: 14px;
-  font-weight: 600;
   white-space: nowrap;
   line-height: 1.4;
 }
@@ -85,30 +74,11 @@
   border-radius: 50%;
   background: currentColor;
 }
-.hunch-badge-success {
-  color: #6ee7b7;
-  background: #10b9810c;
-  border-color: #10b98130;
-}
-.hunch-badge-warning {
-  color: #fbbf24;
-  background: #f59e0b0c;
-  border-color: #f59e0b30;
-}
-.hunch-badge-violet {
-  color: #c4b5fd;
-  background: #8b5cf60c;
-  border-color: #8b5cf630;
-}
 .hunch-simulation {
   margin-top: 17px;
   padding: 6px 8px;
-  border: 1px solid #f59e0b22;
-  background: #f59e0b08;
-  color: #bba16c;
+  border: 1px solid var(--hunch-widget-border);
   border-radius: 5px;
-  font-size: 12px;
-  font-weight: 600;
   text-align: center;
 }
 .hunch-question {
@@ -146,8 +116,6 @@
   flex-direction: column;
   min-width: 0;
   border: 1px solid var(--hunch-widget-control-border);
-  border-radius: 10px;
-  padding: 15px 14px;
   cursor: pointer;
   background: var(--hunch-widget-elevated);
 }
@@ -172,29 +140,22 @@
     var(--hunch-widget-surface)
   );
 }
-.hunch-outcome-winner {
-  border-color: #10b98166;
-}
 .hunch-outcome-top {
   display: flex;
   justify-content: space-between;
   gap: 4px;
   color: var(--hunch-widget-muted);
-  font-size: 14px;
   align-items: center;
 }
 .hunch-outcome-name {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .hunch-outcome-selected .hunch-outcome-top {
   color: var(--hunch-widget-primary);
 }
 .hunch-outcome strong {
-  font-size: 33px;
   line-height: 1.4;
-  font-weight: 550;
   font-variant-numeric: tabular-nums;
   margin-top: 7px;
 }
@@ -205,7 +166,6 @@
   margin-left: 2px;
 }
 .hunch-outcome-caption {
-  font-size: 12px;
   color: var(--hunch-widget-muted);
 }
 .hunch-pool {
@@ -226,15 +186,13 @@
   font-variant-numeric: tabular-nums;
 }
 .hunch-distribution-head small {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--hunch-widget-muted);
   font-weight: 400;
 }
 .hunch-distribution-track {
   display: flex;
-  height: 5px;
   overflow: hidden;
-  background: #505068;
   border-radius: 3px;
   margin-top: 10px;
 }
@@ -245,9 +203,7 @@
 }
 .hunch-pool p {
   color: var(--hunch-widget-muted);
-  font-size: 12px;
   margin: 8px 0 0;
-  line-height: 1.5;
 }
 .hunch-stake-label {
   display: flex;
@@ -258,7 +214,7 @@
   margin-bottom: 8px;
 }
 .hunch-stake-label > span {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--hunch-widget-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -291,7 +247,6 @@
 }
 .hunch-field-error {
   font-size: 14px;
-  color: #fb7185;
   margin: 8px 0;
 }
 .hunch-button {
@@ -299,7 +254,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 44px;
   border-radius: 8px;
   padding: 9px 14px;
   border: 1px solid transparent;
@@ -366,7 +321,6 @@
   margin-top: 17px;
 }
 .hunch-connect p {
-  font-size: 14px;
   color: var(--hunch-widget-muted);
 }
 .hunch-connect .hunch-button {
@@ -378,14 +332,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 12px;
   color: var(--hunch-widget-muted);
   margin-top: 13px;
 }
 .hunch-account .hunch-button {
   padding: 4px 0;
   min-height: 25px;
-  font-size: 12px;
+  font-size: 14px;
   border: 0;
   background: transparent;
 }
@@ -409,10 +362,8 @@
   margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
   align-items: center;
   color: var(--hunch-widget-muted);
-  font-size: 12px;
 }
 .hunch-widget-footer > span {
   margin-left: auto;
@@ -422,9 +373,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 12px;
-  border: 1px solid #ef444433;
-  background: #ef444408;
-  color: #fda4af;
+  border: 1px solid var(--hunch-widget-border);
   border-radius: 8px;
   font-size: 14px;
   line-height: 1.6;
@@ -436,6 +385,7 @@
   margin-top: 2px;
 }
 .hunch-text-button {
+  min-height: 44px;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -446,7 +396,6 @@
   text-decoration: underline;
 }
 .hunch-text-link {
-  color: #c4b5fd;
   font-size: 14px;
   display: inline-flex;
   align-items: center;
@@ -465,20 +414,18 @@
   font-size: 14px;
 }
 .hunch-transaction-label {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--hunch-widget-muted);
 }
 .hunch-claim {
   padding: 16px;
-  border: 1px solid #10b98133;
+  border: 1px solid var(--hunch-widget-border);
   border-radius: 10px;
-  background: #10b98106;
 }
 .hunch-claim-heading {
   display: flex;
   gap: 10px;
   align-items: center;
-  color: #6ee7b7;
 }
 .hunch-claim-heading div {
   display: flex;
@@ -486,30 +433,12 @@
 }
 .hunch-claim-heading small {
   color: var(--hunch-widget-muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .hunch-claim-heading strong {
-  font-size: 15px;
-}
-.hunch-theme-light .hunch-badge-success,
-.hunch-theme-light .hunch-claim-heading {
-  color: #047857;
-}
-.hunch-theme-light .hunch-badge-warning,
-.hunch-theme-light .hunch-simulation {
-  color: #854d0e;
-}
-.hunch-theme-light .hunch-badge-violet,
-.hunch-theme-light .hunch-outcome-selected .hunch-outcome-top,
-.hunch-theme-light .hunch-text-link {
-  color: #6d28d9;
-}
-.hunch-theme-light .hunch-error,
-.hunch-theme-light .hunch-field-error {
-  color: #be123c;
+  font-size: 16px;
 }
 .hunch-claim p {
-  font-size: 14px;
   color: var(--hunch-widget-muted);
 }
 .hunch-claim-amount {
@@ -522,7 +451,7 @@
   color: var(--hunch-widget-muted);
 }
 .hunch-claim-amount strong {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--hunch-widget-text);
   font-variant-numeric: tabular-nums;
 }
@@ -544,7 +473,6 @@
 }
 .hunch-waiting p {
   margin: 0;
-  font-size: 14px;
 }
 .hunch-card {
   background: var(--hunch-widget-surface);
@@ -600,9 +528,6 @@
 .hunch-toast > span {
   display: block;
   padding: 13px 18px;
-  background: #20202e;
-  color: #f8fafc;
-  border: 1px solid #3b3b52;
   border-radius: 10px;
   box-shadow: 0 10px 30px #0004;
   font-size: 14px;
@@ -610,15 +535,26 @@
 .hunch-wallet-error {
   margin: 12px;
   padding: 12px;
-  background: #421722;
-  border: 1px solid #ef444450;
+  background: color-mix(
+    in srgb,
+    var(--hunch-widget-danger) 5%,
+    var(--hunch-widget-surface)
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--hunch-widget-danger) 25%,
+      var(--hunch-widget-surface)
+    );
   border-radius: 8px;
-  color: #fecdd3;
+  color: var(--hunch-widget-danger);
   display: flex;
   justify-content: space-between;
   font-size: 14px;
 }
 .hunch-wallet-error button {
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -629,7 +565,6 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: #000a;
 }
 .hunch-dialog {
   position: fixed;
@@ -653,12 +588,6 @@
   font-size: 14px;
   line-height: 1.8;
 }
-.hunch-dialog .hunch-field-error {
-  color: #fb7185;
-}
-.hunch-dialog.hunch-theme-light .hunch-field-error {
-  color: #be123c;
-}
 .hunch-dialog-actions {
   margin-top: 24px;
   display: flex;
@@ -670,13 +599,11 @@
   top: 14px;
   right: 14px;
   background: transparent;
-  color: #94a3b8;
   border: 0;
   cursor: pointer;
 }
 .hunch-copy-feedback {
   display: block;
-  color: #fda4af;
   font-size: 14px;
   margin-top: 6px;
 }
@@ -690,7 +617,7 @@
 }
 @container (max-width:300px) {
   .hunch-question h2 {
-    font-size: 19px;
+    font-size: 18px;
   }
   .hunch-outcome {
     padding: 12px 9px;
@@ -705,9 +632,6 @@
   .hunch-stake-label {
     flex-wrap: wrap;
   }
-}
-.hunch-widget-compact {
-  padding: 17px;
 }
 @media (prefers-reduced-motion: reduce) {
   .hunch-button {
@@ -743,7 +667,7 @@
   padding-top: 24px;
 }
 .hunch-badge {
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 5px;
   font-weight: 600;
 }
@@ -803,7 +727,7 @@
   );
 }
 .hunch-simulation {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   border-color: color-mix(
     in srgb,
@@ -844,7 +768,7 @@
 .hunch-account,
 .hunch-claim p,
 .hunch-waiting p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .hunch-distribution-track {
@@ -875,7 +799,7 @@
   );
 }
 .hunch-widget-footer {
-  font-size: 11px;
+  font-size: 14px;
   gap: 6px;
 }
 .hunch-error,
@@ -917,6 +841,26 @@
 .hunch-dialog-close {
   color: var(--hunch-widget-muted);
   padding: 6px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.hunch-claim-history {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.hunch-claim-history > strong {
+  font-weight: 650;
+}
+.hunch-claim-history > p {
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) {
+  .hunch-stake input {
+    font-size: 16px;
+  }
 }
 .hunch-dialog-overlay {
   background: #102a2299;
@@ -931,16 +875,16 @@
 }
 @container (max-width: 300px) {
   .hunch-widget h2 {
-    font-size: 21px;
+    font-size: 20px;
   }
   .hunch-outcome {
     padding: 12px 10px;
   }
   .hunch-outcome strong {
-    font-size: 27px;
+    font-size: 28px;
   }
   .hunch-outcome-top {
-    font-size: 13px;
+    font-size: 14px;
   }
   .hunch-widget-top {
     flex-wrap: wrap;

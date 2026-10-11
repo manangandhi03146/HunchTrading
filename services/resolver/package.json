@@ -1,22 +1,46 @@
 {
   "name": "@hunch/resolver",
   "version": "0.1.0",
-  "description": "hunch resolver — verifies signed game results and submits on-chain resolution.",
+  "description": "Hunch signed-result resolver and shared demo API",
   "type": "module",
+  "main": "dist/public.js",
+  "types": "dist/public.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/public.d.ts",
+      "import": "./dist/public.js"
+    }
+  },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "build": "tsc -p tsconfig.json"
+    "dev": "node --watch --import tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "demo": "node --import tsx src/demo.ts",
+    "register": "node --import tsx src/register.ts",
+    "sign-event": "node --import tsx src/sign-event.ts",
+    "submit-event": "node --import tsx src/submit-event.ts",
+    "reconcile": "node --import tsx src/reconcile.ts",
+    "shared": "node --import tsx src/shared-dev.ts",
+    "demo:key": "node --import tsx src/shared-key.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
     "@hunch/sdk": "*",
-    "@solana/web3.js": "^1.95.0",
-    "express": "^4.19.0",
-    "tweetnacl": "^1.0.3"
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.6.0",
+    "tweetnacl": "^1.0.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "tsx": "^4.16.0",
-    "typescript": "^5.5.0"
+    "@coral-xyz/anchor": "0.32.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.18.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
   }
 }

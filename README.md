@@ -1,3 +1,5 @@
+> Full app setup and hosting: [docs/full-app-hosting.md](docs/full-app-hosting.md). Run `npm run dev:shared` and `npm run dev` in separate terminals.
+
 # hunch
 
 **Embeddable on-chain prediction markets on Solana.** Any game or app can drop

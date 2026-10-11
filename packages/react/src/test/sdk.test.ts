@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { Hunch, type Outcome } from "@hunch/sdk";
+import { LegacyHunch as Hunch, type Outcome } from "@hunch/sdk";
 
 function setup() {
   const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);

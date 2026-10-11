@@ -92,13 +92,13 @@ describe("adapter contract", () => {
       5n,
     );
   });
-  it("fails explicitly when live SDK capabilities are missing", async () => {
+  it("rejects invalid live market IDs and simulated receipts", async () => {
     const client = new SdkHunchClient({
       connection: new Connection("https://api.devnet.solana.com"),
       getWallet: () => ({ publicKey: null }),
     });
     await expect(client.getClaimableAmount("id", "wallet")).rejects.toThrow(
-      "getClaimableAmount SDK binding",
+      "Solana public key",
     );
     await expect(client.newDemoRace()).rejects.toThrow("cannot be reset");
     await expect(

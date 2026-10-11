@@ -186,6 +186,7 @@ function PredictionMarketContent({
                     setFieldError("");
                   }}
                   balance={balance.data}
+                  balancePending={balance.isPending}
                   error={fieldError}
                   disabled={transaction.isPending}
                 />

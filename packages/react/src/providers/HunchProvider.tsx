@@ -112,7 +112,7 @@ function Session({
       walletAddress:
         client.mode === "mock"
           ? demoConnected
-            ? DEMO_WALLET
+            ? (client.demoWalletAddress ?? DEMO_WALLET)
             : null
           : (wallet.publicKey?.toBase58() ?? null),
       demoConnect: () => setDemoConnected(true),

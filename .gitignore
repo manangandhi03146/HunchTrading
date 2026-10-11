@@ -36,3 +36,6 @@ wallet.json
 .impeccable/review/
 .impeccable/questions/
 .impeccable/config.local.json
+
+# Runtime databases and local demo evidence
+.data/

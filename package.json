@@ -13,9 +13,12 @@
     "test": "npm run test --workspaces --if-present",
     "sdk": "npm run build --workspace @hunch/sdk",
     "resolver": "npm run dev --workspace @hunch/resolver",
-    "dev": "npm run dev --workspace @hunch/racing",
+    "dev": "npm run dev --workspace @hunch/dashboard",
     "dashboard": "npm run dev --workspace @hunch/dashboard",
-    "esports": "npm run dev --workspace @hunch/esports"
+    "esports": "npm run dev --workspace @hunch/esports",
+    "dev:shared": "npm run build --workspace @hunch/sdk && npm run shared --workspace @hunch/resolver",
+    "racing": "npm run dev --workspace @hunch/racing",
+    "serve:app": "node scripts/serve-app.mjs"
   },
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"

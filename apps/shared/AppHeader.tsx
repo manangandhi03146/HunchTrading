@@ -25,7 +25,7 @@ export function AppHeader({
               aria-current={active === app ? "page" : undefined}
             >
               {app === "dashboard"
-                ? "Developer console"
+                ? "Home"
                 : app === "racing"
                   ? "Racing demo"
                   : "Esports demo"}

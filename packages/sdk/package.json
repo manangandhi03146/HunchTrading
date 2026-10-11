@@ -1,7 +1,7 @@
 {
   "name": "@hunch/sdk",
   "version": "0.1.0",
-  "description": "hunch TypeScript SDK — prediction market client for Solana.",
+  "description": "Hunch TypeScript SDK — prediction market client for Solana.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,17 +9,37 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "import": "./dist/events.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch"
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest run",
+    "smoke:devnet": "npm run build && node scripts/devnet-read-smoke.mjs",
+    "create:devnet": "npm run build && node scripts/devnet-create-market.mjs",
+    "stake:devnet": "npm run build && node scripts/devnet-stake.mjs",
+    "claim:devnet": "npm run build && node scripts/devnet-claim.mjs",
+    "resolve:devnet": "npm run build && node scripts/devnet-resolve.mjs"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.95.0"
+    "@coral-xyz/anchor": "0.32.1",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "bn.js": "^5.2.5",
+    "buffer": "^6.0.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "@types/bn.js": "^5.2.0",
+    "@types/node": "^22.18.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
   }
 }

@@ -25,3 +25,5 @@ export { MarketStatus } from "./components/MarketStatus";
 import "./styles.css";
 
 export { useNow } from "./hooks/useNow";
+
+export { HttpHunchClient } from "./adapters/HttpHunchClient";

@@ -550,7 +550,7 @@ export class MockHunchClient implements HunchClient {
     const { market } = await this.createMarket({
       question: "Who takes the checkered flag?",
       outcomes: ["Player A", "Player B"],
-      closesAt: Math.floor(Date.now() / 1000) + 30,
+      closesAt: Math.floor(Date.now() / 1000) + 120,
     });
     return market;
   }

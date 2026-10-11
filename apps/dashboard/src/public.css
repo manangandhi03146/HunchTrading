@@ -1,0 +1,37 @@
+.public-home section { margin-bottom: 40px; }
+.home-hero { padding: 40px 0 24px; max-width: 780px; }
+.home-hero h1 { font-size: clamp(32px, 5vw, 64px); line-height: 1.06; letter-spacing: -.04em; margin: 20px 0; }
+.home-hero p { font-size: 18px; line-height: 1.6; max-width: 570px; color: var(--hunch-muted); }
+.public-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.home-steps, .public-market-grid, .help-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 24px 0 40px; }
+.home-steps .hunch-card, .public-market-grid .hunch-card, .help-grid .hunch-card, .market-facts, .portfolio-list .hunch-card { padding: 24px; }
+.home-steps h2, .help-grid h2, .public-market-grid h3 { font-size: 20px; margin: 16px 0 12px; }
+.home-steps p, .help-grid p, .market-facts p { line-height: 1.6; color: var(--hunch-muted); }
+.step-number { font-size: 14px; font-weight: 700; color: var(--hunch-muted); }
+.public-market-link { color: inherit; text-decoration: none; min-width: 0; }
+.public-market-link .hunch-card { height: 100%; display: flex; flex-direction: column; align-items: flex-start; }
+.public-market-link h3, .public-market-link p { overflow-wrap: anywhere; }
+.public-market-link p { color: var(--hunch-muted); margin-bottom: 22px; }
+.public-market-link span:last-child { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 24px; }
+.home-builder { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; padding: 28px; margin-top: 28px; }
+.home-builder div { flex: 1; min-width: 200px; }
+.home-builder p { line-height: 1.6; }
+.market-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, .7fr); gap: 28px; align-items: start; }
+.market-facts dt { color: var(--hunch-muted); font-size: 14px; margin-top: 22px; }
+.market-facts dd { margin: 7px 0; line-height: 1.5; }
+.break-id, .share-status { overflow-wrap: anywhere; }
+.share-status { min-height: 20px; font-size: 14px; }
+.portfolio-list { display: grid; gap: 18px; }
+.portfolio-position { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--hunch-line); }
+.portfolio-list .panel-link { margin-top: 18px; }
+.help-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 900px) { .home-steps, .public-market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .market-detail-layout { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .home-steps, .public-market-grid, .help-grid { grid-template-columns: 1fr; } .home-hero { padding-top: 12px; } .home-builder { padding: 20px; } }
+
+@media (min-width: 769px) { .dashboard-sidebar { overflow-y: auto; } }
+
+.developer-links { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.developer-links a { display: inline-flex; min-height: 44px; padding: 10px 16px; align-items: center; border: 1px solid var(--hunch-line); border-radius: 6px; text-decoration: none; color: var(--hunch-ink); }
+.developer-links a.active { background: var(--hunch-surface); font-weight: 700; }
+
+.dashboard-main > .racing-app .racing-main, .dashboard-main > .esports-app .esports-main { padding: 0; }
