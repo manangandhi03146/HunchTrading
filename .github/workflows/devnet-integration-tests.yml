@@ -29,10 +29,11 @@ jobs:
       - run: npm ci
       - run: npm run build --workspace @marketkit/sdk
       - run: npm run build --workspace @marketkit/resolver
-      - run: npm run typecheck --workspace @marketkit/react
+      - run: npm run typecheck --workspace @hunch/react
       - run: npm run test --workspace @hunch/sdk
       - run: npm run test --workspace @marketkit/resolver
-      - run: npm run test --workspace @marketkit/react
+      - run: npm run test --workspace @hunch/react
+      - run: npm run test --workspace @hunch/dashboard
       - run: npm run test:devnet-harness
       - run: node --check scripts/devnet/verify.mjs
       # Only mocked/unit tests run here. No private team key, faucet, mint,
