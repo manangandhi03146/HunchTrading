@@ -7,15 +7,17 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. After the
 | Result | Status |
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
-| Deadline fix | Added locally using existing `MarketStillOpen`; patched execution pending CI rerun with isolated build outputs |
-| Original three LiteSVM suites and failing regression | Passed with exact pins in CI run 38095226793; regression failed for intended early-resolution success. Patched build reused baseline bytecode; the rerun separates output directories |
+| Deadline fix | Verified in Linux CI run 38096073122: original suites passed, regression failed on baseline for the intended reason, all 13 patched Rust tests passed with isolated build outputs; final integrated Rust run pending |
+| Original three LiteSVM suites and failing regression | Baseline and intended failing early-resolution regression passed their checks in CI run 38096073122 |
 | Harness safeguards | Six Node tests pass: mock rejection, protected JSON error redaction, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Live SDK/resolver integration | Existing implementation integrated; actual read-only Devnet market/position decoding verified independently against the raw IDL |
-| SDK/resolver/React validation on Windows | SDK build and 376 tests pass; resolver build and 120 tests pass (one POSIX-permission test requires Linux); React typecheck and 56 tests pass |
-| Real create → stake → signed event → resolve → claim | Pending team key provisioning, funding and working WSL; live SDK stub removed on this branch |
+| SDK/resolver/React validation | Node 24 CI passes on Linux and Windows: 376 SDK, 56 React and 6 harness tests; resolver has 121 passing on Linux, 120 passing and one POSIX-only skip on Windows. Subsequent recovery fix passes all resolver tests locally; its CI rerun is pending |
+| Real create → stake → signed event → resolve → claim | Blocked by unavailable team resolver key and treasury signing authority; live SDK stub removed on this branch |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
 
 Do not present simulated addresses, game signatures, mock receipts, or expected balances as real transaction evidence. A completed real run writes a distinct public evidence JSON with `complete: true`, seven confirmed transaction stages, and actual Explorer links. Until then there are **no verified lifecycle transaction signatures**.
+
+The user confirmed that **Developer A holds the existing resolver private key**, and that neither its protected file path nor the TEST treasury signing authority is available to them. They instructed this task to continue development and testing without those credentials, not to recreate team keys or transfer funds. No further funding, faucet requests or private-key provisioning will be attempted under that instruction. The remaining real-run prerequisites belong to Developer A and the authorized treasury operator; their identities/secure provisioning channel must be established before execution.
 
 ## Public configuration
 
@@ -44,6 +46,8 @@ npm run devnet:audit -- --simulate-deadline
 The second command constructs create + early resolve in one simulated transaction, sets `sigVerify: false` and `replaceRecentBlockhash: true`, and never signs or broadcasts it. The generated market does not exist on chain. Successful `Market resolved` logs before the future deadline establish the deployed defect. The local fix requires `Clock.unix_timestamp >= market.deadline`; staking remains strictly before the deadline.
 
 ## Windows and Linux setup
+
+The environment was rechecked after the user's macOS clarification: this machine is **Windows 11 Home, 10.0.26200, 64-bit**. The isolated repository is `C:\Users\Manas\.codex\worktrees\devnet-lifecycle\hackru` on `feat/devnet-lifecycle`; the preserved frontend checkout is `C:\Users\Manas\Downloads\hackru` on `feat/widget-demos`. Both working trees were clean before this documentation/recovery change. Host Node is 22.19.0; CI uses Node 24.21.0. Tests in Linux CI establish the pinned contract toolchain independently of this host. WSL setup is not required to finish credential-free development and testing, and is not being prioritized. No machine restart was performed; simultaneous replies conflicted about restart permission.
 
 The initial non-elevated WSL install failed. An administrator launch subsequently installed WSL, but WSL2 could not start because Virtual Machine Platform was unavailable. Feature enabling was launched with `/norestart`; an elevated DISM query confirms VirtualMachinePlatform is **Enable Pending** and Windows reports a pending reboot. Do not force a reboot while another developer is working. After a planned restart, finish Ubuntu installation and user setup.
 
@@ -76,7 +80,7 @@ Ordinary `npm test` does not broadcast Devnet transactions. The dedicated comman
 npm run test:contract
 ```
 
-The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs all four suites. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. Baseline and patched builds use separate Cargo/SBF output directories because sharing them reused baseline bytecode despite the changed source. The patched bytecode must differ, and the guard regression must reject early resolution.
+The CI workflow `Contract lifecycle (no deployment)` runs the baseline program logic and original tests from the recorded main SHA in a temporary archive (no clone). It applies only the same exact Anchor dependency pins used by this branch before building, then copies in the early-resolution regression and requires it to fail because resolution unexpectedly succeeds. It builds the patched source and runs every contract suite, including the integrated resolver suite. A compilation failure is not accepted as the expected regression failure. It uploads baseline regression output and the pinned toolchain/test record. Baseline and patched builds use separate Cargo/SBF output directories because sharing them reused baseline bytecode despite the changed source. The patched bytecode must differ, and the guard regression must reject early resolution.
 
 For the equivalent manual baseline on Windows, make a temporary archive of the recorded SHA using host Git, extract it into a separate directory, copy this branch's exact dependency pins from `programs/marketkit/Cargo.toml` (without any behavior change), then run `anchor build --ignore-keys` and `cargo test -p marketkit` there using Ubuntu. Copy only `lifecycle_guards.rs` into that baseline tree and run:
 
@@ -92,11 +96,13 @@ Coverage includes create at/past now; stake at D−1, D, D+1; resolve at D−1, 
 
 Starting main has a stub `AnchorMarketAdapter` that throws `CONTRACT_UNAVAILABLE`; its resolver executable also lacks real-mode wiring. Under the user's later authorization, this branch integrates the completed implementation from `feat/hunch-devnet-integration` (`60fd601`) without waiting for a main merge. SDK reads of an existing developer-created market and position were cross-checked against the raw committed IDL; `docs/evidence/devnet/live-sdk-read-2026-10-10.json` records that read-only result. It is not a market created for this verification and provides no lifecycle transaction signatures. The real SDK is available here; execution now stops at the required Linux/runtime/key preparation boundary rather than the old adapter stub.
 
-The harness uses existing `MarketAdapter` methods, `WalletSigner`, `buildServer`, `ResolverStore`, and `signGameEvent` interfaces. It starts the actual resolver server with the real adapter and signer through its existing public factory, rather than using the currently mock-only executable. It never selects a mock adapter, mock HTTP endpoint, or mock wallet.
+The harness uses existing `MarketAdapter` methods, `WalletSigner`, `buildServer`, `ResolverStore`, and `signGameEvent` interfaces. It starts the actual resolver server with the real adapter and signer through its existing public factory, using a fresh store for this verification. The integrated standalone resolver also supports real mode. The harness never selects a mock adapter, mock HTTP endpoint, or mock wallet.
 
 The integrated constructor accepts RPC/program/mint/resolver configuration and a clock. The harness supplies the observed chain clock, the recorded TEST mint and resolver, and requires participant ATAs. It persists a cryptographically random public 32-byte market seed and its derived PDA before signing, passes `marketSeed` through the existing SDK interface, and requires the returned ID and the independently discovered transaction account to match that PDA. A UUID is only the off-chain run identifier; the live SDK correctly rejects UUIDs supplied as market IDs. The SDK calls `WalletSigner.signTransaction` before broadcasting; the wrapper journals the signature before returning it. A mode label alone is not proof of a live implementation: the harness independently confirms transactions and decodes actual accounts using the committed Anchor IDL. Coordinate before any further shared-interface changes.
 
 ## Secure resolver key and verification wallets
+
+These are future operator instructions, not actions completed in this task. The existing key is currently unavailable to this machine, and the user prohibited recreation of team keys and fund transfers.
 
 The team operator provisions its existing resolver key into a protected Ubuntu file outside Git, e.g. `$HOME/.config/hunch/team-resolver-keypair.json`. Use an approved secure file transfer or local provisioning channel. **Never paste the secret into chat, print it, or commit it.** No generated resolver substitute is permitted.
 
@@ -132,7 +138,7 @@ Inspect and confirm each operator transfer before retrying an uncertain request.
 
 ## Execute the real demo
 
-After WSL/toolchain setup, protected resolver file, and funding (the live SDK is already integrated on this branch):
+After a team-controlled Linux environment (WSL is one option), the protected resolver file, and authorized funding are available (the live SDK is already integrated on this branch):
 
 ```sh
 npm ci
@@ -170,6 +176,8 @@ npm run devnet:reconcile -- /absolute/path/to/.data/devnet-lifecycle/hunch-RUN-I
 ```
 
 Query every recorded signature with history enabled. If the RPC cannot find a transaction, that is not proof it was never submitted. Inspect confirmed market, vault and positions; check the stored resolver event/resolution record; consult the signer operator and another Devnet RPC if necessary. The tool reports partial state if staking stopped early. It neither edits the journal nor broadcasts. There is no automatic resume mode. Preserve failed-run data and do not blindly rerun funded participants after a partial mutation: their exact 1000 TEST preflight should prevent reuse until reconciliation.
+
+The integrated resolver's reconciliation also retains an unseen signature after its blockhash expires, including when `--release` is requested. Missing RPC history plus expiry cannot prove it never landed. The regression first failed against the imported implementation, then passed after this correction; replay still returns the pending record without another submission. Confirmed on-chain failure or interruption before signing can release a reservation on an unresolved market, and a fresh signed event is accepted only after that explicit release.
 
 A complete run exports public evidence to `docs/evidence/devnet/hunch-RUN-ID.json`; incomplete journals remain ignored under `.data/`. Review exported JSON for public-only content before committing it. Include the SDK merge SHA, funding transfer signatures, actual contract test/toolchain results and CI run link in the final handoff.
 

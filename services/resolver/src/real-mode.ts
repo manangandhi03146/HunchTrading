@@ -124,10 +124,9 @@ export async function reconcileEvent(options: {
     definitive = record.status === "failed" ? record.error : { code: "INTERRUPTED_BEFORE_SUBMISSION", message: "Resolution stopped before any transaction was signed" };
   } else if (chainStatus === "failed") {
     definitive = { code: "TRANSACTION_FAILED", message: "Recorded resolution transaction failed on-chain" };
-  } else if (chainStatus === "not_found" && record.lastValidBlockHeight !== null) {
-    const height = await adapter.connection.getBlockHeight("confirmed");
-    if (height > record.lastValidBlockHeight) definitive = { code: "TRANSACTION_EXPIRED", message: "Recorded transaction expired without landing" };
   }
+  // A missing RPC/history result plus an expired blockhash cannot establish that the
+  // transaction never landed. Retain its reservation for operator reconciliation.
   if (!definitive) return result("pending", false);
   const failed = record.status === "failed" ? record : store.updateEvent(eventId, record.status, "failed", now,
     signature ? { mode: "anchor", id: signature, signature, status: "failed" } : null, definitive);
