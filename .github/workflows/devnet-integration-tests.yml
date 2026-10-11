@@ -1,0 +1,39 @@
+name: Devnet integration safeguards (no transactions)
+on:
+  pull_request:
+    paths:
+      - 'packages/sdk/**'
+      - 'packages/marketkit-sdk/**'
+      - 'packages/react/**'
+      - 'services/resolver/**'
+      - 'scripts/devnet/**'
+      - 'package*.json'
+      - '.github/workflows/devnet-integration-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safeguards:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace @marketkit/sdk
+      - run: npm run build --workspace @marketkit/resolver
+      - run: npm run typecheck --workspace @marketkit/react
+      - run: npm run test --workspace @hunch/sdk
+      - run: npm run test --workspace @marketkit/resolver
+      - run: npm run test --workspace @marketkit/react
+      - run: npm run test:devnet-harness
+      - run: node --check scripts/devnet/verify.mjs
+      # Only mocked/unit tests run here. No private team key, faucet, mint,
+      # devnet:verify, deployment, or blockchain mutation is permitted.

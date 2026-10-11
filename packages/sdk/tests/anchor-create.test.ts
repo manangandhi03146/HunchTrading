@@ -5,6 +5,7 @@ import { Connection, Keypair, PublicKey, SendTransactionError, SystemProgram, Tr
 import type { AccountInfo } from "@solana/web3.js";
 import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { Buffer } from "node:buffer";
 import idl from "../src/idl/marketkit.json";
 import {
@@ -80,6 +81,19 @@ beforeEach(async () => {
 });
 
 describe("wallet-signed Anchor creation", () => {
+  it("imports the published SDK in a fresh process without a host Buffer global", () => {
+    const entry = new URL("../dist/index.js", import.meta.url).href;
+    const child = spawnSync(process.execPath, ["--input-type=module", "-e", `
+      globalThis.Buffer = undefined;
+      const sdk = await import(${JSON.stringify(entry)});
+      if (typeof globalThis.Buffer !== 'function' || typeof sdk.AnchorMarketAdapter !== 'function') process.exit(1);
+      console.log('sdk-import-ok');
+    `], { encoding: "utf8", timeout: 15_000 });
+    expect(child.error).toBeUndefined();
+    expect(child.status, child.stderr).toBe(0);
+    expect(child.stdout.trim()).toBe("sdk-import-ok");
+  }, 20_000);
+
   it("derives the exact creator/seed PDA deterministically, independently of wallet signing", () => {
     const creatorKey = new PublicKey(new Uint8Array(32).fill(1));
     const expected = PublicKey.findProgramAddressSync([Buffer.from("market"), creatorKey.toBuffer(), Buffer.from(seed)], programId);
@@ -339,7 +353,7 @@ describe("wallet-signed Anchor creation", () => {
   });
 
   it("refuses the opt-in creation script without deliberate authorization", () => {
-    const result = spawnSync(process.execPath, [new URL("../scripts/devnet-create-market.mjs", import.meta.url).pathname], { encoding: "utf8" });
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL("../scripts/devnet-create-market.mjs", import.meta.url))], { encoding: "utf8" });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("--authorize-devnet-create");
     expect(result.stdout).not.toContain("signature");

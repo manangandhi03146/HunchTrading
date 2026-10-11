@@ -1,0 +1,2 @@
+# Linux setup scripts must remain runnable from Windows-managed worktrees.
+scripts/*.sh text eol=lf

@@ -1,10 +1,20 @@
-# Integration plan — going live (hunch × MarketKit)
+# Integration plan — going live with hunch
 
-**Status (post-merge):** `main` now contains everything integrated — the Anchor
+**Original post-merge snapshot (`main` at `49a5e70`):** the starting tree contains the Anchor
 contract (live on Devnet + local), the SDK with shared types + IDL, Dev C's
 widget/apps (complete in **mock mode**), and the resolver scaffold. The job now
 is to connect the frontend to the live program. Priority order:
 **real SDK reads/writes → signed-event resolution → live UI → demo polish.**
+
+**Current verification branch:** `feat/devnet-lifecycle` incorporates the completed
+live SDK/resolver from `feat/hunch-devnet-integration` (`60fd601`), fixes the React
+Devnet guard, and adds contract and recovery verification. The allocation below
+describes the original integration plan; SDK/resolver implementation is no longer
+the blocker on this branch. Developer A holds the existing resolver key, and the
+user has no secure path or TEST treasury signing authority. No team keys will be
+recreated and no funding attempted. The real lifecycle remains unverified until
+those operators provide the prerequisites. See the current
+[Devnet runbook and evidence](docs/devnet-lifecycle.md).
 
 ## Shared config (everyone uses these)
 
@@ -31,8 +41,9 @@ is to connect the frontend to the live program. Priority order:
 
 ## Developer B — SDK + Automation (`packages/sdk/`, `services/`)
 
-Branch `feat/sdk-resolver` (currently empty — start from updated `main`).
-You are the critical blocker now: the UI is ready and waiting for live data.
+Original allocation: `feat/sdk-resolver`. The completed replacement implementation
+from `feat/hunch-devnet-integration` is now incorporated on `feat/devnet-lifecycle`.
+Review the current runbook before duplicating SDK or resolver work.
 
 | # | Task | File(s) | Prio |
 |---|------|---------|------|
@@ -71,7 +82,7 @@ live-mode wiring + one bug fix.
 | # | Task | File(s) | Prio |
 |---|------|---------|------|
 | C1 | Real wallet adapter (Phantom) producing a live `WalletSigner` for SDK mode, replacing the demo wallet. | `packages/react/src/components/WalletButton.tsx`, provider | P0 |
-| C2 | **Fix the Devnet genesis-hash guard** — the constant is truncated and blocks all live signing. Use `EtWTRABZaYq6iMfeYKouRu166VU2xqa1VM7zTVz4yYg`, and allow the local-validator hash when testing locally. | `packages/react/src/adapters/SdkMarketKitClient.ts:88` | P0 |
+| C2 | **Fix the Devnet genesis-hash guard** — use the RPC-confirmed `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`. Live signing remains restricted to Devnet; contract tests use LiteSVM separately. Fixed on `feat/devnet-lifecycle`. | `packages/react/src/adapters/SdkMarketKitClient.ts:88` | P0 |
 | C3 | Plug Dev B's `SdkBindings` into each `apps/*/src/main.tsx` `MarketKitProvider`; set env: `VITE_MARKETKIT_MODE=sdk`, `VITE_SOLANA_CLUSTER=devnet`, `VITE_MARKETKIT_PROGRAM_ID`, `VITE_TEST_TOKEN_MINT`, `VITE_RESOLVER_API_URL`. | `apps/*/.env.local`, `src/main.tsx` | P0 |
 | C4 | Live-test C5/C6: connect wallet → see live market state → predict → claim on Devnet; verify Explorer links render. | apps | P0 |
 | C5 | Coordinate with B on the race-server contract (`getRace`/`startRace`/result signing). | — | P1 |

@@ -46,7 +46,9 @@ describe("real-mode startup validation", () => {
     const repositoryFile = fileURLToPath(new URL("../package.json", import.meta.url));
     expect(start({ RESOLVER_KEYPAIR_PATH: repositoryFile }).stderr).toContain("outside the repository");
     if (process.platform !== "win32") expect(start({ RESOLVER_KEYPAIR_PATH: keyFile("open.json", 0o644) }).stderr).toContain("chmod 600");
-  });
+    // Up to three real processes each have a 15s deadline; the default 5s
+    // test deadline can expire during valid startup checks on a busy host.
+  }, 46_000);
 
   it("refuses a keypair that does not match the configured resolver", () => {
     const result = start({ RESOLVER_KEYPAIR_PATH: keyFile("mismatch.json"), RESOLVER_PUBLIC_KEY: Keypair.generate().publicKey.toBase58() });

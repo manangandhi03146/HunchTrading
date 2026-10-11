@@ -241,10 +241,13 @@ Reconciliation reads the market and the recorded signature's status (with histor
 | Market resolved with the event's outcome | `confirmed` (source `transaction` or `market-state`) |
 | Market resolved with another outcome | `failed`, `OUTCOME_CONFLICT`, never releasable |
 | Signature failed on-chain | `failed`, `TRANSACTION_FAILED`, releasable |
-| Signature unseen and block height past `lastValidBlockHeight` | `failed`, `TRANSACTION_EXPIRED`, releasable |
+| Signature unseen, including after `lastValidBlockHeight` | `pending`, never released from missing history alone |
 | No signature recorded (stopped before signing) | `failed`, releasable |
 | Anything that could still land | stays `submitted` (`pending`) |
 
 `--release` deletes only a definitively failed reservation on a still-unresolved
 market, after these checks. The game server then signs a fresh event (same event
 ID, current timestamp) and posts it. Nothing is ever resent automatically.
+Missing RPC history and an expired blockhash do not prove a transaction never
+landed. Preserve that reservation and reconcile the market and recorded signature
+with the signer operator and another RPC before deciding how to recover.

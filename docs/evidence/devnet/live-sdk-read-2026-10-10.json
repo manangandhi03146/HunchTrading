@@ -1,0 +1,72 @@
+{
+  "observedAt": "2026-10-10T23:57:57.192Z",
+  "readOnly": true,
+  "purpose": "Live SDK read validation against an existing market created by another developer; no verification lifecycle transactions were executed",
+  "sdkIntegrationCommit": "60fd601",
+  "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "programId": "J7ENUqQR5uxqRB4bbskqCKuDziWkXnJAmxwhM4TLgfrP",
+  "rawAccountContextSlot": 509713503,
+  "adapterMode": "anchor",
+  "market": {
+    "id": "G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF",
+    "authority": "4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S",
+    "resolverAuthority": "6S713ZCwtF2VG1X8Dpr1pA8XJBDXSMsrUrUwTbZwMHUt",
+    "tokenMint": "9G1B7DcQ7u89ZdWyV6PYCqogMstkCgYMEcN5FdAuGJFs",
+    "closesAt": 1791679058,
+    "pools": [
+      "0",
+      "10"
+    ],
+    "totalPool": "10",
+    "winningOutcome": null,
+    "marketSeed": {
+      "0": 81,
+      "1": 47,
+      "2": 160,
+      "3": 102,
+      "4": 230,
+      "5": 225,
+      "6": 254,
+      "7": 81,
+      "8": 59,
+      "9": 132,
+      "10": 166,
+      "11": 128,
+      "12": 216,
+      "13": 55,
+      "14": 194,
+      "15": 120,
+      "16": 149,
+      "17": 231,
+      "18": 30,
+      "19": 121,
+      "20": 200,
+      "21": 228,
+      "22": 90,
+      "23": 21,
+      "24": 136,
+      "25": 137,
+      "26": 38,
+      "27": 122,
+      "28": 233,
+      "29": 62,
+      "30": 62,
+      "31": 60
+    },
+    "status": "open",
+    "metadata": null
+  },
+  "positions": [
+    {
+      "id": "CcEMuDNyaswW8di5iZDhg9vSw7QeLpxEWqGKEviFrser",
+      "marketId": "G5NT43KJSgQf3AkQUA92ayH78vLSyhVHRFNPpNQCi5jF",
+      "wallet": "4AM4GTTjuqSrmsLiSzjgXAUpb62nY2qcReKtQJ9N842S",
+      "outcome": 1,
+      "amount": "10",
+      "claimed": false,
+      "payout": "0"
+    }
+  ],
+  "privateKeysRead": false,
+  "transactionsSubmitted": 0
+}

@@ -300,22 +300,27 @@ describe("reconciliation before any retry", () => {
     expect((await reconcile(true)).action).toBe("pending");
   });
 
-  it("releases an expired signature only after proving it cannot land, then accepts a fresh event", async () => {
+  it("retains an expired unseen signature because missing RPC history does not prove failure", async () => {
     await uncertain();
     blockHeight = 2001;
-    expect(await reconcile()).toMatchObject({ action: "failed", retryable: true, record: { status: "failed", error: { code: "TRANSACTION_EXPIRED" } } });
-    expect(await reconcile(true)).toMatchObject({ action: "released", retryable: true, record: null });
-    time = 1250;
-    const retry = await post(sign());
-    expect(retry.statusCode).toBe(200);
-    expect(retry.json()).toMatchObject({ status: "confirmed", settlement: { winningOutcome: 1 } });
-    expect(sent).toHaveLength(2);
+    expect(await reconcile()).toMatchObject({ action: "pending", retryable: false, record: { status: "submitted" } });
+    expect(await reconcile(true)).toMatchObject({ action: "pending", retryable: false, record: { status: "submitted" } });
+    const replay = await post(sign());
+    expect(replay.statusCode).toBe(202);
+    expect(replay.json()).toMatchObject({ status: "submitted", settlement: null });
+    expect(sent).toHaveLength(1);
   });
 
   it("releases a signature that failed on-chain", async () => {
     await uncertain();
     chainStatus = { slot: 1, confirmations: null, err: { InstructionError: [0, { Custom: 6002 }] }, confirmationStatus: "finalized" };
     expect(await reconcile(true)).toMatchObject({ action: "released" });
+    chainStatus = null;
+    time = 1250;
+    const retry = await post(sign());
+    expect(retry.statusCode).toBe(200);
+    expect(retry.json()).toMatchObject({ status: "confirmed", settlement: { winningOutcome: 1 } });
+    expect(sent).toHaveLength(2);
   });
 
   it("releases a failure that happened before any signature", async () => {

@@ -9,6 +9,12 @@
     "apps/*"
   ],
   "scripts": {
+    "test:contract": "node scripts/contract-test.mjs",
+    "test:devnet-harness": "node --test scripts/devnet/core.test.mjs",
+    "devnet:audit": "node scripts/devnet/audit.mjs",
+    "devnet:prepare": "node scripts/devnet/prepare.mjs",
+    "devnet:verify": "npm run sdk && npm run build --workspace @marketkit/resolver && node scripts/devnet/verify.mjs",
+    "devnet:reconcile": "node scripts/devnet/reconcile.mjs",
     "build": "npm run sdk && npm run build --workspaces --if-present",
     "pretest": "npm run sdk",
     "test": "npm run test --workspaces --if-present",

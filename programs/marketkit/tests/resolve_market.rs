@@ -28,7 +28,9 @@ fn send(svm: &mut LiteSVM, ix: Instruction, payer: &Keypair) -> Result<(), Strin
     let blockhash = svm.latest_blockhash();
     let msg = Message::new_with_blockhash(&[ix], Some(&payer.pubkey()), &blockhash);
     let tx = VersionedTransaction::try_new(VersionedMessage::Legacy(msg), &[payer]).unwrap();
-    svm.send_transaction(tx).map(|_| ()).map_err(|failure| format!("{:?}", failure.err))
+    svm.send_transaction(tx)
+        .map(|_| ())
+        .map_err(|failure| format!("{:?}", failure.err))
 }
 
 fn set_time(svm: &mut LiteSVM, unix_timestamp: i64) {
@@ -43,13 +45,20 @@ fn setup() -> Fixture {
     let resolver = Keypair::new();
     let market_id = [9u8; 32];
     let (market, _) = Pubkey::find_program_address(
-        &[marketkit::constants::MARKET_SEED, creator.pubkey().as_ref(), market_id.as_ref()],
+        &[
+            marketkit::constants::MARKET_SEED,
+            creator.pubkey().as_ref(),
+            market_id.as_ref(),
+        ],
         &program_id,
     );
     let mut svm = LiteSVM::new();
     svm.add_program(
         program_id,
-        include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/marketkit.so")),
+        include_bytes!(concat!(
+            env!("CARGO_TARGET_TMPDIR"),
+            "/../deploy/marketkit.so"
+        )),
     )
     .unwrap();
     svm.airdrop(&creator.pubkey(), 1_000_000_000).unwrap();
@@ -72,14 +81,24 @@ fn setup() -> Fixture {
         .to_account_metas(None),
     );
     send(&mut svm, create, &creator).expect("create_market failed");
-    Fixture { svm, creator, resolver, market, deadline }
+    Fixture {
+        svm,
+        creator,
+        resolver,
+        market,
+        deadline,
+    }
 }
 
 fn resolve_ix(market: Pubkey, resolver: &Pubkey, winning_outcome: u8) -> Instruction {
     Instruction::new_with_bytes(
         marketkit::id(),
         &marketkit::instruction::ResolveMarket { winning_outcome }.data(),
-        marketkit::accounts::ResolveMarket { resolver: *resolver, market }.to_account_metas(None),
+        marketkit::accounts::ResolveMarket {
+            resolver: *resolver,
+            market,
+        }
+        .to_account_metas(None),
     )
 }
 
@@ -93,7 +112,10 @@ fn test_resolve_rejected_while_market_is_open() {
     let mut f = setup();
     let ix = resolve_ix(f.market, &f.resolver.pubkey(), 1);
     let err = send(&mut f.svm, ix, &f.resolver).unwrap_err();
-    assert!(err.contains("Custom(6004)"), "expected MarketStillOpen, got {err}");
+    assert!(
+        err.contains("Custom(6004)"),
+        "expected MarketStillOpen, got {err}"
+    );
     let market = market_state(&f.svm, &f.market);
     assert_eq!(market.status, MarketStatus::Active);
     assert_eq!(market.winning_outcome, None);
@@ -105,7 +127,10 @@ fn test_resolve_rejected_one_second_before_deadline() {
     set_time(&mut f.svm, f.deadline - 1);
     let ix = resolve_ix(f.market, &f.resolver.pubkey(), 0);
     let err = send(&mut f.svm, ix, &f.resolver).unwrap_err();
-    assert!(err.contains("Custom(6004)"), "expected MarketStillOpen, got {err}");
+    assert!(
+        err.contains("Custom(6004)"),
+        "expected MarketStillOpen, got {err}"
+    );
 }
 
 #[test]
@@ -120,7 +145,10 @@ fn test_resolve_succeeds_at_deadline_and_only_once() {
 
     let again = resolve_ix(f.market, &f.resolver.pubkey(), 0);
     let err = send(&mut f.svm, again, &f.resolver).unwrap_err();
-    assert!(err.contains("Custom(6002)"), "expected MarketNotActive, got {err}");
+    assert!(
+        err.contains("Custom(6002)"),
+        "expected MarketNotActive, got {err}"
+    );
     assert_eq!(market_state(&f.svm, &f.market).winning_outcome, Some(1));
 }
 
@@ -131,7 +159,10 @@ fn test_resolve_rejects_other_signers_after_deadline() {
     // The market creator is not its resolver; has_one rejects it (ConstraintHasOne = 2001).
     let ix = resolve_ix(f.market, &f.creator.pubkey(), 1);
     let err = send(&mut f.svm, ix, &f.creator).unwrap_err();
-    assert!(err.contains("Custom(2001)"), "expected ConstraintHasOne, got {err}");
+    assert!(
+        err.contains("Custom(2001)"),
+        "expected ConstraintHasOne, got {err}"
+    );
     assert_eq!(market_state(&f.svm, &f.market).status, MarketStatus::Active);
 }
 
@@ -141,5 +172,8 @@ fn test_resolve_rejects_invalid_outcome_after_deadline() {
     set_time(&mut f.svm, f.deadline);
     let ix = resolve_ix(f.market, &f.resolver.pubkey(), 2);
     let err = send(&mut f.svm, ix, &f.resolver).unwrap_err();
-    assert!(err.contains("Custom(6001)"), "expected InvalidOutcome, got {err}");
+    assert!(
+        err.contains("Custom(6001)"),
+        "expected InvalidOutcome, got {err}"
+    );
 }

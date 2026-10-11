@@ -1,0 +1,72 @@
+{
+  "scope": "Unit and integration tests over simulated RPC; not real Devnet lifecycle proof",
+  "id": 38097650300,
+  "head_sha": "9e8bc7fc7d1cabe7e30a2a501555beb7ba79deab",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/manangandhi03146/HunchTrading/actions/runs/38097650300",
+  "created_at": "2026-10-11T00:12:40Z",
+  "updated_at": "2026-10-11T00:15:58Z",
+  "jobs": [
+    {
+      "os": "ubuntu-24.04",
+      "node": "v24.21.0",
+      "sdk": {
+        "passed": 376,
+        "failed": 0
+      },
+      "resolver": {
+        "passed": 121,
+        "failed": 0,
+        "skipped": 0,
+        "skipReason": null
+      },
+      "react": {
+        "passed": 56,
+        "failed": 0
+      },
+      "harness": {
+        "passed": 6,
+        "failed": 0
+      },
+      "sdkBuild": "passed",
+      "resolverBuild": "passed",
+      "reactTypecheck": "passed",
+      "harnessSyntax": "passed"
+    },
+    {
+      "os": "windows-latest",
+      "node": "v24.21.0",
+      "sdk": {
+        "passed": 376,
+        "failed": 0
+      },
+      "resolver": {
+        "passed": 120,
+        "failed": 0,
+        "skipped": 1,
+        "skipReason": "POSIX file-permission test is not applicable on Windows"
+      },
+      "react": {
+        "passed": 56,
+        "failed": 0
+      },
+      "harness": {
+        "passed": 6,
+        "failed": 0
+      },
+      "sdkBuild": "passed",
+      "resolverBuild": "passed",
+      "reactTypecheck": "passed",
+      "harnessSyntax": "passed"
+    }
+  ],
+  "recoveryRegression": {
+    "test": "retains an expired unseen signature because missing RPC history does not prove failure",
+    "beforeFixSourceCommit": "96dd89d0df4164a9145b5ac9d5d64452765bb4a1",
+    "beforeFix": "Failed: reconciliation marked the unseen transaction failed and retryable instead of keeping it pending",
+    "afterFix": "Passed: record remains pending even with --release; replay submits no additional transaction"
+  },
+  "transactionsSubmittedToDevnet": 0,
+  "contractDeployed": false
+}
