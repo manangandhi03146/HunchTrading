@@ -4,6 +4,8 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. After the
 
 ## Verification status
 
+The subsequent [full functionality audit](functionality-verification.md) verifies simulation UI flows and finds a separate browser integration gap: app providers do not supply live SDK bindings, and React falls back to the legacy compatibility client. The lifecycle harness uses the completed `Hunch` API independently; its credential blockers below do not establish browser app readiness. The audit fixes module-time browser Buffer initialization and records current local test counts. Earlier CI links below identify their exact tested revisions, predating this audit.
+
 | Result | Status |
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |

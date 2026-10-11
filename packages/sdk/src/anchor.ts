@@ -1,7 +1,7 @@
+import { Buffer } from "./browser-runtime.js";
 import { Program, utils } from "@coral-xyz/anchor";
 import type { IdlAccounts } from "@coral-xyz/anchor";
 import BN from "bn.js";
-import { Buffer } from "buffer";
 import { Connection, PublicKey, SendTransactionError, SystemProgram, SYSVAR_CLOCK_PUBKEY, Transaction } from "@solana/web3.js";
 import { ACCOUNT_SIZE, TOKEN_PROGRAM_ID, unpackMint, unpackAccount, getAssociatedTokenAddressSync,
   createAssociatedTokenAccountIdempotentInstruction, createTransferCheckedInstruction } from "@solana/spl-token";
