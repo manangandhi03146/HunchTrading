@@ -20,12 +20,12 @@ import {
   Button,
   Card,
   ErrorState,
-  MockMarketKitClient,
+  MockHunchClient,
   PredictionMarket,
   effectiveStatus,
   useMarket,
-  useMarketKit,
-} from "@marketkit/react";
+  useHunch,
+} from "@hunch/react";
 import { AppHeader } from "../../shared/AppHeader";
 
 function Car({ color }: { color: string }) {
@@ -41,15 +41,14 @@ function Car({ color }: { color: string }) {
     </svg>
   );
 }
-export default function App() {
+export default function App({ embedded = false }: { embedded?: boolean }) {
+  const Main = embedded ? "section" : "main";
   const { theme } = useTheme();
-  const { client, mode, notify } = useMarketKit();
+  const { client, mode, notify } = useHunch();
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
   const marketId =
-    params.get("market") ??
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ??
-    "race-42";
+    params.get("market") ?? import.meta.env.VITE_HUNCH_MARKET_ID ?? "race-42";
   const market = useMarket(marketId);
   const race = useQuery({
     queryKey: ["race", marketId, mode],
@@ -82,9 +81,9 @@ export default function App() {
   });
   const close = useMutation({
     mutationFn: () => {
-      if (!(client instanceof MockMarketKitClient))
+      if (!(client instanceof MockHunchClient))
         throw new Error("Only simulated markets support early close.");
-      return client.closeDemoMarket(marketId);
+      return (client as MockHunchClient).closeDemoMarket(marketId);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries();
@@ -120,6 +119,25 @@ export default function App() {
   const winner =
     race.data?.winner ??
     (market.data?.status === "resolved" ? market.data.winningOutcome : null);
+  const predictionState =
+    market.isError || race.isError
+      ? "RACE DATA UNAVAILABLE"
+      : marketStatus === null
+        ? "LOADING RACE"
+        : marketStatus === "resolved" || state === "finished"
+          ? "RACE COMPLETE"
+          : marketStatus === "cancelled"
+            ? "MARKET CANCELLED"
+            : state === "racing"
+              ? "RACE IN PROGRESS"
+              : marketStatus === "open"
+                ? "PREDICTIONS OPEN"
+                : "PREDICTIONS CLOSED · READY TO RACE";
+  const needsFreshDemo =
+    client instanceof MockHunchClient &&
+    marketStatus !== null &&
+    marketStatus !== "open" &&
+    state !== "racing";
   const raceSteps = [
     {
       label: "Predictions close",
@@ -156,7 +174,7 @@ export default function App() {
   ];
   return (
     <div className="racing-app">
-      <AppHeader
+      {!embedded && <AppHeader
         active="racing"
         brand={
           <a className="velocity-brand" href="/">
@@ -164,8 +182,8 @@ export default function App() {
             VELOCITY<span>RACING LEAGUE</span>
           </a>
         }
-      />
-      <main id="main" className="racing-main">
+      />}
+      <Main id={embedded ? undefined : "main"} className="racing-main">
         <div className="racing-heading">
           <div>
             <h1>
@@ -181,25 +199,68 @@ export default function App() {
               12<span>sec</span>
             </strong>
             <div>
-              <Radio size={12} />{" "}
-              {state === "racing"
-                ? "RACE IN PROGRESS"
-                : state === "finished"
-                  ? "RACE COMPLETE"
-                  : "PADDOCK OPEN"}
+              <Radio size={12} /> {predictionState}
             </div>
           </div>
         </div>
+        <div className="mode-notice">
+          <span>
+            {mode === "mock"
+              ? "Interactive simulation · TEST credits have no value. Race results and settlement are fixtures."
+              : "Solana Devnet · game-server results are authoritative. TEST tokens have no value."}
+          </span>
+          <span>POWERED BY HUNCH</span>
+        </div>
+        {(market.error || race.error) && (
+          <ErrorState
+            error={market.error ?? race.error}
+            retry={() => {
+              void market.refetch();
+              void race.refetch();
+            }}
+          />
+        )}
         <div className="racing-layout">
-          <div className="racing-left">
-            <div className="mode-notice">
-              <span>
-                {mode === "mock"
-                  ? "Interactive simulation · TEST credits have no value. Race results and settlement are fixtures."
-                  : "Solana Devnet · game-server results are authoritative. TEST tokens have no value."}
-              </span>
-              <span>POWERED BY HUNCH</span>
+          <aside className="race-prediction">
+            <div className="widget-caption">
+              <h2>Your prediction</h2>
+              <ShieldCheck size={14} />
             </div>
+            {needsFreshDemo && (
+              <div className="fresh-demo">
+                <p>
+                  {marketStatus === "closed"
+                    ? "This pool is closed. Start a fresh demo to make a prediction, or use race controls to finish this run."
+                    : "This run has ended. Start a fresh demo to try another prediction."}{" "}
+                  Existing positions stay available.
+                </p>
+                <Button
+                  disabled={controlsPending}
+                  busy={reset.isPending}
+                  onClick={() => reset.mutate()}
+                >
+                  <RotateCcw size={15} />
+                  Start fresh demo
+                </Button>
+              </div>
+            )}
+            {reset.error && (
+              <ErrorState error={reset.error} retry={() => reset.mutate()} />
+            )}
+            <PredictionMarket
+              key={marketId}
+              marketId={marketId}
+              theme={theme}
+            />
+            <div className="embed-note">
+              <span>One component. Any application.</span>
+              <code>{'<PredictionMarket marketId="…" />'}</code>
+              <a href={appUrl("dashboard", "/integration")}>
+                Explore the integration <ArrowRight size={12} />
+              </a>
+            </div>
+          </aside>
+          <div className="racing-left">
             <section className="race-stage" aria-label="Racing circuit">
               <div className="race-stage-head">
                 <div>
@@ -210,7 +271,15 @@ export default function App() {
                     ? "Live"
                     : state === "finished"
                       ? "Finished"
-                      : "Upcoming"}
+                      : marketStatus === "open"
+                        ? "Predictions open"
+                        : marketStatus === "closed"
+                          ? "Pool closed"
+                          : marketStatus === "resolved"
+                            ? "Settled"
+                            : marketStatus === "cancelled"
+                              ? "Cancelled"
+                              : "Loading"}
                 </Badge>
               </div>
               <div className="circuit-info">
@@ -300,124 +369,114 @@ export default function App() {
                 </div>
               )}
             </section>
-            <Card className="race-controls">
-              <div>
-                <h3>
-                  {mode === "mock" ? "Demo race controls" : "Race controls"}
-                </h3>
-                <p>
-                  Start the race after the pool closes. The authorized result
-                  drives settlement.
-                </p>
-              </div>
-              <div className="race-control-buttons">
-                <Button
-                  disabled={
-                    controlsPending ||
-                    marketStatus !== "closed" ||
-                    state === "racing" ||
-                    state === "finished" ||
-                    market.isError ||
-                    race.isPending ||
-                    race.isError
-                  }
-                  busy={start.isPending}
-                  onClick={() => start.mutate()}
-                >
-                  <Play size={14} />
-                  Start race
-                </Button>
-                {mode === "mock" && (
+            <details className="race-operator disclosure">
+              <summary>
+                Race controls and lifecycle{" "}
+                <Flag size={17} aria-hidden="true" />
+              </summary>
+              <Card className="race-controls">
+                <div>
+                  <h3>
+                    {mode === "mock" ? "Demo race controls" : "Race controls"}
+                  </h3>
+                  <p>
+                    Start the race after the pool closes. The authorized result
+                    drives settlement.
+                  </p>
+                </div>
+                <div className="race-control-buttons">
                   <Button
-                    variant="secondary"
                     disabled={
                       controlsPending ||
-                      marketStatus !== "open" ||
-                      state !== "upcoming"
+                      marketStatus !== "closed" ||
+                      state === "racing" ||
+                      state === "finished" ||
+                      market.isError ||
+                      race.isPending ||
+                      race.isError
                     }
-                    busy={close.isPending}
-                    onClick={() => close.mutate()}
+                    busy={start.isPending}
+                    onClick={() => start.mutate()}
                   >
-                    Close demo predictions
+                    <Play size={14} />
+                    Start race
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  disabled={
-                    controlsPending || mode !== "mock" || state === "racing"
-                  }
-                  busy={reset.isPending}
-                  onClick={() => reset.mutate()}
-                >
-                  <RotateCcw size={13} />
-                  New demo race
-                </Button>
-              </div>
-              {mode === "sdk" && (
-                <p>
-                  For another live run, select a new market with{" "}
-                  <code>?market=ID</code>.
-                </p>
-              )}
-              {(start.error || close.error || reset.error) && (
-                <ErrorState error={start.error ?? close.error ?? reset.error} />
-              )}
-              {race.error && (
-                <ErrorState
-                  error={race.error}
-                  retry={() => {
-                    void race.refetch();
-                  }}
-                />
-              )}
-              {market.error && (
-                <ErrorState
-                  error={market.error}
-                  retry={() => {
-                    void market.refetch();
-                  }}
-                />
-              )}
-            </Card>
-            <div className="race-lifecycle">
-              {raceSteps.map((step, index) => (
-                <div key={step.label}>
-                  <span className={step.complete ? "step-done" : ""}>
-                    {step.complete ? (
-                      <CheckCircle2 size={17} />
-                    ) : (
-                      `0${index + 1}`
-                    )}
-                  </span>
-                  <div>
-                    <strong>{step.label}</strong>
-                    <small>{step.detail}</small>
-                  </div>
-                  {index < 2 && (
-                    <ChevronRight size={14} className="step-chevron" />
+                  {client instanceof MockHunchClient && (
+                    <Button
+                      variant="secondary"
+                      disabled={
+                        controlsPending ||
+                        marketStatus !== "open" ||
+                        state !== "upcoming"
+                      }
+                      busy={close.isPending}
+                      onClick={() => close.mutate()}
+                    >
+                      Close demo predictions
+                    </Button>
                   )}
+                  <Button
+                    variant="ghost"
+                    disabled={
+                      controlsPending || !(client instanceof MockHunchClient) || state === "racing"
+                    }
+                    busy={reset.isPending}
+                    onClick={() => reset.mutate()}
+                  >
+                    <RotateCcw size={13} />
+                    New demo race
+                  </Button>
                 </div>
-              ))}
-            </div>
+                {mode === "sdk" && (
+                  <p>
+                    For another live run, select a new market with{" "}
+                    <code>?market=ID</code>.
+                  </p>
+                )}
+                {(start.error || close.error || reset.error) && (
+                  <ErrorState
+                    error={start.error ?? close.error ?? reset.error}
+                  />
+                )}
+                {race.error && (
+                  <ErrorState
+                    error={race.error}
+                    retry={() => {
+                      void race.refetch();
+                    }}
+                  />
+                )}
+                {market.error && (
+                  <ErrorState
+                    error={market.error}
+                    retry={() => {
+                      void market.refetch();
+                    }}
+                  />
+                )}
+              </Card>
+              <div className="race-lifecycle">
+                {raceSteps.map((step, index) => (
+                  <div key={step.label}>
+                    <span className={step.complete ? "step-done" : ""}>
+                      {step.complete ? (
+                        <CheckCircle2 size={17} />
+                      ) : (
+                        `0${index + 1}`
+                      )}
+                    </span>
+                    <div>
+                      <strong>{step.label}</strong>
+                      <small>{step.detail}</small>
+                    </div>
+                    {index < 2 && (
+                      <ChevronRight size={14} className="step-chevron" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
-          <aside>
-            <div className="widget-caption">
-              <h2>Your prediction</h2>
-              <ShieldCheck size={14} />
-            </div>
-            <PredictionMarket
-              key={marketId}
-              marketId={marketId}
-              theme={theme}
-            />
-            <div className="embed-note">
-              <span>One component. Any application.</span>
-              <code>{'<PredictionMarket marketId="…" />'}</code>
-              <a href={appUrl("dashboard", "/integration")}>
-                Explore the integration <ArrowRight size={12} />
-              </a>
-            </div>
-          </aside>
         </div>
         <footer className="app-footer">
           <span>Velocity Racing · A hunch integration demo</span>
@@ -427,7 +486,7 @@ export default function App() {
               : "Solana Devnet infrastructure · nonredeemable test tokens only"}
           </span>
         </footer>
-      </main>
+      </Main>
     </div>
   );
 }

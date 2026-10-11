@@ -1,3 +1,8 @@
+import { Home, MarketPage, Portfolio, Help, NotFound } from "./PublicPages";
+import RacingApp from "../../racing/src/App";
+import EsportsApp from "../../esports/src/App";
+import "../../racing/src/styles.css";
+import "../../esports/src/styles.css";
 import { appUrl } from "../../shared/links";
 import { ThemeSwitch, useTheme, type Theme } from "../../shared/theme";
 import { useState, type FormEvent } from "react";
@@ -8,6 +13,7 @@ import {
   Route,
   Routes,
   useNavigate,
+  useLocation,
   useSearchParams,
 } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +28,7 @@ import {
   ChevronRight,
   CircleHelp,
   Code2,
+  Copy,
   FileCode2,
   Flag,
   Layers3,
@@ -51,19 +58,20 @@ import {
   formatTokens,
   useEvents,
   useMarket,
-  useMarketKit,
+  useHunch,
   useMarkets,
   useNow,
   type CreateMarketParams,
   type Market,
   type MarketEvent,
-} from "@marketkit/react";
+} from "@hunch/react";
 
 const NAV = [
-  { path: "/", label: "Overview", icon: LayoutDashboard },
+  { path: "/", label: "Home", icon: LayoutDashboard },
   { path: "/markets", label: "Markets", icon: Layers3 },
-  { path: "/integration", label: "Integration", icon: Code2 },
-  { path: "/events", label: "Events", icon: Activity },
+  { path: "/portfolio", label: "My predictions", icon: ShieldCheck },
+  { path: "/help", label: "How it works", icon: CircleHelp },
+  { path: "/overview", label: "Developer tools", icon: Code2 },
 ];
 function date(seconds: number) {
   return new Date(seconds * 1000).toLocaleString(undefined, {
@@ -74,13 +82,13 @@ function date(seconds: number) {
   });
 }
 function ModeNotice() {
-  const { mode } = useMarketKit();
+  const { mode, client } = useHunch();
   return (
     <div className="mode-notice">
       <span>
         <ShieldCheck size={14} />
         {mode === "mock"
-          ? "Demo workspace · all markets, balances, and events are simulated locally."
+          ? client.shared ? "Shared demo · markets and simulated balances are served by one backend." : "Local demo · markets and simulated balances stay on this device."
           : "Live SDK workspace · Solana Devnet · nonredeemable test tokens."}
       </span>
       <span>
@@ -137,7 +145,7 @@ function MarketTable({
             <tr key={market.id} role="row">
               <td role="cell">
                 <Link
-                  to={`/integration?market=${encodeURIComponent(market.id)}`}
+                  to={`/markets/${encodeURIComponent(market.id)}`}
                 >
                   <span className="market-table-icon">
                     <Flag size={15} />
@@ -151,7 +159,7 @@ function MarketTable({
               <td role="cell">
                 <MarketStatus status={effectiveStatus(market, now)} />
               </td>
-              <td role="cell">
+              <td role="cell" data-label="Pool">
                 <strong className="tabular">
                   {formatTokens(market.totalPool)}
                 </strong>
@@ -170,7 +178,7 @@ function MarketTable({
               <td role="cell">
                 <Link
                   className="table-open"
-                  to={`/integration?market=${encodeURIComponent(market.id)}`}
+                  to={`/markets/${encodeURIComponent(market.id)}`}
                   aria-label={`View ${market.question}`}
                 >
                   <ArrowUpRight size={16} />
@@ -185,7 +193,7 @@ function MarketTable({
 }
 function Overview() {
   const now = useNow();
-  const { mode } = useMarketKit();
+  const { mode, client } = useHunch();
   const markets = useMarkets();
   const events = useEvents();
   const list = markets.data ?? [];
@@ -257,7 +265,7 @@ function Overview() {
         title="Your prediction workspace"
         subtitle="Create markets, follow outcomes, and bring hunch into your product."
         action={
-          <Link className="mk-button mk-button-primary" to="/markets/new">
+          <Link className="hunch-button hunch-button-primary" to="/markets/new">
             <Plus size={15} />
             Create market
           </Link>
@@ -319,7 +327,7 @@ function Overview() {
             {!markets.isPending && list.length === 0 && (
               <EmptyState title="Your first market starts here">
                 <Link
-                  className="mk-button mk-button-secondary"
+                  className="hunch-button hunch-button-secondary"
                   to="/markets/new"
                 >
                   Create a market
@@ -345,7 +353,7 @@ function Overview() {
             <code>
               <span>import</span> {"{ PredictionMarket }"}
               {"\n"}
-              <span>from</span> <b>'@marketkit/react'</b>;{"\n\n"}
+              <span>from</span> <b>'@hunch/react'</b>;{"\n\n"}
               {"<PredictionMarket"}
               {'\n  marketId="race-42"\n/>'}
             </code>
@@ -371,7 +379,10 @@ function Overview() {
           <MarketTable markets={list.slice(0, 4)} compact />
         ) : (
           <EmptyState title="No markets yet">
-            <Link className="mk-button mk-button-secondary" to="/markets/new">
+            <Link
+              className="hunch-button hunch-button-secondary"
+              to="/markets/new"
+            >
               Create your first market
             </Link>
           </EmptyState>
@@ -401,7 +412,7 @@ function Overview() {
   );
 }
 function Markets() {
-  const { mode } = useMarketKit();
+  const { mode, client } = useHunch();
   const now = useNow();
   const query = useMarkets();
   const [search, setSearch] = useState("");
@@ -417,10 +428,10 @@ function Markets() {
     <>
       <PageTitle
         eyebrow="MARKET INFRASTRUCTURE"
-        title="Your markets"
-        subtitle="Create, monitor, and embed markets across your applications."
+        title="Explore markets"
+        subtitle="Find a question, make your prediction, and follow the result."
         action={
-          <Link className="mk-button mk-button-primary" to="/markets/new">
+          <Link className="hunch-button hunch-button-primary" to="/markets/new">
             <Plus size={15} />
             Create market
           </Link>
@@ -468,7 +479,10 @@ function Markets() {
             }
           >
             {!query.data?.length ? (
-              <Link className="mk-button mk-button-primary" to="/markets/new">
+              <Link
+                className="hunch-button hunch-button-primary"
+                to="/markets/new"
+              >
                 Create your first market
               </Link>
             ) : (
@@ -486,7 +500,7 @@ function Markets() {
         )}
         <div className="table-footnote">
           {list.length} market{list.length !== 1 ? "s" : ""} ·{" "}
-          {mode === "mock" ? "Local simulation" : "Solana Devnet"}
+          {mode === "mock" ? client.shared ? "Shared simulation" : "Local simulation" : "Solana Devnet"}
         </div>
       </Card>
     </>
@@ -499,7 +513,7 @@ function localDatetime(milliseconds: number) {
     .slice(0, 16);
 }
 function CreateMarket() {
-  const { client, mode, notify } = useMarketKit();
+  const { client, mode, notify } = useHunch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [question, setQuestion] = useState("");
@@ -509,7 +523,9 @@ function CreateMarket() {
     localDatetime(Date.now() + 3600000),
   );
   const [description, setDescription] = useState("");
-  const [validation, setValidation] = useState("");
+  const [validation, setValidation] = useState<
+    Partial<Record<"question" | "outcome-a" | "outcome-b" | "closing", string>>
+  >({});
   const create = useMutation({
     mutationFn: async (params: CreateMarketParams) => {
       const result = await client.createMarket(params);
@@ -520,10 +536,10 @@ function CreateMarket() {
       void queryClient.invalidateQueries();
       notify(
         mode === "mock"
-          ? "Simulated market created. Your integration is ready."
+          ? "Simulated market created. Open its page to share or predict."
           : "Market creation confirmed on Devnet.",
       );
-      navigate(`/integration?market=${encodeURIComponent(result.market.id)}`, {
+      navigate(`/markets/${encodeURIComponent(result.market.id)}`, {
         state: { transaction: result.transaction },
       });
     },
@@ -532,20 +548,32 @@ function CreateMarket() {
     event.preventDefault();
     if (create.isPending) return;
     const closesAt = Math.floor(new Date(closing).getTime() / 1000);
+    const errors: typeof validation = {};
+    if (!question.trim())
+      errors.question = "Enter the question your community will answer.";
+    if (!outcomeA.trim())
+      errors["outcome-a"] = "Enter the first possible outcome.";
+    if (!outcomeB.trim())
+      errors["outcome-b"] = "Enter the second possible outcome.";
     if (
-      !question.trim() ||
-      !outcomeA.trim() ||
-      !outcomeB.trim() ||
-      outcomeA.trim().toLowerCase() === outcomeB.trim().toLowerCase() ||
-      !Number.isFinite(closesAt) ||
-      closesAt <= Date.now() / 1000
+      outcomeA.trim() &&
+      outcomeA.trim().toLowerCase() === outcomeB.trim().toLowerCase()
     ) {
-      setValidation(
-        "Enter a question, two distinct outcomes, and a future closing time.",
-      );
+      errors["outcome-b"] =
+        "Choose a different outcome. Outcome A and B must be distinct.";
+    }
+    if (!Number.isFinite(closesAt) || closesAt <= Date.now() / 1000) {
+      errors.closing =
+        "Choose a future date and time, before your event begins.";
+    }
+    setValidation(errors);
+    const firstInvalid = Object.keys(errors)[0];
+    if (firstInvalid) {
+      event.currentTarget
+        .querySelector<HTMLInputElement>(`#${firstInvalid}`)
+        ?.focus();
       return;
     }
-    setValidation("");
     create.mutate({
       question: question.trim(),
       outcomes: [outcomeA.trim(), outcomeB.trim()],
@@ -563,7 +591,7 @@ function CreateMarket() {
       <ModeNotice />
       <div className="create-layout">
         <Card className="create-form-card">
-          <form onSubmit={submit}>
+          <form onSubmit={submit} noValidate>
             <div className="form-section-title">
               <span>01</span>
               <div>
@@ -576,12 +604,27 @@ function CreateMarket() {
               <input
                 id="question"
                 value={question}
-                onChange={(event) => setQuestion(event.target.value)}
+                onChange={(event) => {
+                  setQuestion(event.target.value);
+                  setValidation((errors) => ({
+                    ...errors,
+                    question: undefined,
+                  }));
+                }}
+                aria-invalid={!!validation.question}
+                aria-describedby={`question-hint${validation.question ? " question-error" : ""}`}
                 maxLength={200}
                 required
                 placeholder="Who wins the championship final?"
               />
-              <small>This question appears at the top of your widget.</small>
+              <small id="question-hint">
+                This question appears at the top of your widget.
+              </small>
+              {validation.question && (
+                <p className="form-field-error" id="question-error">
+                  {validation.question}
+                </p>
+              )}
             </div>
             <div className="form-outcomes">
               <div className="form-field">
@@ -589,22 +632,53 @@ function CreateMarket() {
                 <input
                   id="outcome-a"
                   value={outcomeA}
-                  onChange={(event) => setOutcomeA(event.target.value)}
+                  onChange={(event) => {
+                    setOutcomeA(event.target.value);
+                    setValidation((errors) => ({
+                      ...errors,
+                      "outcome-a": undefined,
+                      "outcome-b": undefined,
+                    }));
+                  }}
+                  aria-invalid={!!validation["outcome-a"]}
+                  aria-describedby={
+                    validation["outcome-a"] ? "outcome-a-error" : undefined
+                  }
                   maxLength={60}
                   required
                   placeholder="Team Nova"
                 />
+                {validation["outcome-a"] && (
+                  <p className="form-field-error" id="outcome-a-error">
+                    {validation["outcome-a"]}
+                  </p>
+                )}
               </div>
               <div className="form-field">
                 <label htmlFor="outcome-b">Outcome B</label>
                 <input
                   id="outcome-b"
                   value={outcomeB}
-                  onChange={(event) => setOutcomeB(event.target.value)}
+                  onChange={(event) => {
+                    setOutcomeB(event.target.value);
+                    setValidation((errors) => ({
+                      ...errors,
+                      "outcome-b": undefined,
+                    }));
+                  }}
+                  aria-invalid={!!validation["outcome-b"]}
+                  aria-describedby={
+                    validation["outcome-b"] ? "outcome-b-error" : undefined
+                  }
                   maxLength={60}
                   required
                   placeholder="Team Titan"
                 />
+                {validation["outcome-b"] && (
+                  <p className="form-field-error" id="outcome-b-error">
+                    {validation["outcome-b"]}
+                  </p>
+                )}
               </div>
             </div>
             <div className="form-field">
@@ -632,16 +706,31 @@ function CreateMarket() {
                 id="closing"
                 type="datetime-local"
                 value={closing}
-                onChange={(event) => setClosing(event.target.value)}
+                onChange={(event) => {
+                  setClosing(event.target.value);
+                  setValidation((errors) => ({
+                    ...errors,
+                    closing: undefined,
+                  }));
+                }}
+                aria-invalid={!!validation.closing}
+                aria-describedby={`closing-hint${validation.closing ? " closing-error" : ""}`}
                 min={localDatetime(Date.now() + 60000)}
                 required
               />
-              <small>Shown in your browser’s local timezone.</small>
+              <small id="closing-hint">
+                Shown in your browser’s local timezone (
+                {Intl.DateTimeFormat().resolvedOptions().timeZone}).
+              </small>
+              {validation.closing && (
+                <p className="form-field-error" id="closing-error">
+                  {validation.closing}
+                </p>
+              )}
             </div>
-            {validation && <ErrorState error={validation} />}
             {create.error && <ErrorState error={create.error} />}
             <div className="form-submit">
-              <Link className="mk-button mk-button-ghost" to="/markets">
+              <Link className="hunch-button hunch-button-ghost" to="/markets">
                 Cancel
               </Link>
               <Button type="submit" busy={create.isPending}>
@@ -679,11 +768,11 @@ function CreateMarket() {
           </div>
           <div>
             <Check size={14} />
-            <span>Solana Devnet only</span>
+            <span>Live mode uses Solana Devnet only</span>
           </div>
           <p className="guide-note">
             {mode === "mock"
-              ? "This creates a local simulated market. No tokens are transferred on-chain."
+              ? "This creates a simulated market. Shared-demo markets can be opened in other browser sessions; browser-local markets stay on this device."
               : "Your wallet signs market creation through the SDK. The authorized resolver submits the result."}
           </p>
         </aside>
@@ -694,7 +783,7 @@ function CreateMarket() {
 function Integration() {
   const { theme: appTheme } = useTheme();
   const now = useNow();
-  const { client, mode } = useMarketKit();
+  const { client, mode } = useHunch();
   const markets = useMarkets();
   const [params, setParams] = useSearchParams();
   const [widgetTheme, setWidgetTheme] = useState<Theme | "app">("app");
@@ -702,12 +791,15 @@ function Integration() {
   const [variant, setVariant] = useState<"default" | "compact">("default");
   const marketId =
     params.get("market") ??
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ??
+    import.meta.env.VITE_HUNCH_MARKET_ID ??
     markets.data?.[0]?.id ??
     "race-42";
   const market = useMarket(marketId);
-  const snippet = `import { PredictionMarket } from "@marketkit/react";\nimport "@marketkit/react/styles.css";\n\n// Inside the MarketKitProvider configured below:\n<PredictionMarket\n  marketId=${JSON.stringify(marketId)}\n  theme="${theme}"\n  variant="${variant}"\n/>`;
-  const providerSnippet = `import { MarketKitProvider } from "@marketkit/react";\n\n<MarketKitProvider mode="${mode}">\n  <App />\n</MarketKitProvider>`;
+  const snippet = `import { PredictionMarket } from "@hunch/react";\nimport "@hunch/react/styles.css";\n\n// Inside the HunchProvider configured below:\n<PredictionMarket\n  marketId=${JSON.stringify(marketId)}\n  theme="${theme}"\n  variant="${variant}"\n/>`;
+  const providerSnippet =
+    mode === "mock"
+      ? `import { HunchProvider } from "@hunch/react";\n\n<HunchProvider mode="mock">\n  <App />\n</HunchProvider>`
+      : `import { HunchProvider } from "@hunch/react";\n\n// Your reviewed SDK bindings and public Devnet configuration:\n<HunchProvider\n  mode="sdk"\n  programId={programId}\n  tokenMint={tokenMint}\n  sdkBindings={sdkBindings}\n  rpcUrl="https://api.devnet.solana.com"\n>\n  <App />\n</HunchProvider>`;
   return (
     <>
       <PageTitle
@@ -717,72 +809,85 @@ function Integration() {
       />
       <ModeNotice />
       <div className="integration-layout">
-        <div>
-          <Card className="integration-config">
-            <div className="panel-heading">
-              <h2>Configure your widget</h2>
-              <Badge>React</Badge>
+        <Card className="integration-config">
+          <div className="panel-heading">
+            <h2>Configure your widget</h2>
+            <Badge>React</Badge>
+          </div>
+          <div className="integration-fields">
+            {markets.error && (
+              <ErrorState
+                error={markets.error}
+                retry={() => {
+                  void markets.refetch();
+                }}
+              />
+            )}
+            <div className="form-field">
+              <label htmlFor="market-select">Market</label>
+              <select
+                id="market-select"
+                value={marketId}
+                disabled={markets.isPending}
+                onChange={(event) => setParams({ market: event.target.value })}
+              >
+                {markets.data?.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.question}
+                  </option>
+                ))}
+                {!markets.data?.some((item) => item.id === marketId) && (
+                  <option value={marketId}>{marketId}</option>
+                )}
+              </select>
             </div>
-            <div className="integration-fields">
-              {markets.error && (
-                <ErrorState
-                  error={markets.error}
-                  retry={() => {
-                    void markets.refetch();
-                  }}
-                />
-              )}
+            <div className="form-outcomes">
               <div className="form-field">
-                <label htmlFor="market-select">Market</label>
+                <label htmlFor="theme">Widget theme</label>
                 <select
-                  id="market-select"
-                  value={marketId}
-                  disabled={markets.isPending}
+                  id="theme"
+                  value={widgetTheme}
                   onChange={(event) =>
-                    setParams({ market: event.target.value })
+                    setWidgetTheme(event.target.value as Theme | "app")
                   }
                 >
-                  {markets.data?.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.question}
-                    </option>
-                  ))}
-                  {!markets.data?.some((item) => item.id === marketId) && (
-                    <option value={marketId}>{marketId}</option>
-                  )}
+                  <option value="app">Follow app theme</option>
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
                 </select>
               </div>
-              <div className="form-outcomes">
-                <div className="form-field">
-                  <label htmlFor="theme">Widget theme</label>
-                  <select
-                    id="theme"
-                    value={widgetTheme}
-                    onChange={(event) =>
-                      setWidgetTheme(event.target.value as Theme | "app")
-                    }
-                  >
-                    <option value="app">Follow app theme</option>
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                  </select>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="variant">Size</label>
-                  <select
-                    id="variant"
-                    value={variant}
-                    onChange={(event) =>
-                      setVariant(event.target.value as "default" | "compact")
-                    }
-                  >
-                    <option value="default">Default</option>
-                    <option value="compact">Compact</option>
-                  </select>
-                </div>
+              <div className="form-field">
+                <label htmlFor="variant">Size</label>
+                <select
+                  id="variant"
+                  value={variant}
+                  onChange={(event) =>
+                    setVariant(event.target.value as "default" | "compact")
+                  }
+                >
+                  <option value="default">Default</option>
+                  <option value="compact">Compact</option>
+                </select>
               </div>
             </div>
-          </Card>
+          </div>
+        </Card>
+        <aside className="integration-preview">
+          <div className="preview-heading">
+            <h2>Widget preview</h2>
+            <Badge>{mode === "mock" ? "Simulated" : "Devnet"}</Badge>
+          </div>
+          <PredictionMarket
+            key={marketId}
+            marketId={marketId}
+            theme={theme}
+            variant={variant}
+          />
+        </aside>
+        <details className="integration-documentation disclosure">
+          <summary>
+            Embed code and setup guide <Code2 size={17} aria-hidden="true" />
+          </summary>
           <Card className="integration-code">
             <div className="code-header">
               <span>
@@ -800,7 +905,11 @@ function Integration() {
               <span>1</span>
               <div>
                 <h3>Install the workspace packages</h3>
-                <code>npm install</code>
+                <pre>
+                  <code>
+                    {"npm install\nnpm run build --workspace @hunch/react"}
+                  </code>
+                </pre>
                 <p>
                   This hackathon package is available in the monorepo. It has
                   not been published to npm.
@@ -825,53 +934,45 @@ function Integration() {
               <div>
                 <h3>Connect the live SDK when ready</h3>
                 <p>
-                  Pass Developer B’s <code>sdkBindings</code>, the deployed{" "}
+                  Pass your <code>sdkBindings</code>, the configured{" "}
                   <code>programId</code>, and <code>tokenMint</code> to the
                   provider in SDK mode. Mock mode works without them.
                 </p>
               </div>
             </div>
           </Card>
-        </div>
-        <aside>
-          <div className="preview-heading">
-            <h2>Widget preview</h2>
-            <Badge>{mode === "mock" ? "Simulated" : "Devnet"}</Badge>
+        </details>
+        <Card className="network-info integration-details">
+          <h3>Integration details</h3>
+          <div>
+            <span>Market ID</span>
+            <code>{marketId}</code>
           </div>
-          <PredictionMarket
-            key={marketId}
-            marketId={marketId}
-            theme={theme}
-            variant={variant}
-          />
-          <Card className="network-info">
-            <h3>Integration details</h3>
-            <div>
-              <span>Market ID</span>
-              <code>{marketId}</code>
-            </div>
-            <div>
-              <span>Status</span>
-              {market.data && (
-                <MarketStatus status={effectiveStatus(market.data, now)} />
-              )}
-            </div>
-            <div>
-              <span>Network</span>
-              <strong>Solana Devnet</strong>
-            </div>
-            <div>
-              <span>Contract</span>
-              <code>{client.programId ?? "Awaiting deployment"}</code>
-            </div>
-            <div>
-              <span>Mode</span>
-              <strong>
-                {mode === "mock" ? "Local simulation" : "Live SDK"}
-              </strong>
-            </div>
-          </Card>
-        </aside>
+          <div>
+            <span>Status</span>
+            {market.data && (
+              <MarketStatus status={effectiveStatus(market.data, now)} />
+            )}
+          </div>
+          <div>
+            <span>Network</span>
+            <strong>
+              {mode === "mock" ? "Local demo · no RPC" : "Solana Devnet"}
+            </strong>
+          </div>
+          <div>
+            <span>Program configuration</span>
+            <code>
+              {mode === "mock"
+                ? "Not used in simulation"
+                : (client.programId ?? "Program not configured")}
+            </code>
+          </div>
+          <div>
+            <span>Mode</span>
+            <strong>{mode === "mock" ? "Local simulation" : "Live SDK"}</strong>
+          </div>
+        </Card>
       </div>
     </>
   );
@@ -883,10 +984,11 @@ function EventRows({
   events: MarketEvent[];
   compact?: boolean;
 }) {
+  const markets = useMarkets();
   if (!events.length)
     return (
       <EmptyState title="No events yet">
-        <Link className="mk-button mk-button-secondary" to="/markets/new">
+        <Link className="hunch-button hunch-button-secondary" to="/markets/new">
           Create a market
         </Link>
       </EmptyState>
@@ -906,12 +1008,20 @@ function EventRows({
               <Activity size={16} />
             )}
           </span>
-          <div>
+          <div className="event-content">
             <strong>{event.message}</strong>
-            <span>
-              {event.marketId}{" "}
-              {!compact && `· ${event.type.replace(/_/g, " ")}`}
-            </span>
+            <Link
+              className="event-market"
+              to={`/markets/${encodeURIComponent(event.marketId)}`}
+            >
+              {markets.data?.find((market) => market.id === event.marketId)
+                ?.question ?? "View market"}
+              <ArrowUpRight size={14} aria-hidden="true" />
+            </Link>
+            <div className="event-context">
+              <EventMarketId id={event.marketId} />
+              {!compact && <span> · {event.type.replace(/_/g, " ")}</span>}
+            </div>
           </div>
           <div className="event-meta">
             <time dateTime={new Date(event.timestamp * 1000).toISOString()}>
@@ -936,6 +1046,48 @@ function EventRows({
     </div>
   );
 }
+function EventMarketId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  return (
+    <span className="event-id">
+      <abbr title={id}>
+        {copyFailed || id.length <= 20
+          ? id
+          : `${id.slice(0, 8)}…${id.slice(-6)}`}
+      </abbr>
+      <button
+        type="button"
+        className="event-id-copy"
+        aria-label={`Copy full market ID ${id}`}
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(id);
+            setCopied(true);
+            setCopyFailed(false);
+          } catch {
+            setCopied(false);
+            setCopyFailed(true);
+          }
+        }}
+      >
+        {copied ? (
+          <Check size={14} aria-hidden="true" />
+        ) : (
+          <Copy size={14} aria-hidden="true" />
+        )}
+        {copied ? "Copied" : "Copy ID"}
+      </button>
+      <span className="sr-only" role="status">
+        {copied
+          ? "Market ID copied."
+          : copyFailed
+            ? "Copy unavailable. The full market ID is shown for manual copying."
+            : ""}
+      </span>
+    </span>
+  );
+}
 function Events() {
   const query = useEvents();
   const [filter, setFilter] = useState("all");
@@ -950,20 +1102,29 @@ function Events() {
         subtitle="From game-server result to market resolution, with every step visible."
       />
       <ModeNotice />
-      <div className="event-pipeline">
-        {[
-          { icon: RadioIcon, label: "Event received" },
-          { icon: ShieldCheck, label: "Signature verified" },
-          { icon: Terminal, label: "Resolution submitted" },
-          { icon: CheckCircle2, label: "Transaction confirmed" },
-        ].map((step, index) => (
-          <div key={step.label}>
-            <step.icon size={18} />
-            <span>{step.label}</span>
-            {index < 3 && <ChevronRight size={13} />}
-          </div>
-        ))}
-      </div>
+      <details className="pipeline-explainer disclosure">
+        <summary>
+          How settlement works <CircleHelp size={17} aria-hidden="true" />
+        </summary>
+        <p>
+          This is the settlement sequence, not the progress of a specific
+          transaction. Check the activity below for actual events and receipts.
+        </p>
+        <div className="event-pipeline">
+          {[
+            { icon: RadioIcon, label: "Event received" },
+            { icon: ShieldCheck, label: "Signature verified" },
+            { icon: Terminal, label: "Resolution submitted" },
+            { icon: CheckCircle2, label: "Transaction confirmed" },
+          ].map((step, index) => (
+            <div key={step.label}>
+              <step.icon size={18} />
+              <span>{step.label}</span>
+              {index < 3 && <ChevronRight size={13} />}
+            </div>
+          ))}
+        </div>
+      </details>
       <Card className="events-panel">
         <div className="panel-heading">
           <h2>Recent activity</h2>
@@ -1009,7 +1170,8 @@ function RadioIcon(props: { size?: number }) {
   return <Activity {...props} />;
 }
 export default function App() {
-  const { mode } = useMarketKit();
+  const { pathname } = useLocation();
+  const { mode, client } = useHunch();
   return (
     <div className="dashboard-app">
       <a className="skip-link" href="#main">
@@ -1022,7 +1184,7 @@ export default function App() {
         <div className="workspace-switch">
           <span className="workspace-avatar">h</span>
           <div>
-            <strong>HackRU workspace</strong>
+            <strong>hunch community</strong>
             <small>
               {mode === "mock" ? "Demo environment" : "Devnet environment"}
             </small>
@@ -1030,7 +1192,7 @@ export default function App() {
           <Badge>DEV</Badge>
         </div>
         <span className="sidebar-section-label">WORKSPACE</span>
-        <nav aria-label="Developer dashboard">
+        <nav aria-label="Hunch navigation">
           {NAV.map((item) => (
             <NavLink
               key={item.path}
@@ -1049,14 +1211,22 @@ export default function App() {
         <span className="sidebar-section-label demos-label">
           EXAMPLE APPLICATIONS
         </span>
-        <a className="sidebar-nav-link" href={appUrl("racing")}>
+        <a
+          className="sidebar-nav-link sidebar-demo-link"
+          href={appUrl("racing")}
+          aria-label="Racing demo"
+        >
           <Flag size={17} />
-          Racing demo
+          Racing<span className="sidebar-demo-suffix"> demo</span>
           <ArrowUpRight size={13} />
         </a>
-        <a className="sidebar-nav-link" href={appUrl("esports")}>
+        <a
+          className="sidebar-nav-link sidebar-demo-link"
+          href={appUrl("esports")}
+          aria-label="Esports demo"
+        >
           <Boxes size={17} />
-          Esports demo
+          Esports<span className="sidebar-demo-suffix"> demo</span>
           <ArrowUpRight size={13} />
         </a>
         <div className="sidebar-bottom">
@@ -1079,7 +1249,7 @@ export default function App() {
           <div className="sidebar-footer">
             <span className="network-badge">
               <i />
-              Solana Devnet
+              {mode === "mock" ? client.shared ? "Shared demo" : "Local demo" : "Solana Devnet"}
             </span>
             <small>v0.1.0</small>
           </div>
@@ -1090,7 +1260,7 @@ export default function App() {
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={12} />
-            <strong>Developer console</strong>
+            <strong>Prediction markets</strong>
           </div>
           <div className="topbar-actions">
             <ThemeSwitch />
@@ -1101,13 +1271,20 @@ export default function App() {
           </div>
         </header>
         <main id="main" className="dashboard-main">
+          {["/overview", "/integration", "/events"].includes(pathname) && <nav className="developer-links" aria-label="Developer tools"><NavLink to="/overview">Overview</NavLink><NavLink to="/integration">Integration</NavLink><NavLink to="/events">Events</NavLink></nav>}
           <Routes>
-            <Route path="/" element={<Overview />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/overview" element={<Overview />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/markets/:marketId" element={<MarketPage />} />
+            <Route path="/racing" element={<RacingApp embedded />} />
+            <Route path="/esports" element={<EsportsApp embedded />} />
             <Route path="/markets" element={<Markets />} />
             <Route path="/markets/new" element={<CreateMarket />} />
             <Route path="/integration" element={<Integration />} />
             <Route path="/events" element={<Events />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <footer className="dashboard-footer">
             <span>hunch · Prediction infrastructure for your product.</span>
@@ -1118,7 +1295,11 @@ export default function App() {
             >
               hunchtrading.tech
             </a>
-            <span>Devnet only · Nonredeemable TEST tokens</span>
+            <span>
+              {mode === "mock"
+                ? client.shared ? "Shared simulation · Nonredeemable demo credits" : "Local simulation · Nonredeemable demo credits"
+                : "Devnet only · Nonredeemable TEST tokens"}
+            </span>
           </footer>
         </main>
       </div>

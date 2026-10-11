@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { MarketKit, type Outcome } from "@marketkit/sdk";
+import { LegacyHunch as Hunch, type Outcome } from "@hunch/sdk";
 
 function setup() {
   const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
-  const client = new MarketKit({ mock: undefined, rpcUrl: undefined });
+  const client = new Hunch({ mock: undefined, rpcUrl: undefined });
   const params = {
     question: "Who wins?",
     outcomes: ["A", "B"] as [string, string],
@@ -24,7 +24,7 @@ describe("SDK mock lifecycle", () => {
       await expect(client.createMarket(invalid)).rejects.toThrow();
     expect((await client.createMarket(params)).market.status).toBe("open");
     await expect(
-      new MarketKit({ mock: false }).createMarket(params),
+      new Hunch({ mock: false }).createMarket(params),
     ).rejects.toThrow("real impl pending");
   });
   it("rejects invalid stakes without changing positions or pools", async () => {

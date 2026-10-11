@@ -8,8 +8,8 @@ export function PoolDistribution({
 }) {
   const percent = poolPercent(market.pools[0], market.totalPool);
   return (
-    <div className="mk-pool">
-      <div className="mk-distribution-head">
+    <div className="hunch-pool">
+      <div className="hunch-distribution-head">
         <span>Pool distribution</span>
         {showPool && (
           <strong>
@@ -18,7 +18,7 @@ export function PoolDistribution({
         )}
       </div>
       <div
-        className="mk-distribution-track"
+        className="hunch-distribution-track"
         role="img"
         aria-label={
           market.totalPool === 0n

@@ -1,10 +1,16 @@
 import { Trophy, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useClaimable } from "../hooks/useMarketPositions";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 import { useTransaction } from "../hooks/usePrediction";
 import { formatTokens, type Market } from "../types";
 import { Button, ErrorState, TransactionLink } from "./ui";
 import { WalletButton } from "./WalletButton";
+import {
+  readClaimReceipt,
+  saveClaimReceipt,
+  type ClaimReceipt,
+} from "./claimReceipt";
 export function ClaimPanel({
   market,
   onError,
@@ -14,8 +20,16 @@ export function ClaimPanel({
   onError?: (error: Error) => void;
   showWalletButton?: boolean;
 }) {
-  const { walletAddress, client } = useMarketKit();
+  const { walletAddress, client } = useHunch();
   const claimable = useClaimable(market.id, true);
+  const receiptKey = `hunch.claim.v1:${JSON.stringify([client.mode, client.programId ?? "local", market.id, walletAddress])}`;
+  const [savedReceipt, setSavedReceipt] = useState<ClaimReceipt | null>(() =>
+    readClaimReceipt(receiptKey),
+  );
+  useEffect(
+    () => setSavedReceipt(readClaimReceipt(receiptKey)),
+    [receiptKey, client],
+  );
   const transaction = useTransaction(async () =>
     client.claimWinnings({
       marketId: market.id,
@@ -24,8 +38,8 @@ export function ClaimPanel({
     }),
   );
   return (
-    <div className="mk-claim">
-      <div className="mk-claim-heading">
+    <div className="hunch-claim">
+      <div className="hunch-claim-heading">
         <Trophy size={19} />
         <div>
           <small>
@@ -47,10 +61,10 @@ export function ClaimPanel({
         </>
       ) : (
         <>
-          <div className="mk-claim-amount">
+          <div className="hunch-claim-amount">
             <span>
               {claimable.data?.claimed
-                ? "Already claimed"
+                ? "Remaining to claim"
                 : market.status === "cancelled"
                   ? "Refund available"
                   : "Your claimable amount"}
@@ -72,7 +86,7 @@ export function ClaimPanel({
             />
           )}
           <Button
-            className="mk-full"
+            className="hunch-full"
             disabled={
               !claimable.data ||
               claimable.data.claimed ||
@@ -80,8 +94,23 @@ export function ClaimPanel({
             }
             busy={transaction.isPending}
             onClick={() => {
+              const amount = claimable.data?.amount;
               void transaction
                 .execute(undefined)
+                .then((receipt) => {
+                  if (
+                    !receipt ||
+                    receipt.status !== "confirmed" ||
+                    amount === undefined
+                  )
+                    return;
+                  const record = {
+                    amount: amount.toString(),
+                    transaction: receipt,
+                  };
+                  setSavedReceipt(record);
+                  saveClaimReceipt(receiptKey, record);
+                })
                 .catch((error) =>
                   onError?.(
                     error instanceof Error ? error : new Error(String(error)),
@@ -105,8 +134,26 @@ export function ClaimPanel({
             <p>You have no eligible unclaimed position.</p>
           )}
           {transaction.error && <ErrorState error={transaction.error} />}
-          {transaction.receipt && (
-            <TransactionLink result={transaction.receipt} />
+          {claimable.data?.claimed && (
+            <div className="hunch-claim-history" role="status">
+              <strong>
+                {savedReceipt
+                  ? `${savedReceipt.transaction.simulated ? "Simulated" : "Confirmed"} ${market.status === "cancelled" ? "refund" : "payout"}: ${formatTokens(BigInt(savedReceipt.amount))} TEST`
+                  : "Claim completed. No tokens remain to claim."}
+              </strong>
+              {savedReceipt && (
+                <p>
+                  Receipt saved on this device. Eligibility is checked against
+                  your current position.
+                </p>
+              )}
+            </div>
+          )}
+          {(transaction.receipt ||
+            (claimable.data?.claimed && savedReceipt)) && (
+            <TransactionLink
+              result={transaction.receipt ?? savedReceipt!.transaction}
+            />
           )}
         </>
       )}

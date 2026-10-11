@@ -1,13 +1,13 @@
 import { Wallet, LogOut } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 import { Button } from "./ui";
 import { shortAddress } from "../types";
 export function WalletButton() {
-  const { mode, walletAddress, demoConnect, disconnect } = useMarketKit();
+  const { mode, walletAddress, demoConnect, disconnect } = useHunch();
   if (mode === "sdk")
     return (
-      <div className="mk-wallet-live">
+      <div className="hunch-wallet-live">
         <WalletMultiButton />
         {walletAddress && (
           <Button
@@ -26,13 +26,13 @@ export function WalletButton() {
       onClick={walletAddress ? disconnect : demoConnect}
     >
       <Wallet size={15} />
-      {walletAddress ? "Demo account connected" : "Connect demo account"}
+      {walletAddress ? "Disconnect demo account" : "Connect demo account"}
       {walletAddress && <LogOut size={14} />}
     </Button>
   );
 }
 export function WalletAddress() {
-  const { walletAddress, mode } = useMarketKit();
+  const { walletAddress, mode } = useHunch();
   return (
     <span>
       {walletAddress

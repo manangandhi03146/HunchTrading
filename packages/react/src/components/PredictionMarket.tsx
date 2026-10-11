@@ -6,7 +6,7 @@ import { useNow } from "../hooks/useNow";
 import { useBalance } from "../hooks/useMarket";
 import { useMarketPositions } from "../hooks/useMarketPositions";
 import { useTransaction } from "../hooks/usePrediction";
-import { useMarketKit } from "../providers/MarketKitProvider";
+import { useHunch } from "../providers/HunchProvider";
 import {
   effectiveStatus,
   formatTokens,
@@ -32,7 +32,7 @@ export interface PredictionMarketProps {
   onError?: (error: Error) => void;
 }
 export function PredictionMarket(props: PredictionMarketProps) {
-  const { walletAddress } = useMarketKit();
+  const { walletAddress } = useHunch();
   return (
     <PredictionMarketContent
       key={`${props.marketId}:${walletAddress}`}
@@ -50,7 +50,7 @@ function PredictionMarketContent({
   onPredictionSuccess,
   onError,
 }: PredictionMarketProps) {
-  const { client, walletAddress, mode } = useMarketKit();
+  const { client, walletAddress, mode } = useHunch();
   const marketQuery = useMarket(marketId);
   const balance = useBalance();
   const positions = useMarketPositions(marketId);
@@ -110,19 +110,19 @@ function PredictionMarketContent({
   return (
     <section
       className={cn(
-        "mk-widget",
-        `mk-theme-${theme}`,
-        variant === "compact" && "mk-widget-compact",
+        "hunch-widget",
+        `hunch-theme-${theme}`,
+        variant === "compact" && "hunch-widget-compact",
         className,
       )}
       aria-label="Prediction market"
     >
-      <div className="mk-widget-top">
+      <div className="hunch-widget-top">
         <Logo small />
         {market && <MarketStatus status={status} />}
       </div>
       {mode === "mock" && (
-        <div className="mk-simulation">
+        <div className="hunch-simulation">
           SIMULATED DEMO · NO ON-CHAIN TRANSACTIONS
         </div>
       )}
@@ -138,7 +138,7 @@ function PredictionMarketContent({
       ) : (
         market && (
           <>
-            <div className="mk-question">
+            <div className="hunch-question">
               <h2>{market.question}</h2>
               <span>
                 <Clock3 size={13} />
@@ -168,7 +168,7 @@ function PredictionMarketContent({
                 showWalletButton={showWalletButton}
               />
             ) : status === "closed" ? (
-              <div className="mk-waiting">
+              <div className="hunch-waiting">
                 <Clock3 size={22} />
                 <strong>Waiting for the official result</strong>
                 <p>
@@ -186,6 +186,7 @@ function PredictionMarketContent({
                     setFieldError("");
                   }}
                   balance={balance.data}
+                  balancePending={balance.isPending}
                   error={fieldError}
                   disabled={transaction.isPending}
                 />
@@ -198,7 +199,7 @@ function PredictionMarketContent({
                   />
                 )}
                 {!walletAddress ? (
-                  <div className="mk-connect">
+                  <div className="hunch-connect">
                     <p>
                       {mode === "mock"
                         ? "Try the complete flow with a simulated account."
@@ -209,7 +210,7 @@ function PredictionMarketContent({
                 ) : (
                   <>
                     <Button
-                      className="mk-full"
+                      className="hunch-full"
                       disabled={balance.data === undefined || balance.isError}
                       busy={transaction.isPending}
                       onClick={(event) => {
@@ -229,7 +230,7 @@ function PredictionMarketContent({
                         </>
                       )}
                     </Button>
-                    <div className="mk-account">
+                    <div className="hunch-account">
                       <WalletAddress />
                       <span>
                         {positions.data?.reduce((sum, p) => sum + p.amount, 0n)
@@ -244,7 +245,7 @@ function PredictionMarketContent({
             )}
             {transaction.error && <ErrorState error={transaction.error} />}
             {transaction.receipt && (
-              <div className="mk-transaction" role="status">
+              <div className="hunch-transaction" role="status">
                 <strong>
                   {transaction.phase === "confirmed"
                     ? mode === "mock"
@@ -257,7 +258,7 @@ function PredictionMarketContent({
                 <TransactionLink result={transaction.receipt} />
               </div>
             )}
-            <footer className="mk-widget-footer">
+            <footer className="hunch-widget-footer">
               <ShieldCheck size={13} />
               {mode === "mock"
                 ? "Nonredeemable demo credits"
@@ -266,9 +267,9 @@ function PredictionMarketContent({
             </footer>
             <Dialog.Root open={review} onOpenChange={setReview}>
               <Dialog.Portal>
-                <Dialog.Overlay className="mk-dialog-overlay" />
+                <Dialog.Overlay className="hunch-dialog-overlay" />
                 <Dialog.Content
-                  className={cn("mk-dialog", `mk-theme-${theme}`)}
+                  className={cn("hunch-dialog", `hunch-theme-${theme}`)}
                   onCloseAutoFocus={(event) => {
                     if (reviewTrigger.current?.isConnected) {
                       event.preventDefault();
@@ -289,11 +290,11 @@ function PredictionMarketContent({
                     Final payouts depend on the closed pool.
                   </Dialog.Description>
                   {fieldError && (
-                    <p className="mk-field-error" role="alert">
+                    <p className="hunch-field-error" role="alert">
                       {fieldError}
                     </p>
                   )}
-                  <div className="mk-dialog-actions">
+                  <div className="hunch-dialog-actions">
                     <Dialog.Close asChild>
                       <Button variant="secondary">Go back</Button>
                     </Dialog.Close>
@@ -307,12 +308,12 @@ function PredictionMarketContent({
                     </Button>
                   </div>
                   {status !== "open" && (
-                    <p className="mk-field-error">
+                    <p className="hunch-field-error">
                       Predictions closed while you were reviewing.
                     </p>
                   )}
                   <Dialog.Close
-                    className="mk-dialog-close"
+                    className="hunch-dialog-close"
                     aria-label="Close prediction review"
                   >
                     <X size={18} />

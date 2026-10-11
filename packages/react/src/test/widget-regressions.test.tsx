@@ -3,15 +3,12 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PredictionMarket } from "../components/PredictionMarket";
 import { Button } from "../components/ui";
-import { MarketKitProvider } from "../providers/MarketKitProvider";
-import {
-  MockMarketKitClient,
-  DEMO_WALLET,
-} from "../adapters/MockMarketKitClient";
+import { HunchProvider } from "../providers/HunchProvider";
+import { MockHunchClient, DEMO_WALLET } from "../adapters/MockHunchClient";
 import type { Market } from "../types";
 
 function client() {
-  return new MockMarketKitClient({ persist: false, latencyMs: 0 });
+  return new MockHunchClient({ persist: false, latencyMs: 0 });
 }
 describe("widget integration regressions", () => {
   it.each(["cancel", "escape"])(
@@ -23,9 +20,9 @@ describe("widget integration regressions", () => {
       render(
         <>
           <a href="#main">Skip to content</a>
-          <MarketKitProvider client={mock} defaultDemoConnected>
+          <HunchProvider client={mock} defaultDemoConnected>
             <PredictionMarket marketId="race-42" />
-          </MarketKitProvider>
+          </HunchProvider>
         </>,
       );
       await user.click(await screen.findByRole("radio", { name: /Player A/ }));
@@ -50,9 +47,9 @@ describe("widget integration regressions", () => {
     const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault());
     render(
       <form onSubmit={onSubmit}>
-        <MarketKitProvider client={client()}>
+        <HunchProvider client={client()}>
           <PredictionMarket marketId="race-42" />
-        </MarketKitProvider>
+        </HunchProvider>
       </form>,
     );
     await user.click(
@@ -83,9 +80,9 @@ describe("widget integration regressions", () => {
       const market = await mock.getMarket("orbit-echo");
       vi.spyOn(mock, "getMarket").mockResolvedValue({ ...market, status });
       render(
-        <MarketKitProvider client={mock}>
+        <HunchProvider client={mock}>
           <PredictionMarket marketId="orbit-echo" showWalletButton={false} />
-        </MarketKitProvider>,
+        </HunchProvider>,
       );
       expect(
         await screen.findByText("Connect your account to check your position."),
@@ -111,18 +108,18 @@ describe("widget integration regressions", () => {
     );
     vi.spyOn(second, "getTokenBalance").mockResolvedValue(12n);
     const view = render(
-      <MarketKitProvider client={first} defaultDemoConnected>
+      <HunchProvider client={first} defaultDemoConnected>
         <PredictionMarket marketId="race-42" />
-      </MarketKitProvider>,
+      </HunchProvider>,
     );
     expect(await screen.findByText("1,000 TEST available")).toBeInTheDocument();
     await userEvent
       .setup()
       .click(screen.getByRole("radio", { name: /Player A/ }));
     view.rerender(
-      <MarketKitProvider client={second} defaultDemoConnected>
+      <HunchProvider client={second} defaultDemoConnected>
         <PredictionMarket marketId="race-42" />
-      </MarketKitProvider>,
+      </HunchProvider>,
     );
     expect(
       screen.queryByText("Who takes the checkered flag?"),
@@ -139,16 +136,16 @@ describe("widget integration regressions", () => {
     const predict = vi.spyOn(mock, "predict");
     const user = userEvent.setup();
     render(
-      <MarketKitProvider client={mock} defaultDemoConnected>
+      <HunchProvider client={mock} defaultDemoConnected>
         <PredictionMarket marketId="race-42" theme="light" />
-      </MarketKitProvider>,
+      </HunchProvider>,
     );
     await user.click(await screen.findByRole("radio", { name: /Player A/ }));
     const review = screen.getByRole("button", { name: /Review prediction/ });
     await waitFor(() => expect(review).toBeEnabled());
     await user.click(review);
     const dialog = screen.getByRole("dialog");
-    expect(dialog).toHaveClass("mk-theme-light");
+    expect(dialog).toHaveClass("hunch-theme-light");
     await act(async () => {
       await mock.predict({
         marketId: "nova-titan",

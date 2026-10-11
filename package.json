@@ -1,8 +1,8 @@
 {
-  "name": "marketkit",
+  "name": "hunch",
   "version": "0.1.0",
   "private": true,
-  "description": "MarketKit \u2014 embeddable on-chain prediction markets on Solana. HackRU 2026.",
+  "description": "hunch — embeddable on-chain prediction markets on Solana. HackRU 2026.",
   "workspaces": [
     "packages/*",
     "services/*",
@@ -21,12 +21,11 @@
     "sdk": "npm run build --workspace @hunch/sdk",
     "resolver": "npm run sdk && npm run dev --workspace @marketkit/resolver",
     "demo": "npm run sdk && npm run demo --workspace @marketkit/resolver",
-    "dev": "npm run dev --workspace @marketkit/racing",
-    "dashboard": "npm run dev --workspace @marketkit/dashboard",
-    "esports": "npm run dev --workspace @marketkit/esports"
-  },
-  "dependencies": {
-    "@marketkit/sdk": "file:packages/marketkit-sdk"
+    "dev": "npm run dev --workspace @hunch/racing",
+    "racing": "npm run dev --workspace @hunch/racing",
+    "dashboard": "npm run dev --workspace @hunch/dashboard",
+    "esports": "npm run dev --workspace @hunch/esports",
+    "serve:app": "node scripts/serve-app.mjs"
   },
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"

@@ -4,13 +4,14 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 export default defineConfig({
+  server: { proxy: { "/v1": { target: "http://127.0.0.1:8787", changeOrigin: true }, "/health": { target: "http://127.0.0.1:8787", changeOrigin: true } } },
   plugins: [themeBootstrap(), react(), tailwindcss()],
   resolve: {
     alias: {
-      "@marketkit/react": fileURLToPath(
+      "@hunch/react": fileURLToPath(
         new URL("../../packages/react/src/index.ts", import.meta.url),
       ),
-      "@marketkit/sdk": fileURLToPath(
+      "@hunch/sdk": fileURLToPath(
         new URL("../../packages/sdk/src/index.ts", import.meta.url),
       ),
     },

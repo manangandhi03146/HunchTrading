@@ -1,7 +1,15 @@
-import type { Market as SdkMarket, Outcome, Prediction } from "@marketkit/sdk";
+import type { Outcome, Prediction } from "@hunch/sdk";
 export type { Outcome };
 export type Mode = "mock" | "sdk";
-export interface Market extends SdkMarket {
+export interface Market {
+  id: string;
+  question: string;
+  outcomes: [string, string];
+  closesAt: number;
+  status: "open" | "closed" | "resolved" | "cancelled";
+  totalPool: bigint;
+  pools: [bigint, bigint];
+  winningOutcome: Outcome | null;
   description?: string;
   createdAt?: number;
   application?: string;

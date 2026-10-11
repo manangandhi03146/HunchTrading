@@ -23,9 +23,9 @@ import {
   effectiveStatus,
   useNow,
   formatTokens,
-  useMarketKit,
+  useHunch,
   useMarkets,
-} from "@marketkit/react";
+} from "@hunch/react";
 import { AppHeader } from "../../shared/AppHeader";
 const MATCHES = ["nova-titan", "orbit-echo", "zenith-pulse"];
 const ICONS = [Triangle, Hexagon, Orbit, AudioLines];
@@ -45,12 +45,13 @@ function TeamMark({
     </span>
   );
 }
-export default function App() {
+export default function App({ embedded = false }: { embedded?: boolean }) {
+  const Main = embedded ? "section" : "main";
   const { theme } = useTheme();
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   const markets = useMarkets();
   const [selected, setSelected] = useState(
-    import.meta.env.VITE_MARKETKIT_MARKET_ID ?? "nova-titan",
+    import.meta.env.VITE_HUNCH_MARKET_ID ?? "nova-titan",
   );
   const matches =
     mode === "mock"
@@ -69,7 +70,7 @@ export default function App() {
     .size;
   return (
     <div className="esports-app">
-      <AppHeader
+      {!embedded && <AppHeader
         active="esports"
         brand={
           <a href="/" className="nexus-brand">
@@ -77,8 +78,8 @@ export default function App() {
             NEXUS<span>INVITATIONAL</span>
           </a>
         }
-      />
-      <main id="main" className="esports-main">
+      />}
+      <Main id={embedded ? undefined : "main"} className="esports-main">
         <div className="tournament-hero">
           <div>
             <h1>
@@ -106,7 +107,7 @@ export default function App() {
           </div>
         </div>
         <div className="tournament-layout">
-          <div>
+          <section className="tournament-feature" aria-label="Selected match">
             <div className="section-heading">
               <h2>Match center</h2>
               <Badge tone="success">Tournament hub</Badge>
@@ -157,6 +158,46 @@ export default function App() {
                 </div>
               </Card>
             )}
+          </section>
+          <aside
+            className="tournament-prediction"
+            aria-label="Selected match prediction"
+          >
+            <div className="section-heading">
+              <h2>Your prediction</h2>
+              <span>BY HUNCH</span>
+            </div>
+            {current ? (
+              <PredictionMarket
+                key={current.id}
+                marketId={current.id}
+                theme={theme}
+              />
+            ) : (
+              <Card className="match-skeleton" role="status">
+                {markets.isPending
+                  ? "Loading your prediction market…"
+                  : markets.isError
+                    ? "Matches are unavailable. Retry loading the match center."
+                    : "Your prediction market will appear when a match is available."}
+              </Card>
+            )}
+            <div className="tournament-disclaimer">
+              <span className="network-badge">
+                <i />
+                {mode === "mock" ? "Simulated tournament" : "Devnet tournament"}
+              </span>
+              <p>
+                {mode === "mock"
+                  ? "All matches, stakes, and settlement shown here are simulated. No blockchain transactions are submitted."
+                  : "Predictions use nonredeemable Devnet TEST tokens. Results follow the authorized resolver."}
+              </p>
+            </div>
+          </aside>
+          <section
+            className="tournament-schedule"
+            aria-label="Tournament schedule"
+          >
             <div className="match-list-head">
               <span>TOURNAMENT SCHEDULE</span>
               <span>{matches?.length ?? 0} MATCHES</span>
@@ -221,45 +262,13 @@ export default function App() {
                 <ArrowUpRight size={23} />
               </a>
             </div>
-          </div>
-          <aside>
-            <div className="section-heading">
-              <h2>Your prediction</h2>
-              <span>BY HUNCH</span>
-            </div>
-            {current ? (
-              <PredictionMarket
-                key={current.id}
-                marketId={current.id}
-                theme={theme}
-              />
-            ) : (
-              <Card className="match-skeleton" role="status">
-                {markets.isPending
-                  ? "Loading your prediction market…"
-                  : markets.isError
-                    ? "Matches are unavailable. Retry loading the match center."
-                    : "Your prediction market will appear when a match is available."}
-              </Card>
-            )}
-            <div className="tournament-disclaimer">
-              <span className="network-badge">
-                <i />
-                {mode === "mock" ? "Simulated tournament" : "Devnet tournament"}
-              </span>
-              <p>
-                {mode === "mock"
-                  ? "All matches, stakes, and settlement shown here are simulated. No blockchain transactions are submitted."
-                  : "Predictions use nonredeemable Devnet TEST tokens. Results follow the authorized resolver."}
-              </p>
-            </div>
-          </aside>
+          </section>
         </div>
         <footer className="app-footer">
           <span>Nexus Invitational · A hunch integration demo</span>
           <span>Competition, connected.</span>
         </footer>
-      </main>
+      </Main>
     </div>
   );
 }

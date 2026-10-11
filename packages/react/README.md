@@ -1,6 +1,6 @@
 # hunch frontend — Developer C
 
-The product is **hunch**, at **https://hunchtrading.tech**. Existing `@marketkit/*` workspace names, SDK exports, and environment variables are retained for compatibility with Developer A/B's current integration contract.
+The product is **hunch**, at **https://hunchtrading.tech**. All workspaces use `@hunch/*`; the React API uses `HunchProvider`, `useHunch`, and `HunchClient`, and the SDK exports `Hunch` and `HunchConfig`. After merging the rename, rerun `npm install` and update local environment files to the `VITE_HUNCH_*` names below. Previous branding aliases are not exported.
 
 Reusable React widget, Velocity Racing demo, Nexus esports demo, and the developer console. All demo credits are nonredeemable; live signing is restricted to Solana Devnet. The Anchor program and live SDK/resolver integration remain scaffolds; mock validation and the frontend demo are exercised by the workspace regression suite.
 
@@ -10,17 +10,17 @@ Node 22.12+ and npm 10+ recommended. From the monorepo root:
 
 ```sh
 npm install
-npm run dev --workspace @marketkit/racing     # http://127.0.0.1:5173
-npm run dev --workspace @marketkit/esports    # http://127.0.0.1:5174
-npm run dev --workspace @marketkit/dashboard  # http://127.0.0.1:5175
+npm run dev --workspace @hunch/racing     # http://127.0.0.1:5173
+npm run dev --workspace @hunch/esports    # http://127.0.0.1:5174
+npm run dev --workspace @hunch/dashboard  # http://127.0.0.1:5175
 ```
 
 Run the three development commands in separate terminals. The defaults are mock mode, no wallet extension required. Connect **Demo account**, choose an outcome, review and confirm a prediction. In racing, **Close demo predictions** then **Start race**. After the 12-second fixture finishes, claim your eligible payout. **New demo race** creates a new market and keeps old positions intact.
 
 ```sh
 npm run build                               # all existing workspace builds
-npm run build --workspace @marketkit/react   # distributable JS, declarations, CSS
-npm run test --workspace @marketkit/react    # Vitest + Testing Library
+npm run build --workspace @hunch/react   # distributable JS, declarations, CSS
+npm run test --workspace @hunch/react    # Vitest + Testing Library
 ```
 
 Use the root shortcuts `npm run dev`, `npm run esports`, and `npm run dashboard` to start the three apps. Widget build first builds the SDK declarations it consumes. Vite development aliases resolve the workspace sources directly.
@@ -28,14 +28,14 @@ Use the root shortcuts `npm run dev`, `npm run esports`, and `npm run dashboard`
 ## Embed
 
 ```tsx
-import { MarketKitProvider, PredictionMarket } from "@marketkit/react";
-import "@marketkit/react/styles.css";
+import { HunchProvider, PredictionMarket } from "@hunch/react";
+import "@hunch/react/styles.css";
 
 export function App() {
   return (
-    <MarketKitProvider mode="mock">
+    <HunchProvider mode="mock">
       <PredictionMarket marketId="race-42" theme="dark" />
-    </MarketKitProvider>
+    </HunchProvider>
   );
 }
 ```
@@ -50,33 +50,33 @@ Copy the relevant `apps/<app>/.env.example` to `.env.local`:
 
 | Variable                                                                | Default / purpose                                                                               |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `VITE_MARKETKIT_MODE`                                                   | `mock` or `sdk` (no automatic fallback from failed real calls)                                  |
+| `VITE_HUNCH_MODE`                                                       | `mock` or `sdk` (no automatic fallback from failed real calls)                                  |
 | `VITE_SOLANA_CLUSTER`                                                   | `devnet`; other values stop startup                                                             |
-| `VITE_MARKETKIT_PROGRAM_ID`                                             | Deployed program's public address                                                               |
+| `VITE_HUNCH_PROGRAM_ID`                                                 | Deployed program's public address                                                               |
 | `VITE_TEST_TOKEN_MINT`                                                  | Public address of the zero-decimal Devnet TEST mint                                             |
-| `VITE_MARKETKIT_MARKET_ID`                                              | Initial race/match ID; must actually exist in SDK mode                                          |
+| `VITE_HUNCH_MARKET_ID`                                                  | Initial race/match ID; must actually exist in SDK mode                                          |
 | `VITE_RESOLVER_API_URL`                                                 | Reserved for the backend integration below; not called without an agreed API                    |
 | `VITE_RACING_APP_URL`, `VITE_ESPORTS_APP_URL`, `VITE_DASHBOARD_APP_URL` | Optional public URLs for cross-app links when deployed; defaults are local ports 5173/5174/5175 |
 
 Vite variables are public. Never put game-server signing keys, resolver keys, or seed phrases in them. Phantom and Solflare are configured using Wallet Adapter; Wallet Standard wallets are also detected. A missing extension opens the standard wallet selection UI. The adapter verifies the RPC genesis hash before exposing a signer to live mutation bindings.
 
-Mock data is stored per browser origin in `localStorage` under `marketkit.frontend.demo.v1`, with bigint amounts serialized as strings. Different app ports have separate simulated stores. The dashboard's integration preview shares its created markets. Live mode uses shared Devnet state across applications. Mock receipts are always labeled and never linked to Explorer. Deleting that one storage entry starts fresh fixtures; no blockchain state is affected.
+Mock data is stored per browser origin in `localStorage` under `hunch.frontend.demo.v1`, with bigint amounts serialized as strings. When that key is absent, a single valid previous namespace snapshot with the `.frontend.demo.v1` suffix is migrated, preserving markets, positions, balances, races, and events. The previous entry is removed only after the new entry is written. Invalid or ambiguous snapshots are not migrated; an existing hunch entry always takes precedence. Different app ports have separate simulated stores. The dashboard's integration preview shares its created markets. Live mode uses shared Devnet state across applications. Mock receipts are always labeled and never linked to Explorer. Deleting the migrated storage entry starts fresh fixtures; no blockchain state is affected.
 
 ## Developer B integration requirements
 
-The checked-in SDK currently exposes `MarketKit`, `getMarket`, and `getPositions`, but its live implementation throws “pending.” Its mock validates closing times and rejects repeated claims, but does not expose frontend balances or enriched claim status, so the frontend uses a separate demo client.
+The checked-in SDK currently exposes `Hunch`, `getMarket`, and `getPositions`, but its live implementation throws “pending.” Its mock validates closing times and rejects repeated claims, but does not expose frontend balances or enriched claim status, so the frontend uses a separate demo client.
 
-`SdkMarketKitClient` consumes the existing reads without inventing SDK exports. Supply typed `SdkBindings` through the provider once B implements the methods. See `src/adapters/SdkMarketKitClient.ts` for the exact TypeScript contract.
+`SdkHunchClient` consumes the existing reads without inventing SDK exports. Supply typed `SdkBindings` through the provider once B implements the methods. See `src/adapters/SdkHunchClient.ts` for the exact TypeScript contract.
 
 ```tsx
-<MarketKitProvider
+<HunchProvider
   mode="sdk"
   programId={programId}
   tokenMint={testMint}
   sdkBindings={bindingsFromDeveloperB}
 >
   <App />
-</MarketKitProvider>
+</HunchProvider>
 ```
 
 | Binding                           | Required behavior                                                                    |

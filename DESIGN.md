@@ -97,9 +97,29 @@ typography:
     lineHeight: 1.4
   "caption":
     fontFamily: "\"Manrope\", ui-sans-serif, system-ui, sans-serif"
-    fontSize: "12px"
+    fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.6
+  "subheading":
+    fontSize: "20px"
+    fontWeight: 650
+    lineHeight: 1.4
+  "metric":
+    fontSize: "28px"
+    fontWeight: 750
+    lineHeight: 1.4
+  "mobile-display":
+    fontSize: "32px"
+    fontWeight: 750
+    lineHeight: 1.13
+  "headline-max":
+    fontSize: "38px"
+    fontWeight: 750
+    lineHeight: 1.2
+  "race-duration":
+    fontSize: "48px"
+    fontWeight: 750
+    lineHeight: 1.1
   "outcome-value":
     fontFamily: "\"Manrope\", ui-sans-serif, system-ui, sans-serif"
     fontSize: "30px"
@@ -146,7 +166,7 @@ components:
     rounded: "{rounded.control}"
     padding: "9px 14px"
   "button-primary-hover":
-    backgroundColor: "color-mix(in srgb, var(--mk-primary) 85%, var(--mk-text))"
+    backgroundColor: "color-mix(in srgb, var(--hunch-widget-primary) 85%, var(--hunch-widget-text))"
   "button-race-hover":
     backgroundColor: "{colors.orange-hover}"
   "button-secondary":
@@ -179,7 +199,7 @@ components:
     borderColor: "{colors.control-border}"
     rounded: "{rounded.control}"
     padding: "9px 12px"
-    height: "42px"
+    height: "44px"
   "navigation-item-active":
     backgroundColor: "{colors.lime}"
     textColor: "{colors.moss}"
@@ -189,7 +209,7 @@ components:
     textColor: "{colors.success}"
     rounded: "{rounded.badge}"
     padding: "4px 9px"
-    size: "12px"
+    size: "14px"
   "card":
     backgroundColor: "{colors.white}"
     textColor: "{colors.ink}"
@@ -205,7 +225,7 @@ components:
     rounded: "{rounded.outcome}"
     padding: "16px 14px"
   "outcome-selected":
-    backgroundColor: "color-mix(in srgb, var(--mk-primary) 9%, var(--mk-surface))"
+    backgroundColor: "color-mix(in srgb, var(--hunch-widget-primary) 9%, var(--hunch-widget-surface))"
     textColor: "{colors.orange}"
     rounded: "{rounded.outcome}"
     padding: "16px 14px"
@@ -259,24 +279,24 @@ Theme assignment is semantic; colors are not an automatically inverted palette:
 
 | Widget variable | Light theme token | Dark theme token |
 | --- | --- | --- |
-| `--mk-bg` | paper | dark-bg |
-| `--mk-surface` | white | moss |
-| `--mk-elevated` | elevated | moss-raised |
-| `--mk-text` | ink | dark-text |
-| `--mk-muted` | muted | dark-muted |
-| `--mk-border` | line | dark-border |
-| `--mk-control-border` | control-border | dark-control-border |
-| `--mk-primary` | orange | dark-primary |
-| `--mk-primary-text` | white (#ffffff) | dark-bg |
-| `--mk-success` | success | lime |
-| `--mk-warning` | warning | dark-warning |
-| `--mk-danger` | danger | dark-danger |
+| `--hunch-widget-bg` | paper | dark-bg |
+| `--hunch-widget-surface` | white | moss |
+| `--hunch-widget-elevated` | elevated | moss-raised |
+| `--hunch-widget-text` | ink | dark-text |
+| `--hunch-widget-muted` | muted | dark-muted |
+| `--hunch-widget-border` | line | dark-border |
+| `--hunch-widget-control-border` | control-border | dark-control-border |
+| `--hunch-widget-primary` | orange | dark-primary |
+| `--hunch-widget-primary-text` | white (#ffffff) | dark-bg |
+| `--hunch-widget-success` | success | lime |
+| `--hunch-widget-warning` | warning | dark-warning |
+| `--hunch-widget-danger` | danger | dark-danger |
 
-The dashboard rail locally assigns lime to `--mk-primary`; dark application headers use soft orange. Preserve these contextual assignments. Status backgrounds mix their semantic color at 7% with the surface, with a 30% border mix. Error surfaces use 5% and 25%; selected outcomes use 9%.
+The dashboard rail locally assigns lime to `--hunch-widget-primary`; dark application headers use soft orange. Preserve these contextual assignments. Status backgrounds mix their semantic color at 7% with the surface, with a 30% border mix. Error surfaces use 5% and 25%; selected outcomes use 9%.
 
 ### Page theme and widget theme
 
-`packages/react/src/tokens.css` holds both palettes. Page surfaces consume semantic `--hunch-*` variables; `:root[data-theme="dark"]` assigns the dark palette. Widgets explicitly scope `--mk-*` variables with `.mk-theme-light` and `.mk-theme-dark`, so a host page can show either widget theme independently. The racing and esports widgets follow the app preference. The console integration preview defaults to **Follow app theme** and also accepts explicit Light or Dark overrides.
+`packages/react/src/tokens.css` holds both palettes. Page surfaces consume semantic `--hunch-*` variables; `:root[data-theme="dark"]` assigns the dark palette. Widgets explicitly scope `--hunch-widget-*` variables with `.hunch-theme-light` and `.hunch-theme-dark`, so a host page can show either widget theme independently. The racing and esports widgets follow the app preference. The console integration preview defaults to **Follow app theme** and also accepts explicit Light or Dark overrides.
 
 The header switch first follows the device's `prefers-color-scheme`. An explicit choice persists as `hunch.theme.v1` per origin and syncs with other tabs of that origin. The Vite bootstrap applies the same preference before the app's first paint; the provider updates native `color-scheme` and browser theme color. Blocked storage keeps the current tab usable. Theme changes preserve the provider, selected outcome, stake input, and account state.
 
@@ -293,12 +313,12 @@ Manrope is self-hosted as a variable WOFF2 covering weights 400–800, with `fon
 
 ### Hierarchy
 
-- **Display:** demo page headings use the frontmatter display role; at the demo stacking breakpoints they become 38px.
-- **Headline:** dashboard page headings use the headline role; at 760px and below they become 31px.
+- **Display:** demo page headings use the frontmatter display role; at the demo stacking breakpoints they become 32px.
+- **Headline:** dashboard page headings use the headline role; at 760px and below they become 30px.
 - **Title:** widget questions use the title role. Integration-card titles use the same size with weight 700 and line-height 1.2.
 - **Section:** panels and widget section captions use the section role and real heading elements.
 - **Page body / body:** the app root uses the page-body role; the widget and operational rows use the body role. Introductory demo copy is 15px with line-height 1.7; dashboard introductory copy is 14px with line-height 1.7.
-- **Label / caption:** buttons use the label role; support copy and pool captions use the caption role. Small contextual metadata in the incumbent implementation also uses 11px.
+- **Label / caption:** buttons use the label role; support copy and pool captions use the caption role. Supporting metadata uses a 14px floor. Mobile text inputs use 16px to avoid focus zoom.
 - **Outcome value:** the outcome-value role uses tabular numerals. The percent sign is 20px, weight 400, and muted.
 
 Paragraphs in the dashboard intro and demo explanatory sections are capped at 65ch where the source establishes it. Headings balance their wrapping; paragraphs use pretty wrapping.
@@ -319,13 +339,13 @@ Observed responsive behavior:
 | --- | --- |
 | Dashboard ≤1200px | Rail becomes 220px; main padding becomes 30px 28px 24px; topbar gutters become 28px. |
 | Dashboard ≤1000px | Rail becomes 204px; stats become two columns; overview and integration stack. |
-| Dashboard and shared header ≤760px | Rail becomes a static header with four navigation columns; main gutters become 18px; titles and actions stack; topbar wraps. Demo links take a full row. |
+| Dashboard and shared header ≤760px | Rail becomes a static header with four navigation columns; main gutters become 18px; titles and actions stack; topbar wraps. Dashboard demo links sit beside the logo. |
 | Dashboard ≤760px tables | Each market becomes a grid row with question, status, pool, open action, and both labeled dates retained. Table headings remain available to assistive technology. |
 | Demo layouts ≤1100px | Side gutters become 28px; main split uses a flexible column plus 350px widget, with a 24px gap. The header wraps navigation to a full row. |
-| Esports ≤850px | Main split stacks; gutters become 18px; heading becomes 38px. |
-| Racing ≤800px | Main split and lifecycle stack; gutters become 18px; heading becomes 38px. |
+| Esports ≤850px | Main split stacks; gutters become 18px; heading becomes 32px. |
+| Racing ≤800px | Main split and lifecycle stack; gutters become 18px; heading becomes 32px. |
 | Small controls ≤480px | Dashboard event metadata and form actions wrap; esports match rows and featured-match details reflow; large team marks become 60px. |
-| Widget container ≤300px | Question becomes 21px, outcome value 27px, outcome label 13px, and tile padding 12px 10px. Footer and stake metadata wrap. |
+| Widget container ≤300px | Question becomes 20px, outcome value 28px, outcome label 14px, and tile padding 12px 10px. Footer and stake metadata wrap. |
 
 An earlier dashboard ≥1550px padding rule is superseded by the later layout stylesheet; it is not an additional design step. The widget uses an inline-size container query, so its compact behavior follows embed width independently of the page viewport.
 
@@ -352,7 +372,7 @@ Corners are restrained and tied to function: controls use the control radius, ba
 
 Direct, compact controls with a clear primary action.
 
-- Shared buttons use label typography, control corners, 9px 14px padding, an 8px icon gap, and a minimum height of 42px.
+- Shared buttons use label typography, control corners, 9px 14px padding, an 8px icon gap, and a minimum height of 44px.
 - Primary fills use the semantic primary color. Light-theme text is white; dark-theme text is the dark background. Secondary fills use the elevated surface and a border; ghost buttons use transparent backgrounds and muted text.
 - Hover mixes primary at 12% into the elevated surface for secondary and ghost variants. Primary hover mixes primary at 85% with theme text. Pressed enabled buttons move down 1px. Disabled and busy buttons are disabled, with opacity 0.45.
 - Background transitions take 160ms ease-out; the press transform takes 150ms ease-out. Keyboard focus is a 2px primary outline, offset 3px. General app controls use a 4px focus offset.
@@ -361,7 +381,7 @@ Direct, compact controls with a clear primary action.
 
 Small factual state markers, not competing actions.
 
-A dot accompanies text inside a thin border, with 4px 9px padding, badge corners, 12px text, weight 600, and line-height 1.4. Neutral, success, warning, and primary-colored variants use their semantic variables; the API's legacy `violet` tone now maps to primary orange. Status text stays explicit, including simulated mode.
+A dot accompanies text inside a thin border, with 4px 9px padding, badge corners, 14px text, weight 600, and line-height 1.4. Neutral, success, warning, and primary-colored variants use their semantic variables; the API's legacy `violet` tone now maps to primary orange. Status text stays explicit, including simulated mode.
 
 ### Cards / Containers
 
@@ -377,13 +397,13 @@ App fields use the theme surface, a one-pixel control border, control corners, 1
 
 ### Theme Switch
 
-A native button with `role="switch"`, stable accessible name **Dark theme**, and `aria-checked` communicates the selected mode. The visible Light/Dark text and sun/moon icon supplement the track. Enter, Space, and pointer activation all toggle the mode. It uses an elevated surface, control border and corners, a 42px minimum height, 9px 12px padding, and 13px text at weight 650. The 32px by 18px track moves a 12px thumb over 180ms; reduced motion removes the transition. Keyboard focus uses a 2px primary outline with a 3px offset. Header controls wrap on narrow screens.
+A native button with `role="switch"`, stable accessible name **Dark theme**, and `aria-checked` communicates the selected mode. The visible Light/Dark text and sun/moon icon supplement the track. Enter, Space, and pointer activation all toggle the mode. It uses an elevated surface, control border and corners, a 44px minimum height, 9px 12px padding, and 14px text at weight 650. The 32px by 18px track moves a 12px thumb over 180ms; reduced motion removes the transition. Keyboard focus uses a 2px primary outline with a 3px offset. Header controls wrap on narrow screens.
 
 ### Navigation
 
 A stable moss frame with a lime current place.
 
-Dashboard links use navigation corners, 12px padding, an icon/text gap of 10px, and a 46px minimum height. Hover uses raised moss and white text. Active links use lime, moss text, and weight 700. At 760px and below the four primary links form a grid with icons over 12px labels and 42px minimum controls. Shared demo links use light text on moss and a lime underline on the current page.
+Dashboard links use navigation corners, 12px padding, an icon/text gap of 10px, and a 46px minimum height. Hover uses raised moss and white text. Active links use lime, moss text, and weight 700. At 760px and below the four primary links form a grid with text-only 14px labels and 44px minimum controls. Shared demo links use light text on moss and a lime underline on the current page.
 
 ### Outcome Selector
 
@@ -423,3 +443,9 @@ The app reduced-motion rule sets animations and transitions to 0.01ms, one itera
 - **Don't** present simulated receipts as on-chain transactions.
 
 Recorded from the effective cascade in `packages/react/src/tokens.css`, `packages/react/src/styles.css`, `apps/shared/styles.css`, dashboard styles and layout, and racing/esports styles, plus their shared React controls. Dormant legacy eyebrow/kicker selectors and overridden purple declarations are not canonized; they are inactive implementation residue.
+
+## UI refinement, October 2026
+
+Mobile task order follows the primary action: integration configuration, widget preview, expandable code/setup guide, then details; esports selected match, prediction, then schedule; racing prediction, circuit, then expandable operator controls. The mobile dashboard keeps demo links beside the logo and uses a compact navigation row. Native disclosures retain keyboard access to all setup and controls.
+
+Typography now uses explicit 14/16/18/20/23/28/30/32/38/48/50px steps. Support text is at least 14px, mobile inputs 16px, and principal controls have a 44px minimum hit area. Earlier overridden CSS declarations were removed while preserving selector order and media conditions. Simulated and live network labels describe the configured mode. Claim receipts store only confirmed public metadata on the current device, scoped to mode/program/market/account, and never determine eligibility. New mock races have a two-minute prediction window; existing markets and Devnet deadlines are unchanged.

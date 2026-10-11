@@ -1,9 +1,11 @@
 import { formatTokens } from "../types";
+import { useHunch } from "../providers/HunchProvider";
 export function StakeInput({
   id,
   value,
   onChange,
   balance,
+  balancePending = false,
   error,
   disabled,
 }: {
@@ -11,20 +13,26 @@ export function StakeInput({
   value: string;
   onChange: (value: string) => void;
   balance?: bigint;
+  balancePending?: boolean;
   error?: string;
   disabled: boolean;
 }) {
+  const { walletAddress } = useHunch();
   return (
-    <div className="mk-stake">
-      <div className="mk-stake-label">
+    <div className="hunch-stake">
+      <div className="hunch-stake-label">
         <label htmlFor={id}>Your stake</label>
         <span>
-          {balance === undefined
-            ? "Balance unavailable"
-            : `${formatTokens(balance)} TEST available`}
+          {!walletAddress
+            ? "Connect to see balance"
+            : balancePending
+              ? "Loading balance…"
+              : balance === undefined
+                ? "Balance unavailable"
+                : `${formatTokens(balance)} TEST available`}
         </span>
       </div>
-      <div className="mk-input-wrap">
+      <div className="hunch-input-wrap">
         <input
           id={id}
           type="text"
@@ -40,7 +48,7 @@ export function StakeInput({
         <span>TEST</span>
       </div>
       {error && (
-        <p className="mk-field-error" id={`${id}-error`} role="alert">
+        <p className="hunch-field-error" id={`${id}-error`} role="alert">
           {error}
         </p>
       )}

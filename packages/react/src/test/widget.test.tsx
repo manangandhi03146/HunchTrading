@@ -2,18 +2,18 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PredictionMarket } from "../components/PredictionMarket";
-import { MarketKitProvider } from "../providers/MarketKitProvider";
-import { MockMarketKitClient } from "../adapters/MockMarketKitClient";
+import { HunchProvider } from "../providers/HunchProvider";
+import { MockHunchClient } from "../adapters/MockHunchClient";
 
 function setup({
-  client = new MockMarketKitClient({ persist: false, latencyMs: 0 }),
+  client = new MockHunchClient({ persist: false, latencyMs: 0 }),
   connected = true,
   marketId = "race-42",
 } = {}) {
   render(
-    <MarketKitProvider client={client} defaultDemoConnected={connected}>
+    <HunchProvider client={client} defaultDemoConnected={connected}>
       <PredictionMarket marketId={marketId} />
-    </MarketKitProvider>,
+    </HunchProvider>,
   );
   return { client, user: userEvent.setup() };
 }
@@ -76,7 +76,7 @@ describe("reusable prediction widget", () => {
     ).toBeInTheDocument();
   });
   it("disables predictions after the close", async () => {
-    const client = new MockMarketKitClient({ persist: false, latencyMs: 0 });
+    const client = new MockHunchClient({ persist: false, latencyMs: 0 });
     await client.closeDemoMarket("race-42");
     setup({ client });
     expect(

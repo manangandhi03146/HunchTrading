@@ -6,13 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@marketkit/sdk": fileURLToPath(
+      "@hunch/sdk": fileURLToPath(
         new URL("../sdk/src/index.ts", import.meta.url),
       ),
     },
   },
   build: {
-    emptyOutDir: false,
     lib: {
       entry: fileURLToPath(new URL("./src/index.ts", import.meta.url)),
       formats: ["es"],
@@ -23,7 +22,7 @@ export default defineConfig({
       external: [
         /^react($|\/)/,
         /^react-dom($|\/)/,
-        /^@marketkit\/sdk/,
+        /^@hunch\/sdk/,
         /^@solana\//,
         /^@tanstack\//,
       ],

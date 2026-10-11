@@ -15,15 +15,15 @@ export function OutcomeSelector({
   name: string;
 }) {
   return (
-    <fieldset className="mk-outcomes" disabled={disabled}>
+    <fieldset className="hunch-outcomes" disabled={disabled}>
       <legend>Choose your outcome</legend>
       {market.outcomes.map((label, index) => (
         <label
           key={index}
           className={cn(
-            "mk-outcome",
-            value === index && "mk-outcome-selected",
-            market.winningOutcome === index && "mk-outcome-winner",
+            "hunch-outcome",
+            value === index && "hunch-outcome-selected",
+            market.winningOutcome === index && "hunch-outcome-winner",
           )}
         >
           <input
@@ -33,8 +33,8 @@ export function OutcomeSelector({
             checked={value === index}
             onChange={() => onChange(index as Outcome)}
           />
-          <span className="mk-outcome-top">
-            <span className="mk-outcome-name">{label}</span>
+          <span className="hunch-outcome-top">
+            <span className="hunch-outcome-name">{label}</span>
             {value === index && <Check size={15} aria-hidden="true" />}
           </span>
           <strong>
@@ -43,7 +43,7 @@ export function OutcomeSelector({
               : "0"}
             <small>%</small>
           </strong>
-          <span className="mk-outcome-caption">
+          <span className="hunch-outcome-caption">
             {market.winningOutcome === index
               ? "Winning outcome"
               : "of current pool"}

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { appUrl } from "./links";
-import { Logo, WalletButton, useMarketKit } from "@marketkit/react";
+import { Logo, WalletButton, useHunch } from "@hunch/react";
 import { ThemeSwitch } from "./theme";
 export function AppHeader({
   active,
@@ -9,7 +9,7 @@ export function AppHeader({
   active: "racing" | "esports" | "dashboard";
   brand?: ReactNode;
 }) {
-  const { mode } = useMarketKit();
+  const { mode } = useHunch();
   return (
     <>
       <a href="#main" className="skip-link">
@@ -25,7 +25,7 @@ export function AppHeader({
               aria-current={active === app ? "page" : undefined}
             >
               {app === "dashboard"
-                ? "Developer console"
+                ? "Home"
                 : app === "racing"
                   ? "Racing demo"
                   : "Esports demo"}

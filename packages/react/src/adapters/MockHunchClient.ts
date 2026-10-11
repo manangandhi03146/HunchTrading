@@ -1,4 +1,4 @@
-import type { MarketKitClient } from "./MarketKitClient";
+import type { HunchClient } from "./HunchClient";
 import {
   effectiveStatus,
   type Claimable,
@@ -117,7 +117,20 @@ function isState(value: unknown): value is State {
       (race.status !== "finished" || isOutcome(race.winner)),
   );
 }
-const STORAGE_KEY = "marketkit.frontend.demo.v1";
+const STORAGE_KEY = "hunch.frontend.demo.v1";
+const DEMO_STORAGE_SUFFIX = ".frontend.demo.v1";
+function restoreState(saved: string): State | null {
+  try {
+    const restored: unknown = JSON.parse(saved, (_key, value) =>
+      typeof value === "string" && /^bigint:\d+$/.test(value)
+        ? BigInt(value.slice(7))
+        : value,
+    );
+    return isState(restored) ? restored : null;
+  } catch {
+    return null;
+  }
+}
 export const DEMO_WALLET = "DemoSpectator";
 // A deterministic game-server fixture, never an authoritative live result.
 const RACE_FIXTURE_WINNER: Outcome = 0;
@@ -192,7 +205,7 @@ function seed(): State {
     ],
   };
 }
-export class MockMarketKitClient implements MarketKitClient {
+export class MockHunchClient implements HunchClient {
   readonly mode = "mock" as const;
   private state: State;
   private listeners = new Set<() => void>();
@@ -203,16 +216,38 @@ export class MockMarketKitClient implements MarketKitClient {
     if (options.persist !== false && typeof localStorage !== "undefined") {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const restored: unknown = JSON.parse(saved, (_key, value) =>
-            typeof value === "string" && /^bigint:\d+$/.test(value)
-              ? BigInt(value.slice(7))
-              : value,
-          );
-          if (isState(restored)) this.state = restored;
+        if (saved !== null) {
+          const restored = restoreState(saved);
+          if (restored) this.state = restored;
+        } else {
+          // Import a single validated same-origin snapshot from a previous
+          // namespace. The versioned suffix identifies the demo ledger schema.
+          let previous:
+            { key: string; saved: string; state: State } | undefined;
+          for (let index = 0; index < localStorage.length; index++) {
+            const key = localStorage.key(index);
+            if (
+              !key ||
+              key === STORAGE_KEY ||
+              !key.endsWith(DEMO_STORAGE_SUFFIX)
+            )
+              continue;
+            const candidate = localStorage.getItem(key);
+            const restored =
+              candidate !== null ? restoreState(candidate) : null;
+            if (!restored || candidate === null) continue;
+            // Ambiguous snapshots remain untouched rather than picking a ledger.
+            if (previous) return;
+            previous = { key, saved: candidate, state: restored };
+          }
+          if (previous) {
+            this.state = previous.state;
+            localStorage.setItem(STORAGE_KEY, previous.saved);
+            localStorage.removeItem(previous.key);
+          }
         }
       } catch {
-        /* Unavailable storage starts a fresh fixture. */
+        /* Keep the restored state or fixture when storage is unavailable. */
       }
     }
   }
@@ -515,7 +550,7 @@ export class MockMarketKitClient implements MarketKitClient {
     const { market } = await this.createMarket({
       question: "Who takes the checkered flag?",
       outcomes: ["Player A", "Player B"],
-      closesAt: Math.floor(Date.now() / 1000) + 30,
+      closesAt: Math.floor(Date.now() / 1000) + 120,
     });
     return market;
   }

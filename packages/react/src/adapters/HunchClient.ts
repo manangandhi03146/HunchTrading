@@ -10,9 +10,11 @@ import type {
   TransactionResult,
 } from "../types";
 
-export interface MarketKitClient {
+export interface HunchClient {
   readonly mode: Mode;
   readonly programId?: string;
+  readonly demoWalletAddress?: string;
+  readonly shared?: boolean;
   getMarket(id: string): Promise<Market>;
   listMarkets(): Promise<Market[]>;
   getPositions(id: string, walletAddress: string): Promise<Position[]>;

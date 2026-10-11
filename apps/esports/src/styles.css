@@ -14,51 +14,31 @@
   gap: 9px;
   font-size: 20px;
   font-weight: 700;
-  color: var(--hunch-ink);
 }
 .nexus-brand > span {
-  font-size: 12px;
-  color: var(--hunch-muted);
   border-left: 1px solid var(--hunch-line);
   padding-left: 10px;
   margin-left: 4px;
 }
 .esports-main {
-  max-width: 1360px;
   margin: auto;
-  padding: 42px 44px 0;
 }
 .tournament-hero {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0 38px;
   border-bottom: 1px solid var(--hunch-line);
-  margin-bottom: 32px;
 }
 .tournament-hero .eyebrow {
   color: var(--hunch-muted);
-  font-size: 12px;
-}
-.tournament-hero h1 {
-  font-size: clamp(38px, 4.3vw, 58px);
-  font-weight: 550;
-  line-height: 1.1;
-  margin: 19px 0;
-}
-.tournament-hero h1 > span {
-  color: var(--hunch-ink);
+  font-size: 14px;
 }
 .tournament-hero p {
   color: var(--hunch-muted);
-  font-size: 14px;
 }
 .tournament-facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 22px;
-  margin-top: 25px;
-  font-size: 12px;
   color: var(--hunch-muted);
 }
 .tournament-facts > span {
@@ -85,33 +65,27 @@
   margin-right: 60px;
 }
 .tournament-emblem > span {
-  font-size: 21px;
+  font-size: 20px;
   color: var(--hunch-ink);
   font-weight: 650;
 }
 .tournament-emblem > small {
-  font-size: 12px;
+  font-size: 14px;
 }
 .tournament-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.85fr) minmax(330px, 1fr);
-  gap: 34px;
 }
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
   gap: 10px;
 }
 .section-heading h2 {
-  font-size: 15px;
-  font-weight: 550;
   margin: 0;
 }
 .section-heading > span {
   color: var(--hunch-muted);
-  font-size: 12px;
 }
 .featured-match {
   background: var(--hunch-white);
@@ -127,14 +101,12 @@
 }
 .featured-top > span {
   color: var(--hunch-muted);
-  font-size: 12px;
 }
 .team-versus {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 38px 22px;
-  gap: 50px;
 }
 .team-versus > div {
   display: flex;
@@ -144,13 +116,10 @@
   min-width: 0;
 }
 .team-versus h3 {
-  font-size: 23px;
-  font-weight: 600;
   margin: 0;
 }
 .team-versus > div > span:last-child {
   color: var(--hunch-muted);
-  font-size: 12px;
 }
 .team-mark {
   display: inline-grid;
@@ -158,31 +127,16 @@
   width: 31px;
   height: 31px;
   border-radius: 8px;
-  border: 1px solid var(--hunch-line);
-  background: var(--hunch-green-tint);
-  color: var(--hunch-ink);
   flex-shrink: 0;
 }
 .team-mark-1 {
-  color: var(--hunch-orange);
-  background: var(--hunch-orange-tint);
   border-color: var(--hunch-line);
-}
-.team-mark-large {
-  width: 90px;
-  height: 90px;
-  border-radius: 20px;
 }
 .versus-text {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 9px;
-  font-size: 21px;
-  color: var(--hunch-muted);
-}
-.versus-text > small {
-  font-size: 12px;
 }
 .featured-bottom {
   display: flex;
@@ -191,7 +145,6 @@
   padding: 17px 24px;
   border-top: 1px solid var(--hunch-line);
   color: var(--hunch-muted);
-  font-size: 12px;
 }
 .featured-bottom > span:last-child {
   font-variant-numeric: tabular-nums;
@@ -199,34 +152,25 @@
 .match-list-head {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
   color: var(--hunch-muted);
-  padding: 27px 0 13px;
 }
 .match-list {
   display: flex;
   flex-direction: column;
-  gap: 9px;
 }
 .match-row {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 17px;
-  background: var(--hunch-white);
-  border: 1px solid var(--hunch-line);
-  padding: 18px;
-  border-radius: 9px;
   text-align: left;
   cursor: pointer;
-  color: var(--hunch-ink);
 }
 .match-row:hover {
   border-color: var(--hunch-line);
 }
 .match-row-selected {
   border-color: var(--hunch-green);
-  background: var(--hunch-match-hover);
 }
 .match-round {
   display: flex;
@@ -235,29 +179,23 @@
   min-width: 46px;
 }
 .match-round > span {
-  color: var(--hunch-muted);
-  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 .match-round small {
   color: var(--hunch-muted);
-  font-size: 12px;
 }
 .match-teams {
   display: flex;
   align-items: center;
   flex: 1;
-  gap: 14px;
   flex-wrap: wrap;
 }
 .match-teams > span {
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 14px;
 }
 .match-teams > small {
-  font-size: 12px;
   color: var(--hunch-muted);
 }
 .match-row > svg {
@@ -278,23 +216,18 @@
   margin-top: 15px;
 }
 .esports-integration .kicker {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--hunch-muted);
 }
 .esports-integration h3 {
-  font-size: 17px;
-  font-weight: 500;
   margin: 0 0 11px;
 }
 .esports-integration p {
-  max-width: 450px;
-  font-size: 14px;
   color: var(--hunch-muted);
   line-height: 1.7;
   margin: 0;
 }
 .esports-integration > a {
-  color: var(--hunch-ink);
   border: 1px solid var(--hunch-line);
   border-radius: 10px;
   width: 42px;
@@ -308,21 +241,10 @@
 }
 .tournament-disclaimer p {
   color: var(--hunch-muted);
-  font-size: 12px;
-  line-height: 1.8;
 }
 @media (max-width: 1100px) {
   .esports-main {
     padding: 30px 24px 0;
-  }
-  .team-versus {
-    gap: 25px;
-  }
-  .tournament-layout {
-    gap: 24px;
-  }
-  .team-versus h3 {
-    font-size: 20px;
   }
   .match-row {
     gap: 10px;
@@ -333,20 +255,11 @@
   }
 }
 @media (max-width: 850px) {
-  .esports-main {
-    padding: 28px 18px 0;
-  }
-  .tournament-layout {
-    grid-template-columns: 1fr;
-  }
   .tournament-emblem {
     display: none;
   }
-  .match-row .mk-badge {
-    font-size: 12px;
-  }
-  .match-teams > span {
-    font-size: 12px;
+  .match-row .hunch-badge {
+    font-size: 14px;
   }
   .team-versus {
     gap: 22px;
@@ -356,7 +269,7 @@
     padding: 16px;
   }
   .featured-top > span {
-    font-size: 12px;
+    font-size: 14px;
   }
   .match-round {
     min-width: 32px;
@@ -370,25 +283,17 @@
   .team-versus {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 10px;
-    padding: 26px 14px;
-  }
-  .team-mark-large {
-    width: 60px;
-    height: 60px;
-    border-radius: 14px;
   }
   .team-mark-large svg {
     width: 32px;
     height: 32px;
   }
   .team-versus h3 {
-    font-size: 17px;
     text-align: center;
     overflow-wrap: anywhere;
   }
   .versus-text {
-    font-size: 17px;
+    font-size: 18px;
   }
   .versus-text > small {
     display: none;
@@ -405,7 +310,7 @@
   .match-teams > small {
     width: 100%;
   }
-  .match-row > .mk-badge {
+  .match-row > .hunch-badge {
     flex-shrink: 0;
   }
 }
@@ -417,7 +322,7 @@
 .nexus-brand > span {
   color: #bfd0c4;
   border-color: #476356;
-  font-size: 11px;
+  font-size: 14px;
 }
 .esports-main {
   max-width: 1440px;
@@ -438,18 +343,33 @@
   color: var(--hunch-heading-green);
 }
 .tournament-hero p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
   margin: 0;
 }
 .tournament-facts {
   margin-top: 22px;
   gap: 24px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .tournament-layout {
   grid-template-columns: minmax(0, 1.65fr) minmax(350px, 1fr);
   gap: 32px;
+  grid-template-areas: "feature prediction" "schedule prediction";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+.tournament-feature {
+  grid-area: feature;
+  min-width: 0;
+}
+.tournament-prediction {
+  grid-area: prediction;
+  min-width: 0;
+}
+.tournament-schedule {
+  grid-area: schedule;
+  min-width: 0;
 }
 .section-heading {
   margin-bottom: 16px;
@@ -459,21 +379,21 @@
   font-weight: 700;
 }
 .section-heading > span {
-  font-size: 12px;
+  font-size: 14px;
 }
 .featured-top > span {
-  font-size: 12px;
+  font-size: 14px;
 }
 .team-versus {
   gap: 48px;
   padding-block: 32px;
 }
 .team-versus h3 {
-  font-size: 25px;
+  font-size: 23px;
   font-weight: 750;
 }
 .team-versus > div > span:last-child {
-  font-size: 11px;
+  font-size: 14px;
 }
 .team-mark {
   background: var(--hunch-green-tint);
@@ -491,16 +411,16 @@
 }
 .versus-text {
   color: var(--hunch-muted);
-  font-size: 19px;
+  font-size: 18px;
 }
 .versus-text > small {
-  font-size: 10px;
+  font-size: 14px;
 }
 .featured-bottom {
-  font-size: 13px;
+  font-size: 14px;
 }
 .match-list-head {
-  font-size: 12px;
+  font-size: 14px;
   padding: 28px 0 12px;
 }
 .match-list {
@@ -526,12 +446,12 @@
   background: var(--hunch-green-tint);
 }
 .match-round > span {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--hunch-ink);
 }
 .match-round small {
-  font-size: 11px;
+  font-size: 14px;
 }
 .match-teams {
   gap: 12px;
@@ -541,7 +461,7 @@
   font-weight: 650;
 }
 .match-teams > small {
-  font-size: 12px;
+  font-size: 14px;
 }
 .esports-integration {
   padding-top: 28px;
@@ -563,7 +483,7 @@
   padding-inline: 2px;
 }
 .tournament-disclaimer p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 @media (max-width: 1100px) {
@@ -578,7 +498,7 @@
     gap: 24px;
   }
   .team-versus h3 {
-    font-size: 22px;
+    font-size: 23px;
   }
 }
 @media (max-width: 850px) {
@@ -587,12 +507,14 @@
   }
   .tournament-layout {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "feature" "prediction" "schedule";
+    grid-template-rows: auto;
   }
   .tournament-hero h1 {
-    font-size: 38px;
+    font-size: 32px;
   }
   .match-teams > span {
-    font-size: 13px;
+    font-size: 14px;
   }
   .match-row {
     gap: 10px;
@@ -601,13 +523,13 @@
 }
 @media (max-width: 480px) {
   .team-mark-large {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     border-radius: 14px;
   }
   .team-versus {
     gap: 10px;
-    padding: 28px 12px;
+    padding: 16px 12px;
   }
   .team-versus h3 {
     font-size: 18px;
@@ -617,10 +539,10 @@
     flex-wrap: wrap;
   }
   .featured-top > span {
-    font-size: 11px;
+    font-size: 14px;
   }
   .featured-bottom {
-    font-size: 12px;
+    font-size: 14px;
   }
   .match-row {
     flex-wrap: wrap;
@@ -628,8 +550,32 @@
   .match-teams {
     flex-basis: calc(100% - 55px);
   }
-  .match-row .mk-badge {
+  .match-row .hunch-badge {
     margin-left: 43px;
-    font-size: 11px;
+    font-size: 14px;
+  }
+  .team-mark-large svg {
+    width: 26px;
+    height: 26px;
+  }
+  .team-versus > div > span:last-child,
+  .versus-text > small {
+    display: none;
+  }
+  .team-versus h3 {
+    margin: 8px 0 0;
+  }
+  .featured-bottom {
+    padding-block: 14px;
+    gap: 8px;
+  }
+  .tournament-hero {
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+  .tournament-facts {
+    margin-top: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 }
