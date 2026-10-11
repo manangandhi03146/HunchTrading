@@ -1,0 +1,106 @@
+{
+  "runs": [
+    {
+      "scope": "Contract tests only; no deployment or Devnet lifecycle transactions",
+      "id": 38096073122,
+      "head_sha": "9124bb1ff5abb74ef65803a1404cc4603b382a04",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/manangandhi03146/HunchTrading/actions/runs/38096073122",
+      "created_at": "2026-10-10T23:44:39Z",
+      "updated_at": "2026-10-11T00:04:57Z",
+      "baselineSourceCommit": "49a5e7055d3a490c3c7791d03315ef6107fb28e9",
+      "originalIntegrationSuitesPassed": 3,
+      "baselineUnitTestsPassed": 1,
+      "baselineRegression": {
+        "test": "early_resolution_regression",
+        "expectedResult": "failed",
+        "reason": "operation unexpectedly succeeded: ()",
+        "checkPassed": true
+      },
+      "patchedRustTestsPassed": 13,
+      "patchedRustTestsFailed": 0,
+      "patchedBytecodeDiffersFromBaseline": true,
+      "toolchain": {
+        "rustc": "rustc 1.89.0 (29483883e 2025-08-04)",
+        "anchor": "anchor-cli 1.1.2",
+        "solana": "solana-cli 4.1.2 (src:182084b8; feat:c763ae0a, client:Agave)",
+        "sbf": "cargo-build-sbf 4.1.0\nplatform-tools v1.54",
+        "node": "v24.21.0",
+        "avmBootstrapRust": "rustc 1.91.0 (f8297e351 2025-10-28)"
+      },
+      "commands": [
+        {
+          "command": "anchor",
+          "args": [
+            "build",
+            "--ignore-keys"
+          ],
+          "exitCode": 0
+        },
+        {
+          "command": "cargo",
+          "args": [
+            "test",
+            "-p",
+            "marketkit"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "scope": "Contract tests only; no deployment or Devnet lifecycle transactions",
+      "id": 38097003483,
+      "head_sha": "96dd89d0df4164a9145b5ac9d5d64452765bb4a1",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/manangandhi03146/HunchTrading/actions/runs/38097003483",
+      "created_at": "2026-10-11T00:01:22Z",
+      "updated_at": "2026-10-11T00:20:53Z",
+      "baselineSourceCommit": "49a5e7055d3a490c3c7791d03315ef6107fb28e9",
+      "programSourceTree": "13e458ac9b385baaf6b973ea2620af36ecd6ab5e",
+      "sourceAlsoVerifiedForCommit": "9e8bc7fc7d1cabe7e30a2a501555beb7ba79deab",
+      "originalIntegrationSuitesPassed": 3,
+      "baselineUnitTestsPassed": 1,
+      "baselineRegression": {
+        "test": "early_resolution_regression",
+        "expectedResult": "failed",
+        "reason": "operation unexpectedly succeeded: ()",
+        "checkPassed": true
+      },
+      "patchedRustTestsPassed": 18,
+      "patchedRustTestsFailed": 0,
+      "patchedBytecodeDiffersFromBaseline": true,
+      "toolchain": {
+        "rustc": "rustc 1.89.0 (29483883e 2025-08-04)",
+        "anchor": "anchor-cli 1.1.2",
+        "solana": "solana-cli 4.1.2 (src:182084b8; feat:c763ae0a, client:Agave)",
+        "sbf": "cargo-build-sbf 4.1.0\nplatform-tools v1.54",
+        "node": "v24.21.0",
+        "avmBootstrapRust": "rustc 1.91.0 (f8297e351 2025-10-28)"
+      },
+      "commands": [
+        {
+          "command": "anchor",
+          "args": [
+            "build",
+            "--ignore-keys"
+          ],
+          "exitCode": 0
+        },
+        {
+          "command": "cargo",
+          "args": [
+            "test",
+            "-p",
+            "marketkit"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

@@ -7,17 +7,19 @@ This branch starts at main `49a5e7055d3a490c3c7791d03315ef6107fb28e9`. After the
 | Result | Status |
 | --- | --- |
 | Current deployed program permits early resolution | Reproduced with unsigned, non-broadcast RPC simulation |
-| Deadline fix | Verified in Linux CI run 38096073122: original suites passed, regression failed on baseline for the intended reason, all 13 patched Rust tests passed with isolated build outputs; final integrated Rust run pending |
-| Original three LiteSVM suites and failing regression | Baseline and intended failing early-resolution regression passed their checks in CI run 38096073122 |
+| Deadline fix | Verified in Linux CI run 38097003483: original suites passed, regression failed on baseline for the intended reason, all 18 patched Rust tests passed with isolated build outputs |
+| Original three LiteSVM suites and failing regression | Baseline and intended failing early-resolution regression passed their checks in CI run 38097003483 |
 | Harness safeguards | Six Node tests pass: mock rejection, protected JSON error redaction, cluster guard, stale/unsigned receipt rejection, write-before-broadcast/uncertain transaction handling, and actual program invocation |
 | Live SDK/resolver integration | Existing implementation integrated; actual read-only Devnet market/position decoding verified independently against the raw IDL |
-| SDK/resolver/React validation | Node 24 CI passes on Linux and Windows: 376 SDK, 56 React and 6 harness tests; resolver has 121 passing on Linux, 120 passing and one POSIX-only skip on Windows. Subsequent recovery fix passes all resolver tests locally; its CI rerun is pending |
+| SDK/resolver/React validation | CI run 38097650300 passes with Node 24 on Linux and Windows, including the recovery fix: 376 SDK, 56 React and 6 harness tests; resolver has 121 passing on Linux, 120 passing and one POSIX-only skip on Windows |
 | Real create → stake → signed event → resolve → claim | Blocked by unavailable team resolver key and treasury signing authority; live SDK stub removed on this branch |
 | Deployed deadline enforcement | Requires separately approved program upgrade; this branch does not upgrade |
 
 Do not present simulated addresses, game signatures, mock receipts, or expected balances as real transaction evidence. A completed real run writes a distinct public evidence JSON with `complete: true`, seven confirmed transaction stages, and actual Explorer links. Until then there are **no verified lifecycle transaction signatures**.
 
 The user confirmed that **Developer A holds the existing resolver private key**, and that neither its protected file path nor the TEST treasury signing authority is available to them. They instructed this task to continue development and testing without those credentials, not to recreate team keys or transfer funds. No further funding, faucet requests or private-key provisioning will be attempted under that instruction. The remaining real-run prerequisites belong to Developer A and the authorized treasury operator; their identities/secure provisioning channel must be established before execution.
+
+Public evidence: [contract CI and exact toolchain versions](evidence/devnet/contract-ci-2026-10-10.json), [Linux/Windows integration CI](evidence/devnet/integration-ci-2026-10-10.json), [deployed deadline simulation](evidence/devnet/deployment-audit-2026-10-10.json), and [actual read-only SDK validation](evidence/devnet/live-sdk-read-2026-10-10.json). The successful [contract run](https://github.com/manangandhi03146/HunchTrading/actions/runs/38097003483) tested source commit `96dd89d`; the program source tree is identical on subsequent recovery commit `9e8bc7f`. The successful [integration run](https://github.com/manangandhi03146/HunchTrading/actions/runs/38097650300) tested `9e8bc7f`. Later handoff/evidence edits change documentation only. CI records Rust 1.89.0, Anchor 1.1.2, Agave CLI 4.1.2, cargo-build-sbf 4.1.0, platform-tools v1.54, Node 24.21.0 and the separate AVM bootstrap Rust 1.91.0. React production build also passed locally.
 
 ## Public configuration
 

@@ -1,5 +1,13 @@
 # Developer B handoff
 
+**Current verification handoff:** `feat/devnet-lifecycle` incorporates this SDK
+and resolver implementation, adds contract lifecycle coverage, corrects the React
+Devnet guard under the user's authorization, and prevents release of uncertain
+resolver events from missing RPC history alone. The
+[Devnet runbook](../../docs/devnet-lifecycle.md) records exact CI results and the
+remaining Developer A resolver-key / authorized treasury blockers. Earlier
+implementation-stage notes below do not establish a completed real Devnet run.
+
 ## Developer A
 
 Developer A's generated IDL and types now live in `src/idl/`, and the public Devnet
@@ -40,9 +48,10 @@ resolver server. Details confirmed against the committed IDL:
   per-wallet/outcome position accumulation, proportional integer payouts, dust,
   double-claim prevention, and behavior when no one stakes on the winner.
 
-During write integration, implement the explicitly blocked methods and add
-an opt-in local-validator/Devnet integration flow. Do not infer the wire interface
-from README sketches. Real signed transaction recovery remains deferred.
+Use the implemented adapter methods for write integration and the opt-in Devnet
+lifecycle harness for verification. Do not infer the wire interface from README
+sketches. Signed submissions are journaled before broadcast; uncertain recovery
+requires reconciliation and never automatically resubmits.
 
 ## Developer C
 
@@ -338,7 +347,11 @@ layouts are unchanged; the SDK already maps 6004 to `MARKET_NOT_CLOSED`.
 `programs/marketkit/tests/resolve_market.rs` covers rejection while open and one
 second before the deadline, success at the deadline, single resolution, other
 signers, and invalid outcomes. `claim_winnings.rs` now advances the clock before
-resolving. These Rust tests have **not been run** (no Rust/Solana toolchain on the
-implementing machine): run `anchor build && cargo test` (Anchor 1.1.2, Rust 1.89).
+resolving. On `feat/devnet-lifecycle`, Linux
+[CI run 38097003483](https://github.com/manangandhi03146/HunchTrading/actions/runs/38097003483)
+passed the original baseline, the intended failing regression against unpatched
+source, and all **18 patched Rust tests**. It used Rust 1.89.0, Anchor 1.1.2,
+Agave 4.1.2 and SBF platform-tools v1.54. Run `npm run test:contract` to reproduce
+the patched build/tests without deployment; see the runbook for the baseline.
 Deploying requires the program's upgrade authority and explicit approval; nothing
 was deployed or upgraded.
