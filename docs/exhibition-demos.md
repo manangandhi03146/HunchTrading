@@ -1,6 +1,6 @@
 # Hunch exhibition demos
 
-The dashboard serves `/fortnite` and `/funding` (`/solana` redirects to funding). Both appear on the home page and in navigation. No SDK interfaces or contracts change.
+The dashboard serves `/fortnite` (also accessible through `/livestream`) and `/funding` (`/solana` redirects to funding). **Livestream demo** appears under Example Applications with SypherPK's name. The top-left **Funds** section opens the separate real Devnet wallet page, `/wallet`; see [wallet funds](wallet-funds.md). No SDK interfaces or contracts change.
 
 ## Run and present
 

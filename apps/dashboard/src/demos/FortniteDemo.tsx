@@ -140,7 +140,7 @@ export function FortniteDemo() {
     <div className="exhibition">
       <div className="demo-page-heading">
         <div>
-          <span className="demo-eyebrow">WATCH & PREDICT</span>
+          <span className="demo-eyebrow">LIVESTREAM DEMO · VOD REPLAY</span>
           <h1>A hunch, in the middle of the action.</h1>
           <p>Watch SypherPK’s Fortnite VOD. Back a finish. Follow the crowd.</p>
         </div>

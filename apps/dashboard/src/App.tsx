@@ -2,6 +2,9 @@ import { Home, MarketPage, Portfolio, Help, NotFound } from "./PublicPages";
 import { DemoProvider, ExhibitionAccountBadge } from "./demos/DemoProvider";
 import { FortniteDemo } from "./demos/FortniteDemo";
 import { FundingDemo } from "./demos/FundingDemo";
+import { FundsProvider } from "./wallet/FundsProvider";
+import { SidebarFunds, WalletFundsPage } from "./wallet/WalletFunds";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import RacingApp from "../../racing/src/App";
 import EsportsApp from "../../esports/src/App";
 import "../../racing/src/styles.css";
@@ -1176,8 +1179,9 @@ export default function App() {
   const { pathname } = useLocation();
   const { mode, client } = useHunch();
   const exhibition = ["/fortnite", "/funding"].includes(pathname);
+  const fundsPage = pathname === "/wallet";
   return (
-    <DemoProvider><div className="dashboard-app">
+    <FundsProvider><DemoProvider><div className="dashboard-app">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -1185,6 +1189,7 @@ export default function App() {
         <Link to="/" className="sidebar-logo">
           <Logo />
         </Link>
+        <SidebarFunds />
         <div className="workspace-switch">
           <span className="workspace-avatar">h</span>
           <div>
@@ -1212,11 +1217,11 @@ export default function App() {
             </NavLink>
           ))}
         </nav>
-        <span className="sidebar-section-label demos-label">
+        <div className="sidebar-examples"><span className="sidebar-section-label demos-label">
           EXAMPLE APPLICATIONS
         </span>
-        <NavLink to="/fortnite" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><RadioIcon size={17} />Fortnite VOD market</NavLink>
-        <NavLink to="/funding" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><ArrowDownLeft size={17} />Funding & Solana</NavLink>
+        <NavLink to="/fortnite" className={({ isActive }) => `sidebar-nav-link sidebar-livestream ${isActive ? "active" : ""}`}><RadioIcon size={17} /><span><strong>Livestream demo</strong><small>SypherPK · Fortnite</small></span></NavLink>
+        <NavLink to="/funding" className={({ isActive }) => `sidebar-nav-link ${isActive ? "active" : ""}`}><ArrowDownLeft size={17} />Funding model</NavLink>
         <a
           className="sidebar-nav-link sidebar-demo-link"
           href={appUrl("racing")}
@@ -1235,12 +1240,13 @@ export default function App() {
           Esports<span className="sidebar-demo-suffix"> demo</span>
           <ArrowUpRight size={13} />
         </a>
+        </div>
         <div className="sidebar-bottom">
           <Card className="sidebar-tip">
             <Sparkles size={17} />
-            <strong>Built to be embedded.</strong>
+            <strong>Made for your community.</strong>
             <p>
-              Your interface. Your community.
+              Share a market with your viewers.
               <br />
               Shared settlement infrastructure.
             </p>
@@ -1266,14 +1272,14 @@ export default function App() {
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={12} />
-            <strong>{pathname === "/fortnite" ? "Fortnite exhibition" : pathname === "/funding" ? "Funding & Solana" : "Prediction markets"}</strong>
+            <strong>{fundsPage ? "Wallet funds" : pathname === "/fortnite" ? "Livestream demo" : pathname === "/funding" ? "Funding model" : "Prediction markets"}</strong>
           </div>
           <div className="topbar-actions">
             <ThemeSwitch />
-            <Badge tone={exhibition || mode === "mock" ? "warning" : "violet"}>
-              {exhibition ? "Exhibition" : mode === "mock" ? "Simulated demo" : "Devnet"}
+            <Badge tone={!fundsPage && (exhibition || mode === "mock") ? "warning" : "violet"}>
+              {fundsPage ? "Devnet wallet" : exhibition ? "Exhibition" : mode === "mock" ? "Simulated demo" : "Devnet"}
             </Badge>
-            {exhibition ? <ExhibitionAccountBadge /> : <WalletButton />}
+            {fundsPage ? <WalletMultiButton /> : exhibition ? <ExhibitionAccountBadge /> : <WalletButton />}
           </div>
         </header>
         <main id="main" className="dashboard-main">
@@ -1284,6 +1290,8 @@ export default function App() {
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/help" element={<Help />} />
             <Route path="/fortnite" element={<FortniteDemo />} />
+            <Route path="/livestream" element={<Navigate to="/fortnite" replace />} />
+            <Route path="/wallet" element={<WalletFundsPage />} />
             <Route path="/funding" element={<FundingDemo />} />
             <Route path="/solana" element={<Navigate to="/funding" replace />} />
             <Route path="/markets/:marketId" element={<MarketPage />} />
@@ -1305,13 +1313,13 @@ export default function App() {
               hunchtrading.tech
             </a>
             <span>
-              {exhibition ? "Browser exhibition · Nonredeemable credits" : mode === "mock"
+              {fundsPage ? "Devnet wallet · Test funds only" : exhibition ? "Browser exhibition · Nonredeemable credits" : mode === "mock"
                 ? client.shared ? "Shared simulation · Nonredeemable demo credits" : "Local simulation · Nonredeemable demo credits"
                 : "Devnet only · Nonredeemable TEST tokens"}
             </span>
           </footer>
         </main>
       </div>
-    </div></DemoProvider>
+    </div></DemoProvider></FundsProvider>
   );
 }
