@@ -119,7 +119,7 @@ export function quoteSwap(state: DemoState, input: number) {
   );
 }
 export type Action =
-  | { type: "connect" | "faucet" | "grant" | "claim" | "reset" }
+  | { type: "connect" | "faucet" | "grant" | "claim" | "reset" | "restartMarket" }
   | { type: "stake"; side: Side; amount: number }
   | { type: "tick"; tick: number; second: number }
   | { type: "cue"; cue: string; bias: number }
@@ -180,6 +180,23 @@ export function demoReducer(state: DemoState, action: Action): DemoState {
   switch (action.type) {
     case "reset":
       return initialDemo();
+    case "restartMarket": {
+      // Restart the exhibition, keeping funding usable across page visits.
+      // Release unclaimed demo stakes so reopening never silently loses credits.
+      const returned = state.claimed ? 0 : state.position[0] + state.position[1];
+      return {
+        ...state,
+        pool: [...INITIAL_POOL],
+        position: [0, 0],
+        tokens: state.tokens + returned,
+        claimed: false,
+        placement: null,
+        tick: 0,
+        activity: [],
+        history: [{ tick: 0, share: 62 }],
+        receipts: returned ? receipt(state, "Restart demo · release unclaimed stakes", returned, 0) : state.receipts,
+      };
+    }
     case "connect":
       return { ...state, connected: true };
     case "faucet":

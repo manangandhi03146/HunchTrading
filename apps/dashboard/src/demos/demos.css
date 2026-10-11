@@ -1032,4 +1032,10 @@
 .conversion-stages strong { font-size:20px; overflow-wrap:anywhere; }
 .conversion-stages p { font-size:13px; line-height:1.6; }
 #conversion { scroll-margin-top:100px; }
+.chart-line-no { stroke:var(--demo-no); stroke-dasharray:6 4; }
+.chart-current-yes { fill:var(--demo-yes); }
+.chart-current-no { fill:var(--demo-no); }
+.odds-legend { display:flex; gap:20px; font-size:13px; font-weight:650; font-variant-numeric:tabular-nums; }
+.odds-legend span:first-child { color:var(--demo-yes); }
+.odds-legend span:last-child { color:var(--demo-no); }
 @media(max-width:700px) { .conversion-stages { grid-template-columns:1fr; } .conversion-stages > svg { transform:rotate(90deg); justify-self:center; } }

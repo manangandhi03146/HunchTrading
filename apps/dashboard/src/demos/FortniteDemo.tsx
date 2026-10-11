@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -28,10 +28,10 @@ function Clock({ second }: { second: number }) {
 export function FortniteDemo() {
   const { state, dispatch } = useDemo();
   const [playing, setPlaying] = useState(false);
-  const [second, setSecond] = useState(() => Math.min(state.tick * 4, 220));
+  const [second, setSecond] = useState(0);
   const [clock, setClock] = useState<"presentation" | "vod">("vod");
   const [ready, setReady] = useState(false);
-  const [seekTo, setSeekTo] = useState<number | null>(() => VOD.start + Math.min(state.tick * 4, 220));
+  const [seekTo, setSeekTo] = useState<number | null>(VOD.start);
   const [side, setSide] = useState<Side>(0);
   const [amount, setAmount] = useState("100");
   const [review, setReview] = useState(false);
@@ -54,6 +54,9 @@ export function FortniteDemo() {
   const winning =
     state.placement === null ? null : state.placement < 10 ? 0 : 1;
   const eligible = payout(state);
+  useLayoutEffect(() => {
+    dispatch({ type: "restartMarket" });
+  }, [dispatch]);
   useEffect(() => {
     if (!playing || clock !== "presentation" || state.placement !== null)
       return;
@@ -131,12 +134,10 @@ export function FortniteDemo() {
     );
     setResetConfirm(false);
   }
-  const chart = state.history
-    .map(
-      (p, i) =>
-        `${20 + (i / Math.max(1, state.history.length - 1)) * 580},${132 - p.share * 1.04}`,
-    )
-    .join(" ");
+  const chart = (side: Side) => state.history.map((p) =>
+    `${20 + (Math.min(p.tick * 4, 220) / 220) * 580},${132 - (side === 0 ? p.share : 100 - p.share) * 1.04}`,
+  ).join(" ");
+  const chartX = 20 + (Math.min(state.tick * 4, 220) / 220) * 580;
   return (
     <div className="exhibition">
       <div className="demo-page-heading">
@@ -341,14 +342,14 @@ export function FortniteDemo() {
           </section>
           <section className="demo-panel">
             <div className="demo-section-heading">
-              <h2>The crowd’s changing view</h2>
-              <span>YES POOL SHARE</span>
+              <h2>Odds over match time</h2>
+              <span>YES / NO POOL SHARE</span>
             </div>
             <div className="share-chart">
               <svg
-                viewBox="0 0 640 160"
+                viewBox="0 0 640 180"
                 role="img"
-                aria-label={`Yes share of the simulated pool is ${yes.toFixed(1)} percent`}
+                aria-label={`Match odds graph: Yes ${yes.toFixed(1)} percent, No ${(100 - yes).toFixed(1)} percent`}
               >
                 <line x1="20" x2="600" y1="28" y2="28" className="chart-grid" />
                 <line x1="20" x2="600" y1="80" y2="80" className="chart-grid" />
@@ -359,7 +360,13 @@ export function FortniteDemo() {
                   y2="132"
                   className="chart-grid"
                 />
-                <polyline points={chart} className="chart-line" />
+                <polyline points={chart(0)} className="chart-line" data-outcome="yes" />
+                <polyline points={chart(1)} className="chart-line chart-line-no" data-outcome="no" />
+                <circle cx={chartX} cy={132 - yes * 1.04} r="4" className="chart-current-yes" />
+                <circle cx={chartX} cy={132 - (100 - yes) * 1.04} r="4" className="chart-current-no" />
+                <text x="20" y="164">0:00</text>
+                <text x="292" y="164">1:50</text>
+                <text x="572" y="164">3:40</text>
                 <text x="607" y="33">
                   100%
                 </text>
@@ -371,6 +378,7 @@ export function FortniteDemo() {
                 </text>
               </svg>
             </div>
+            <div className="odds-legend"><span>Yes {yes.toFixed(1)}%</span><span>No {(100 - yes).toFixed(1)}%</span></div>
             <p className="demo-caption">
               Pool share changes when participants stake. It is not a fixed
               price or calibrated probability. Positions cannot be resold in
